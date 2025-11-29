@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
-// Ambil cart user
+// ini untuk ambil cart user
 $sql = "SELECT c.id AS cart_id, c.quantity, 
                p.id AS product_id, p.name, p.price, p.stock
         FROM cart c
