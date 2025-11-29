@@ -40,7 +40,7 @@
       <div class="container hero-inner">
         <h1>The Spring Collection Is Here</h1>
         <p class="lead">Discover fresh styles and vibrant tops for the new season. Effortless elegance, designed for you.</p>
-        <a class="btn-primary" href="product/listProduct.php">Shop New Arrivals</a>
+        <a class="btn-primary" href="product/listProduct.php">Shop Now</a>
       </div>
     </section>
 
