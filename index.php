@@ -58,28 +58,28 @@
       <h3 class="section-title">Trending Now</h3>
       <div class="grid">
         <div class="product">
-          <div class="product-img" style="background-image:url('assets/silkCamisole.jpg');"></div>
+          <img className="product-img" src="assets/silkCamisole.jpg" alt="Silk Camisole" />
           <div class="product-meta">
             <div class="title">Silk Camisole</div>
             <div class="price">$85.00</div>
           </div>
         </div>
         <div class="product">
-          <div class="product-img" style="background-image:url('assets/ribbedKnitTop.jpg');"></div>
+          <img className="product-img" src="assets/ribbedKnitTop.jpg" alt="Ribbed Knit Top" />
           <div class="product-meta">
             <div class="title">Ribbed Knit Top</div>
             <div class="price">$95.00</div>
           </div>
         </div>
         <div class="product">
-          <div class="product-img" style="background-image:url('assets/stripedLongSleeve.jpg');"></div>
+          <img className="product-img" src="assets/stripedLongSleeve.jpg" alt="Stripped Long-Sleeve" />
           <div class="product-meta">
             <div class="title">Striped Long-Sleeve</div>
             <div class="price">$70.00</div>
           </div>
         </div>
         <div class="product">
-          <div class="product-img" style="background-image:url('assets/puffSleeveBlouse.jpg');"></div>
+          <img className="product-img" src="assets/puffSleeveBlouse.jpg" alt="Puff-Sleeve Blouse" />
           <div class="product-meta">
             <div class="title">Puff-Sleeve Blouse</div>
             <div class="price">$110.00</div>
