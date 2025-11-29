@@ -12,70 +12,63 @@ $user_id = $_SESSION['user_id'];
 $sql = "SELECT c.id AS cart_id, c.quantity,
                p.id AS product_id, p.name, p.price, p.stock
         FROM cart c
-        JOIN products p ON p.id = c.product_id
-        WHERE c.user_id = ?";
-$stmt = $pdo->prepare($sql);
-$stmt->execute([$user_id]);
-$items = $stmt->fetchAll();
+        JOIN products p ON c.product_id = p.id
+        WHERE c.user_id = $user_id";
+$result = $mysqli->query($sql);
 
-if (!$items) {
-    echo "Keranjang kosong!";
-    exit;
-}
-
+$items = [];
 $total_price = 0;
 
-foreach ($items as $item) {
-    if ($item['quantity'] > $item['stock']) {
-        echo "Stok tidak cukup untuk produk: <b>{$item['name']}</b>";
-        exit;
+while ($row = $result->fetch_assoc()) {
+    // ini untuk cek stok
+    if ($row['quantity'] > $row['stock']) {
+        die("Stok kurang untuk produk: " . $row['name']);
     }
-    $total_price += $item['price'] * $item['quantity'];
+
+    $items[] = $row;
+    $total_price += $row['price'] * $row['quantity'];
 }
 
+if (empty($items)) {
+    die("Keranjang kosong, tidak bisa checkout.");
+}
+
+// mulai transaksi
+$mysqli->begin_transaction();
+
 try {
-    $pdo->beginTransaction();
+    // buat order baru
+    $mysqli->query("
+        INSERT INTO orders (user_id, total_price, status)
+        VALUES ($user_id, $total_price, 'pending')
+    ");
 
-    $stmt = $pdo->prepare("INSERT INTO orders (user_id, total_price, status)
-                           VALUES (?, ?, 'pending')");
-    $stmt->execute([$user_id, $total_price]);
-
-    $order_id = $pdo->lastInsertId();
-
-    $insertItem = $pdo->prepare(
-        "INSERT INTO order_items (order_id, product_id, quantity, price)
-         VALUES (?, ?, ?, ?)"
-    );
-    $updateStock = $pdo->prepare(
-        "UPDATE products SET stock = stock - ? WHERE id = ?"
-    );
-    $deleteCart = $pdo->prepare("DELETE FROM cart WHERE id = ?");
+    $order_id = $mysqli->insert_id;
 
     foreach ($items as $item) {
 
-        $insertItem->execute([
-            $order_id,
-            $item['product_id'],
-            $item['quantity'],
-            $item['price']
-        ]);
+        $mysqli->query("
+            INSERT INTO order_items (order_id, product_id, quantity, price)
+            VALUES ($order_id, {$item['product_id']}, {$item['quantity']}, {$item['price']})
+        ");
 
-        // Kurangi stok
-        $updateStock->execute([
-            $item['quantity'],
-            $item['product_id']
-        ]);
+        $mysqli->query("
+            UPDATE products 
+            SET stock = stock - {$item['quantity']}
+            WHERE id = {$item['product_id']}
+        ");
 
-        // Hapus cart
-        $deleteCart->execute([$item['cart_id']]);
+        $mysqli->query("
+            DELETE FROM cart WHERE id = {$item['cart_id']}
+        ");
     }
 
-    $pdo->commit();
+    $mysqli->commit();
 
     header("Location: listOrder.php?order_id=" . $order_id);
     exit;
 
 } catch (Exception $e) {
-    $pdo->rollBack();
-    echo "Error saat checkout: " . $e->getMessage();
+    $mysqli->rollback();
+    die("Gagal membuat order: " . $e->getMessage());
 }

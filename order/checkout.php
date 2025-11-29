@@ -9,18 +9,20 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
-// ini untuk ambil cart user
-$sql = "SELECT c.id AS cart_id, c.quantity, 
+$sql = "SELECT c.id AS cart_id, c.quantity,
                p.id AS product_id, p.name, p.price, p.stock
         FROM cart c
-        JOIN products p ON p.id = c.product_id
-        WHERE c.user_id = ?";
-$stmt = $pdo->prepare($sql);
-$stmt->execute([$user_id]);
-$items = $stmt->fetchAll();
+        JOIN products p ON c.product_id = p.id
+        WHERE c.user_id = $user_id";
+$result = $mysqli->query($sql);
+
+$items = [];
+while ($row = $result->fetch_assoc()) {
+    $items[] = $row;
+}
 
 if (empty($items)) {
-    echo "<h3>Keranjang kosong!</h3>";
+    echo "<h3>Keranjang kamu kosong!</h3>";
     echo "<a href='../index.php'>Belanja sekarang</a>";
     exit;
 }
@@ -60,10 +62,9 @@ foreach ($items as $item) {
 </tr>
 </table>
 
-<br>
 <form method="post" action="create.php">
-    <button type="submit" name="go" value="1">
-        Konfirmasi & Buat Order
+    <button type="submit" name="checkout" value="1">
+        Konfirmasi Order
     </button>
 </form>
 

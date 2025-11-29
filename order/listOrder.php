@@ -9,33 +9,35 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
-$stmt = $pdo->prepare("SELECT * FROM orders WHERE user_id = ? ORDER BY id DESC");
-$stmt->execute([$user_id]);
-$orders = $stmt->fetchAll();
+$result = $mysqli->query("
+    SELECT * FROM orders 
+    WHERE user_id = $user_id 
+    ORDER BY id DESC
+");
 ?>
 <!DOCTYPE html>
 <html>
-<head><title>Daftar Order</title></head>
+<head><title>Order Saya</title></head>
 <body>
 
-<h2>Riwayat Order</h2>
+<h2>Daftar Order Anda</h2>
 
 <table border="1" cellpadding="6">
 <tr>
     <th>ID</th>
     <th>Total Harga</th>
     <th>Status</th>
-    <th>Aksi</th>
+    <th>Detail</th>
 </tr>
 
-<?php foreach ($orders as $o): ?>
+<?php while ($o = $result->fetch_assoc()): ?>
 <tr>
     <td><?= $o['id'] ?></td>
     <td><?= number_format($o['total_price']) ?></td>
     <td><?= $o['status'] ?></td>
-    <td><a href="view.php?id=<?= $o['id'] ?>">Detail</a></td>
+    <td><a href="view.php?id=<?= $o['id'] ?>">Lihat</a></td>
 </tr>
-<?php endforeach; ?>
+<?php endwhile; ?>
 
 </table>
 
