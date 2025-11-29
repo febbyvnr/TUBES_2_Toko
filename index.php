@@ -6,13 +6,21 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <title>Aura — Home</title>
   <link rel="stylesheet" href="styles/HomePage.css">
 </head>
 <body>
   <header class="topbar">
     <div class="container topbar-inner">
-      <div class="brand">Aura</div>
+      <div class="brand">
+        <img 
+          src="assets/logo.jpg"
+          alt="Logo"
+          class="logo"
+        >
+        <span>FEYORA</span>
+      </div>
       <nav class="topnav">
         <a href="#">New In</a>
         <a href="#">Tops</a>
@@ -32,7 +40,7 @@
       <div class="container hero-inner">
         <h1>The Spring Collection Is Here</h1>
         <p class="lead">Discover fresh styles and vibrant tops for the new season. Effortless elegance, designed for you.</p>
-        <a class="btn-primary" href="#">Shop New Arrivals</a>
+        <a class="btn-primary" href="product/listProduct.php">Shop Now</a>
       </div>
     </section>
 
@@ -91,7 +99,7 @@
     <footer class="site-footer">
       <div class="container footer-grid">
         <div class="col">
-          <div class="brand">Aura</div>
+          <div class="brand">FEYORA</div>
           <p class="muted">Timeless tops, designed for the modern woman.</p>
         </div>
         <div class="col">
