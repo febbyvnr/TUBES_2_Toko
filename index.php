@@ -1,11 +1,5 @@
 <?php
-<<<<<<< HEAD
-// Simple homepage showing header with login button (reference design simplified)
-// Debug header: print file path and modification time so we can verify which file is served
-echo "<!-- served-file:" . __FILE__ . " mtime:" . filemtime(__FILE__) . " -->\n";
-=======
 
->>>>>>> 0103b253a44feb538c5eef06f8ceff650de25f50
 ?>
 <!doctype html>
 <html lang="en">
@@ -13,11 +7,7 @@ echo "<!-- served-file:" . __FILE__ . " mtime:" . filemtime(__FILE__) . " -->\n"
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Aura — Home</title>
-<<<<<<< HEAD
-  <link rel="stylesheet" href="../style/HomePage.css">
-=======
   <link rel="stylesheet" href="styles/HomePage.css">
->>>>>>> 0103b253a44feb538c5eef06f8ceff650de25f50
 </head>
 <body>
   <header class="topbar">
@@ -50,17 +40,6 @@ echo "<!-- served-file:" . __FILE__ . " mtime:" . filemtime(__FILE__) . " -->\n"
       <h3 class="section-title">Shop by Category</h3>
       <div class="cards">
         <div class="card">
-<<<<<<< HEAD
-          <div class="card-media" style="background-image:url('https://via.placeholder.com/420x420?text=Blouses');"></div>
-          <div class="card-caption">Blouses</div>
-        </div>
-        <div class="card">
-          <div class="card-media" style="background-image:url('https://via.placeholder.com/420x420?text=Casual+Tops');"></div>
-          <div class="card-caption">Casual Tops</div>
-        </div>
-        <div class="card">
-          <div class="card-media" style="background-image:url('https://via.placeholder.com/420x420?text=Knitwear');"></div>
-=======
           <div class="card-media" style="background-image:url('assets/blouse.jpg');"></div>
           <div class="card-caption">Blouses</div>
         </div>
@@ -70,7 +49,6 @@ echo "<!-- served-file:" . __FILE__ . " mtime:" . filemtime(__FILE__) . " -->\n"
         </div>
         <div class="card">
           <div class="card-media" style="background-image:url('assets/knitwear.jpg');"></div>
->>>>>>> 0103b253a44feb538c5eef06f8ceff650de25f50
           <div class="card-caption">Knitwear</div>
         </div>
       </div>
