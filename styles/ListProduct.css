@@ -1,0 +1,61 @@
+@import url('HomePage.css');
+
+/* Overrides and layout specific to the product listing page */
+.product-list .cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+@media (min-width: 1400px) {
+  .product-list .cards {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+.product-card {
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+}
+
+.product-media {
+  width: 100%;
+  height: 320px; /* slightly taller */
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: transparent;
+}
+
+.product-info {
+  padding: 12px;
+}
+
+.product-title {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 6px;
+  background: transparent;
+}
+
+.product-price {
+  color: #666;
+  font-size: 13px;
+}
+
+/* small responsive tweaks */
+@media (max-width: 900px) {
+  .product-list .cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .product-list .cards {
+    grid-template-columns: 1fr;
+  }
+}
