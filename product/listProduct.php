@@ -1,11 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/db.php';
 
-/*
- |--------------------------------------------------------------------------
- | Component ala React versi PHP
- |--------------------------------------------------------------------------
-*/
 function resolveImage($row)
 {
     $possible = ['image', 'image_name', 'img', 'gambar'];
@@ -55,7 +50,8 @@ function renderProductCard($row)
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Products — FEYORA</title>
-    <link rel="stylesheet" href="../styles/ListProduct.css">
+    <link rel="stylesheet" href="../styles/ListProduct.css?v=<?=time()?>">
+    <link rel="stylesheet" href="../styles/HomePage.css?v=<?=time()?>">
 </head>
 
 <body>
@@ -77,25 +73,7 @@ function renderProductCard($row)
 </header>
 
 <main>
-    <section class="container categories">
-        <h3 class="section-title">New Arrivals</h3>
-        <div class="cards">
-            <?php
-            // Query Produk
-            $sql = "SELECT * FROM products ORDER BY id DESC";
-            $result = $mysqli->query($sql);
-            if ($result) {
-                while ($row = $result->fetch_assoc()) {
-                    echo renderProductCard($row);
-                }
-                $result->free();
-            } else {
-                echo "<p class=\"muted\">Gagal memuat produk: " . htmlspecialchars($mysqli->error) . "</p>";
-            }
-            ?>
-        </div>
-    </section>
-    <section class="container categories product-list">
+    <section class="container product-list">
         <h3 class="section-title">New Arrivals</h3>
 
         <!-- Filter & Sort Form -->
@@ -124,7 +102,7 @@ function renderProductCard($row)
             $qSort = isset($_GET['sort']) ? htmlspecialchars($_GET['sort']) : '';
             ?>
 
-            <label>
+            <label class="filter-label">
                 Category
                 <select name="category">
                     <option value="">All</option>
@@ -134,7 +112,7 @@ function renderProductCard($row)
                 </select>
             </label>
 
-            <label>
+            <label class="filter-label">
                 Size
                 <select name="size">
                     <option value="">All</option>
@@ -144,17 +122,17 @@ function renderProductCard($row)
                 </select>
             </label>
 
-            <label>
+            <label class="filter-label">
                 Price min
                 <input type="number" step="0.01" name="price_min" value="<?=$qMin?>" placeholder="0">
             </label>
 
-            <label>
+            <label class="filter-label">
                 Price max
-                <input type="number" step="0.01" name="price_max" value="<?=$qMax?>" placeholder="9999">
+                <input type="number" step="0.01" name="price_max" value="<?=$qMax?>" placeholder="99999999">
             </label>
 
-            <label>
+            <label class="filter-label">
                 Sort
                 <select name="sort">
                     <option value="">Newest</option>
@@ -201,38 +179,38 @@ function renderProductCard($row)
 
         $sql = "SELECT * FROM products " . $where . " " . $order;
         if ($result = $mysqli->query($sql)) {
-                while ($row = $result->fetch_assoc()) {
-                        $imageName = '';
-                        if (!empty($row['image'])) $imageName = $row['image'];
-                        elseif (!empty($row['image_name'])) $imageName = $row['image_name'];
-                        elseif (!empty($row['img'])) $imageName = $row['img'];
-                        elseif (!empty($row['gambar'])) $imageName = $row['gambar'];
+            while ($row = $result->fetch_assoc()) {
+                $imageName = '';
+                if (!empty($row['image'])) $imageName = $row['image'];
+                elseif (!empty($row['image_name'])) $imageName = $row['image_name'];
+                elseif (!empty($row['img'])) $imageName = $row['img'];
+                elseif (!empty($row['gambar'])) $imageName = $row['gambar'];
 
-                        if (empty($imageName)) {
-                                $imagePath = '../assets/product/placeholder.png';
-                        } else {
-                                $imagePath = '../assets/product/' . $imageName;
-                        }
-
-                        $title = !empty($row['name']) ? htmlspecialchars($row['name']) : (!empty($row['title']) ? htmlspecialchars($row['title']) : 'Untitled Product');
-                        $price = '';
-                        if (isset($row['price'])) {
-                                $price = '$' . number_format((float)$row['price'], 2);
-                        } elseif (isset($row['harga'])) {
-                                $price = 'Rp ' . number_format((float)$row['harga'], 0, ',', '.');
-                        }
-
-                        echo "        <div class=\"product-card\">\n";
-                        echo "          <a href=\"detailProduct.php?id=" . urlencode($row['id']) . "\">\n";
-                        echo "            <div class=\"product-media\" style=\"background-image:url('${imagePath}');\"></div>\n";
-                        echo "          </a>\n";
-                        echo "          <div class=\"product-info\">\n";
-                        echo "            <div class=\"product-title\">${title}</div>\n";
-                        echo "            <div class=\"product-price\">${price}</div>\n";
-                        echo "          </div>\n";
-                        echo "        </div>\n";
+                if (empty($imageName)) {
+                        $imagePath = '../assets/products/placeholder.png';
+                } else {
+                        $imagePath = '../assets/products/' . $imageName;
                 }
-                $result->free();
+
+                $title = !empty($row['name']) ? htmlspecialchars($row['name']) : (!empty($row['title']) ? htmlspecialchars($row['title']) : 'Untitled Product');
+                $price = '';
+                if (isset($row['price'])) {
+                        $price = 'Rp ' . number_format((float)$row['price'], 2);
+                } elseif (isset($row['harga'])) {
+                        $price = 'Rp ' . number_format((float)$row['harga'], 0, ',', '.');
+                }
+
+                echo "        <div class=\"product-card\">\n";
+                echo "          <a href=\"detailProduct.php?id=" . urlencode($row['id']) . "\">\n";
+                echo "            <div class=\"product-media\" style=\"background-image:url('${imagePath}');\"></div>\n";
+                echo "          </a>\n";
+                echo "          <div class=\"product-info\">\n";
+                echo "            <div class=\"product-title\">${title}</div>\n";
+                echo "            <div class=\"product-price\">${price}</div>\n";
+                echo "          </div>\n";
+                echo "        </div>\n";
+            }
+            $result->free();
         } else {
                 echo "<p class=\"muted\">Tidak dapat memuat produk: " . htmlspecialchars($mysqli->error) . "</p>\n";
         }

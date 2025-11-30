@@ -1,7 +1,51 @@
+/* top nav bar */
+.topbar {
+  background: #fff;
+  border-bottom: 1px solid #eee;
+}
+
+.topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size:x-large;
+  font-family: 'Poppins', sans-serif;
+  color: #ff2d7a;
+}
+
+.topnav a {
+  margin: 0 12px;
+  color: #333;
+  text-decoration: none;
+}
+
+.actions .icon {
+  margin-left: 10px;
+  text-decoration: none;
+  color: #666;
+}
+
+.container {
+  padding-left: 6px;
+  padding-right: 6px;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1400px;
+  box-sizing: border-box;
+}
+
 .product-list .cards {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
+  gap: 10px !important;
 }
 
 .categories .cardsList {
@@ -38,7 +82,7 @@
 }
 
 .product-card {
-  background: #1f1f1f;
+  background: transparent;
   border-radius: 10px;
   padding: 10px;
   text-align: center;
@@ -50,8 +94,8 @@
 
 .product-card img {
     width: 100%;
-    height: 200px;        /* kamu bisa atur (contoh: 180–220px) */
-    object-fit: cover;    /* biar proporsional dan tidak ketarik */
+    height: auto;
+    object-fit: cover;
     border-radius: 8px;
 }
 
@@ -63,11 +107,11 @@
 
 .product-media {
   width: 100%;
-  height: 320px; /* slightly taller */
+  height: 260px; /* slightly taller */
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
-  background-color: transparent;
+  background: transparent;
 }
 
 .product-info {
@@ -84,6 +128,10 @@
 .product-price {
   color: #666;
   font-size: 13px;
+}
+
+.filter-label{
+  color: black !important;
 }
 
 @media (min-width: 1400px) {
