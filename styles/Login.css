@@ -1,0 +1,39 @@
+@import url('HomePage.css');
+
+body {
+  background: #faf7f8;
+  color: #222;
+}
+
+.container { 
+    padding-top: 28px; 
+}
+
+.filters, form {
+  margin-top: 8px;
+}
+
+form label { 
+    display:block; 
+    margin-bottom:10px; 
+    color:#333; 
+}
+
+form input[type="text"], 
+form input[type="email"], 
+form input[type="password"], 
+form textarea {
+  width:100%;
+  padding:10px 12px;
+  border:1px solid #e6e6e6;
+  border-radius:6px;
+  background:#fff;
+}
+
+form button.btn-primary { 
+    margin-top:12px; 
+}
+
+.muted { 
+    color: #b00; 
+}

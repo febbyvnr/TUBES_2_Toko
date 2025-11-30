@@ -6,35 +6,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <!-- pastikan base mengarah ke folder project di server -->
+  <base href="/TUBES_2_Toko/">
+
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <title>Aura — Home</title>
-  <link rel="stylesheet" href="styles/HomePage.css">
+  <title>FEYORA — Home</title>
+
+  <!-- cache buster tetap oke -->
+  <link rel="stylesheet" href="styles/HomePage.css?v=<?=time()?>">
 </head>
 <body>
-  <header class="topbar">
-    <div class="container topbar-inner">
-      <div class="brand">
-        <img 
-          src="assets/logo.jpg"
-          alt="Logo"
-          class="logo"
-        >
-        <span>FEYORA</span>
-      </div>
-      <nav class="topnav">
-        <a href="#">New In</a>
-        <a href="#">Tops</a>
-        <a href="#">Blouses</a>
-        <a href="#">Sale</a>
-      </nav>
-      <div class="actions">
-        <a class="icon" href="/pages/auth/login.php" title="Login">Login</a>
-        <a class="icon" href="#" title="Account">❤</a>
-        <a class="icon" href="#" title="Cart">🛒</a>
-      </div>
-    </div>
-  </header>
-
+  <?php include __DIR__ . '/includes/header.php'; ?>
   <main>
     <section class="hero">
       <div class="container hero-inner">
@@ -48,15 +31,15 @@
       <h3 class="section-title">Shop by Category</h3>
       <div class="cards">
         <div class="card">
-          <div class="card-media" style="background-image:url('assets/blouse.jpg');"></div>
+          <div class="card-media" style="background-image:url('/TUBES_2_Toko/assets/products/blouse.jpg');"></div>
           <div class="card-caption">Blouses</div>
         </div>
         <div class="card">
-          <div class="card-media" style="background-image:url('assets/casualTops.jpg');"></div>
+          <div class="card-media" style="background-image:url('/TUBES_2_Toko/assets/products/casualTops.jpg');"></div>
           <div class="card-caption">Casual Tops</div>
         </div>
         <div class="card">
-          <div class="card-media" style="background-image:url('assets/knitwear.jpg');"></div>
+          <div class="card-media" style="background-image:url('/TUBES_2_Toko/assets/products/knitwear.jpg');"></div>
           <div class="card-caption">Knitwear</div>
         </div>
       </div>
@@ -66,28 +49,28 @@
       <h3 class="section-title">Trending Now</h3>
       <div class="grid">
         <div class="product">
-          <img className="product-img" src="assets/silkCamisole.jpg" alt="Silk Camisole" />
+          <img class="product-img" src="/TUBES_2_Toko/assets/products/silkCamisole.jpg" alt="Silk Camisole" />
           <div class="product-meta">
             <div class="title">Silk Camisole</div>
             <div class="price">$85.00</div>
           </div>
         </div>
         <div class="product">
-          <img className="product-img" src="assets/ribbedKnitTop.jpg" alt="Ribbed Knit Top" />
+          <img class="product-img" src="/TUBES_2_Toko/assets/products/ribbedKnitTop.jpg" alt="Ribbed Knit Top" />
           <div class="product-meta">
             <div class="title">Ribbed Knit Top</div>
             <div class="price">$95.00</div>
           </div>
         </div>
         <div class="product">
-          <img className="product-img" src="assets/stripedLongSleeve.jpg" alt="Stripped Long-Sleeve" />
+          <img class="product-img" src="/TUBES_2_Toko/assets/products/stripedLongSleeve.jpg" alt="Stripped Long-Sleeve" />
           <div class="product-meta">
             <div class="title">Striped Long-Sleeve</div>
             <div class="price">$70.00</div>
           </div>
         </div>
         <div class="product">
-          <img className="product-img" src="assets/puffSleeveBlouse.jpg" alt="Puff-Sleeve Blouse" />
+          <img class="product-img" src="/TUBES_2_Toko/assets/products/puffSleeveBlouse.jpg" alt="Puff-Sleeve Blouse" />
           <div class="product-meta">
             <div class="title">Puff-Sleeve Blouse</div>
             <div class="price">$110.00</div>

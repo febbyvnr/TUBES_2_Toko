@@ -60,9 +60,32 @@ body {
   color: #666;
 }
 
+/* profile circle in header */
+.profile-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+.profile-circle.placeholder {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:#ff2d7a;
+  color:#fff;
+  font-weight:700;
+}
+.user-name {
+  margin-right:10px;
+  vertical-align: middle;
+}
+
 .hero {
   background: linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.15)),
-              url('../assets/homePage.jpg') center/cover no-repeat;
+              url('/TUBES_2_Toko/assets/products/homePage.jpg') center/cover no-repeat;
   border-radius: 12px;
   width: 1050px;
   height: 300px;

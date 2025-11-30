@@ -55,22 +55,7 @@ function renderProductCard($row)
 </head>
 
 <body>
-<header class="topbar">
-    <div class="container topbar-inner">
-      <div class="brand">FEYORA</div>
-      <nav class="topnav">
-        <a href="../index.php">New In</a>
-        <a href="#">Tops</a>
-        <a href="#">Blouses</a>
-        <a href="#">Sale</a>
-      </nav>
-      <div class="actions">
-        <a class="icon" href="../auth/login.php">Login</a>
-        <a class="icon" href="#">❤</a>
-        <a class="icon" href="#">🛒</a>
-      </div>
-    </div>
-</header>
+<?php include __DIR__ . '/../includes/header.php'; ?>
 
 <main>
     <section class="container product-list">
@@ -124,12 +109,12 @@ function renderProductCard($row)
 
             <label class="filter-label">
                 Price min
-                <input type="number" step="0.01" name="price_min" value="<?=$qMin?>" placeholder="0">
+                <input type="number" step="1000" name="price_min" value="<?=$qMin?>" placeholder="0">
             </label>
 
             <label class="filter-label">
                 Price max
-                <input type="number" step="0.01" name="price_max" value="<?=$qMax?>" placeholder="99999999">
+                <input type="number" step="1000" name="price_max" value="<?=$qMax?>" placeholder="99999999">
             </label>
 
             <label class="filter-label">
@@ -140,9 +125,14 @@ function renderProductCard($row)
                     <option value="price_desc" <?=($qSort==='price_desc')?'selected':''?>>Price: High → Low</option>
                 </select>
             </label>
-
-            <button type="submit" class="btn-primary">Apply</button>
-            <a href="listProduct.php" style="margin-left:8px; text-decoration:none; color:#666;">Reset</a>
+            
+            <label class="filter-label" style="margin-left:auto">
+                <span style="visibility: hidden;">__</span>
+                <div class="filter-actions">
+                    <button type="submit" class="btn-primary">Apply</button>
+                    <a href="listProduct.php" class="reset-link">Reset</a>
+                </div>
+            </label>
         </form>
 
         <div class="cards">
@@ -177,7 +167,25 @@ function renderProductCard($row)
                 if ($_GET['sort'] === 'price_desc') $order = 'ORDER BY price DESC';
         }
 
-        $sql = "SELECT * FROM products " . $where . " " . $order;
+        // Pagination setup
+        $perPage = 30;
+        $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+
+        // total count for current filters
+        $countSql = "SELECT COUNT(*) AS cnt FROM products " . $where;
+        $total = 0;
+        if ($cres = $mysqli->query($countSql)) {
+            $crow = $cres->fetch_assoc();
+            $total = (int) $crow['cnt'];
+            $cres->free();
+        }
+
+        $totalPages = max(1, (int) ceil($total / $perPage));
+        if ($page > $totalPages) $page = $totalPages;
+        $offset = ($page - 1) * $perPage;
+
+        $sql = "SELECT * FROM products " . $where . " " . $order . " LIMIT " . $perPage . " OFFSET " . $offset;
+
         if ($result = $mysqli->query($sql)) {
             while ($row = $result->fetch_assoc()) {
                 $imageName = '';
@@ -216,6 +224,56 @@ function renderProductCard($row)
         }
         ?>
         </div>
+
+        <?php
+        if (isset($totalPages) && $totalPages > 1) {
+            echo '<div class="pagination">';
+
+            $baseParams = $_GET;
+
+            // Prev button
+            if ($page > 1) {
+                $baseParams['page'] = $page - 1;
+                echo '<a class="page-btn" href="?' . htmlspecialchars(http_build_query($baseParams)) . '">&lt;</a>';
+            } else {
+                echo '<span class="page-btn disabled">&lt;</span>';
+            }
+
+            $start = max(1, $page - 3);
+            $end = min($totalPages, $page + 3);
+
+            if ($start > 1) {
+                $baseParams['page'] = 1;
+                echo '<a class="page-btn" href="?' . htmlspecialchars(http_build_query($baseParams)) . '">1</a>';
+                if ($start > 2) echo '<span class="page-btn disabled">...</span>';
+            }
+
+            for ($p = $start; $p <= $end; $p++) {
+                $baseParams['page'] = $p;
+                if ($p == $page) {
+                    echo '<span class="page-btn active">' . $p . '</span>';
+                } else {
+                    echo '<a class="page-btn" href="?' . htmlspecialchars(http_build_query($baseParams)) . '">' . $p . '</a>';
+                }
+            }
+
+            if ($end < $totalPages) {
+                if ($end < $totalPages - 1) echo '<span class="page-btn disabled">...</span>';
+                $baseParams['page'] = $totalPages;
+                echo '<a class="page-btn" href="?' . htmlspecialchars(http_build_query($baseParams)) . '">' . $totalPages . '</a>';
+            }
+
+            // Next button
+            if ($page < $totalPages) {
+                $baseParams['page'] = $page + 1;
+                echo '<a class="page-btn" href="?' . htmlspecialchars(http_build_query($baseParams)) . '">&gt;</a>';
+            } else {
+                echo '<span class="page-btn disabled">&gt;</span>';
+            }
+            echo '</div>';
+        }
+        ?>
+
     </section>
 
   <footer class="site-footer">
