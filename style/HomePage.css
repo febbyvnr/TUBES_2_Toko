@@ -11,13 +11,8 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
   margin: 0;
-  color: #fdfdfd;
+  color: #222;
   background: #faf7f8;
-}
-
-.logo {
-  width: 40px;
-  height: auto;
 }
 
 .container {
@@ -39,12 +34,7 @@ body {
 }
 
 .brand {
-  display: flex;
-  align-items: center;
-  gap: 6px;
   font-weight: 700;
-  font-size:x-large;
-  font-family: 'Poppins', sans-serif;
   color: #ff2d7a;
 }
 
@@ -60,37 +50,11 @@ body {
   color: #666;
 }
 
-/* profile circle in header */
-.profile-circle {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  object-fit: cover;
-  display: inline-block;
-  vertical-align: middle;
-  margin-right: 8px;
-}
-.profile-circle.placeholder {
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  background:#ff2d7a;
-  color:#fff;
-  font-weight:700;
-}
-.user-name {
-  margin-right:10px;
-  vertical-align: middle;
-}
-
 .hero {
   background: linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.15)),
-              url('/TUBES_2_Toko/assets/products/homePage.jpg') center/cover no-repeat;
+              url('https://via.placeholder.com/1400x520') center/cover no-repeat;
   border-radius: 12px;
-  width: 1050px;
-  height: 300px;
   margin: 28px auto;
-  overflow: hidden;
 }
 
 .hero-inner {
@@ -131,7 +95,7 @@ body {
 
 .categories .cards {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 18px;
 }
 
@@ -167,70 +131,18 @@ body {
   margin-bottom: 40px;
 }
 
-/* Product list specific layout */
-.product-list .cards {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
-}
-
-@media (min-width: 1400px) {
-  .product-list .cards {
-    grid-template-columns: repeat(5, 1fr);
-  }
-}
-
-.product-card {
-  background: transparent;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
-  display: flex;
-  flex-direction: column;
-}
-
-.product-media {
-  width: 100%;
-  aspect-ratio: 4/5;
-  padding-top: 125%;
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-color: transparent;
-}
-
-.product-info {
-  padding: 12px;
-}
-
-.product-title {
-  font-size: 14px;
-  color: #333;
-  margin-bottom: 6px;
-  background: transparent;
-}
-
-.product-price {
-  color: #666;
-  font-size: 13px;
-}
-
 .product {
   background: #fff;
   padding: 12px;
   border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
- .product-img {
-  width: 100%;
+.product-img {
   height: 260px;
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
- }
+}
 
 .product-meta {
   padding-top: 8px;
@@ -250,7 +162,7 @@ body {
 }
 
 .site-footer {
-  background: #07003b;
+  background: #f3eef0;
   padding: 36px 0;
   margin-top: 30px;
 }
@@ -269,7 +181,7 @@ body {
 }
 
 .site-footer a {
-  color: #e3e4e3;
+  color: #555;
   text-decoration: none;
 }
 
@@ -298,9 +210,6 @@ body {
   }
   .hero h1 {
     font-size: 28px;
-  }
-  .hero-inner {
-    padding: 40px 16px;
   }
   .categories .cards {
     grid-template-columns: 1fr;
