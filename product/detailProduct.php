@@ -43,7 +43,7 @@ if(!empty($product['price'])) {
 
 $desc = !empty($product['description']) ? nl2br(htmlspecialchars($product['description'])) : 'No description available.';
 
-// $currentSize = isset($product['size']) ? $product['size'] : '';
+$currentSize = isset($product['size']) ? $product['size'] : '';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -86,8 +86,7 @@ $desc = !empty($product['description']) ? nl2br(htmlspecialchars($product['descr
                     </div>
                 </div>
 
-                <button class="add-cart-btn">Add to Cart</button>
-                    <form action="../cart/add.php" method="POST" id="cartForm">
+                <form action="../cart/add.php" method="POST" id="cartForm">
                     <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
                     <input type="hidden" name="size" id="selectedSize" value="<?= $currentSize ?>">
                     <input type="hidden" name="qty" value="1">

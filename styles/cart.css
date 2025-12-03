@@ -1,0 +1,129 @@
+/* ===== CART CONTAINER ===== */
+.cart-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 14px;
+}
+
+/* ===== TITLE ===== */
+.cart-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #E5007A;
+    text-align: left;
+}
+
+/* ===== TABLE ===== */
+.cart-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.cart-table th {
+    background: #f6b0d5;
+    color: #E5007A;
+    padding: 14px;
+    text-align: left;
+    font-size: 16px;
+    border-bottom: 2px solid #E5007A;
+}
+
+.cart-table td {
+    padding: 14px;
+    border-bottom: 1px solid #ddd;
+    font-size: 15px;
+    color: #333;
+}
+
+/* ===== QTY INPUT ===== */
+.qty-input {
+    width: 60px;
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    text-align: center;
+}
+
+/* ===== UPDATE BUTTON ===== */
+.update-btn {
+    padding: 6px 12px;
+    background: #E5007A;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.update-btn:hover {
+    background: #c70067;
+}
+
+/* ===== DELETE BUTTON ===== */
+.delete-btn {
+    color: #E5007A;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.delete-btn:hover {
+    color: #b40055;
+}
+
+/* ===== TOTAL BAR ===== */
+.total-wrapper {
+    margin-top: 20px;
+    text-align: right;
+}
+
+.total-text {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* ===== CHECKOUT BUTTON ===== */
+.checkout-btn {
+    margin-top: 15px;
+    background: #E5007A;
+    padding: 12px 24px;
+    color: #fff;
+    border: none;
+    font-size: 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.checkout-btn:hover {
+    background: #c70067;
+}
+
+/* ===== EMPTY CART ===== */
+.empty-cart {
+    text-align: center;
+    margin: 40px 0;
+    font-size: 18px;
+    color: #555;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+    .cart-table th, .cart-table td {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    .qty-input {
+        width: 45px;
+    }
+
+    .update-btn {
+        padding: 5px 10px;
+    }
+}
