@@ -30,7 +30,7 @@ if (!empty($_SESSION['user_id'])) {
     </a>
     <nav class="topnav">
         <a href="/TUBES_2_Toko/index.php">New Arrivals</a>
-        <a href="/TUBES_2_Toko/product/listProduct.php">Show Now</a>
+        <a href="/TUBES_2_Toko/product/listProduct.php">Shop Now</a>
         <a href="/TUBES_2_Toko/product/listProduct.php?collection=studio">Studio Collection</a>
         <a href="/TUBES_2_Toko/product/listProduct.php?laststock=1">Last Stock</a>
     </nav>
