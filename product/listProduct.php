@@ -81,7 +81,8 @@ function renderProductCard($row)
             // }
 
             $qCategory = isset($_GET['category']) ? htmlspecialchars($_GET['category']) : '';
-            // $qSize = isset($_GET['size']) ? htmlspecialchars($_GET['size']) : '';
+            $qLastStock = isset($_GET['laststock']) ? (int)$_GET['laststock'] : 0;
+            $qCollection = isset($_GET['collection']) ? $_GET['collection'] : '';
             $qMin = isset($_GET['price_min']) ? htmlspecialchars($_GET['price_min']) : '';
             $qMax = isset($_GET['price_max']) ? htmlspecialchars($_GET['price_max']) : '';
             $qSort = isset($_GET['sort']) ? htmlspecialchars($_GET['sort']) : '';
@@ -139,14 +140,16 @@ function renderProductCard($row)
         <?php
         // Build SQL with filters
         $conditions = [];
+        if ($qLastStock === 1) {
+            $conditions[] = "stock < 100";
+        }
+        if ($qCollection === 'studio') {
+            $conditions[] = "(name LIKE 'Studio Collection%')";
+        }
         if (!empty($_GET['category'])) {
                 $cat = $mysqli->real_escape_string($_GET['category']);
                 $conditions[] = "category = '" . $cat . "'";
         }
-        // if (!empty($_GET['size'])) {
-        //         $size = $mysqli->real_escape_string($_GET['size']);
-        //         $conditions[] = "size = '" . $size . "'";
-        // }
         if (isset($_GET['price_min']) && $_GET['price_min'] !== '') {
                 $min = (float) $_GET['price_min'];
                 $conditions[] = "price >= " . $min;

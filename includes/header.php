@@ -29,11 +29,11 @@ if (!empty($_SESSION['user_id'])) {
         </div>
         </a>
     <nav class="topnav">
-      <a href="/TUBES_2_Toko/index.php">New In</a>
-      <a href="/TUBES_2_Toko/product/listProduct.php">Tops</a>
-      <a href="#">Blouses</a>
-      <a href="#">Sale</a>
-    </nav>
+        <a href="/TUBES_2_Toko/index.php">New Arrivals</a>
+        <a href="/TUBES_2_Toko/product/listProduct.php">All Tops</a>
+        <a href="/TUBES_2_Toko/product/listProduct.php?collection=studio">Studio Collection</a>
+        <a href="/TUBES_2_Toko/product/listProduct.php?laststock=1">Last Stock</a>
+   </nav>
     <div class="actions" style="display:flex; align-items:center; gap:16px;">
         <?php if ($currentUser):
             $profile = $currentUser['profile_photo'] 

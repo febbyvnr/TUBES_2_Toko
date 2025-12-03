@@ -85,7 +85,7 @@ body {
 
 .hero {
   background: linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.15)),
-              url('/TUBES_2_Toko/assets/products/homePage.jpg') center/cover no-repeat;
+              url('/TUBES_2_Toko/assets/HomePage.png') center/cover no-repeat;
   border-radius: 12px;
   width: 1050px;
   height: 300px;
@@ -110,6 +110,7 @@ body {
   max-width: 760px;
   margin: 0 auto 20px;
   color: rgba(255,255,255,0.9);
+  margin-top: 130px;
 }
 
 .btn-primary {
@@ -129,42 +130,244 @@ body {
   color: #111;
 }
 
-.categories .cards {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 18px;
+.categories {
+  margin-top: 24px;
 }
 
+/* Header + tombol panah */
+.categories-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.category-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cat-arrow {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.15s ease, transform 0.12s ease, opacity 0.12s ease;
+}
+
+.cat-arrow:hover:not(:disabled) {
+  background: #f5f5f5;
+  transform: translateY(-1px);
+}
+
+.cat-arrow:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* Wrapper carousel */
+.category-carousel {
+  margin-top: 10px;
+  position: relative;
+}
+
+/* Track kartu – horizontal scroll */
+.categories .cards {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  padding-bottom: 4px;
+}
+
+.categories .cards {
+  scrollbar-width: none;       /* Firefox */
+  -ms-overflow-style: none;    /* IE / Edge lama */
+}
+
+.categories .cards::-webkit-scrollbar {
+  display: none;
+}
+
+.categories .cards::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.categories .cards::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.18);
+  border-radius: 999px;
+}
+
+/* Kartu kategori */
+.categories .card {
+  min-width: 180px;
+  max-width: 220px;
+  flex: 0 0 auto;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.categories .card a {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Gambar kategori */
+.categories .card-media {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  background-size: cover;
+  background-position: center;
+}
+
+/* Caption di bawah gambar, tanpa background hitam */
+.categories .card-caption {
+  padding: 10px 12px 14px;
+  font-weight: 600;
+  color: #111;
+  text-align: center;
+  background: #fff;
+}
+
+/* Hover effect */
+.categories .card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.08);
+}
+
+/* Kartu kategori */
 .card {
   background: #fff;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
+.card a {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Gambar kategori */
 .card-media {
-  height: 260px;
+  width: 100%;
+  aspect-ratio: 4 / 5;
   background-size: cover;
   background-position: center;
 }
 
 .card-caption {
-  padding: 14px;
+  padding: 10px 12px 14px;
   font-weight: 600;
-  color: #fff;
-  background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,0.5));
-  position: relative;
-  top: -48px;
-  margin-left: 14px;
-  border-radius: 6px;
-  width: fit-content;
+  color: #111;
+  text-align: center;
+  background: #fff;
+  /* reset properti overlay lama */
+  position: static;
+  top: auto;
+  margin: 0;
+  border-radius: 0;
+  width: 100%;
 }
 
-.trending .grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.08);
+}
+
+/* FEATURED COLLECTION – horizontal slider */
+.featured {
+  margin-top: 32px;
+  margin-bottom: 32px;
+}
+
+/* wrapper yang bisa di-scroll */
+.featured-carousel {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 6px; /* biar nggak nempel scrollbar */
+}
+
+/* track isi card, dibuat horizontal */
+.featured-track {
+  display: flex;
   gap: 18px;
-  margin-bottom: 40px;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 4px;
+}
+
+/* tiap card nempel di “snap point” */
+.featured-card {
+  flex: 0 0 250px; /* lebar tiap kartu */
+  scroll-snap-align: start;
+
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  text-decoration: none;
+  color: inherit;
+  overflow: hidden;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.featured-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.10);
+}
+
+.featured-media {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.featured-meta {
+  padding: 10px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: center;
+}
+
+.featured-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #222;
+}
+
+.featured-price {
+  font-size: 13px;
+  color: #777;
 }
 
 /* Product list specific layout */
@@ -285,10 +488,15 @@ body {
 
 @media (max-width: 900px) {
   .categories .cards {
-    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
   }
-  .trending .grid {
-    grid-template-columns: repeat(2, 1fr);
+
+  .categories .card {
+    min-width: 150px;
+  }
+
+  .featured-cart {
+    flex: 0 0 180px;
   }
 }
 
@@ -305,7 +513,7 @@ body {
   .categories .cards {
     grid-template-columns: 1fr;
   }
-  .trending .grid {
-    grid-template-columns: 1fr;
+  .feature .card {
+    flex: 0 0 70%;
   }
 }
