@@ -23,9 +23,9 @@ if (!empty($_SESSION['user_id'])) {
         style="text-decoration:none; color:inherit;">
         <div style="display: flex; align-items: center; gap: 6px; font-weight: 700;
                     font-size: x-large; font-family: 'Poppins', sans-serif; color: #ff2d7a;">
-            <img src="/TUBES_2_Toko/assets/products/logo.jpg" 
+            <img src="/TUBES_2_Toko/assets/Logo Feyora.png" 
                 style="width:40px; height:auto;">
-            FEYORA
+            
         </div>
     </a>
     <nav class="topnav">
