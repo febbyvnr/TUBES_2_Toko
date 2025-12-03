@@ -86,7 +86,13 @@ $currentSize = isset($product['size']) ? $product['size'] : '';
                     </div>
                 </div>
 
-                <button class="add-cart-btn">Add to Cart</button>
+                <form action="../cart/add.php" method="POST" id="cartForm">
+                    <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
+                    <input type="hidden" name="size" id="selectedSize" value="<?= $currentSize ?>">
+                    <input type="hidden" name="qty" value="1">
+
+                    <button type="submit" class="add-cart-btn">Add to Cart</button>
+                </form>
 
                 <a href="listProduct.php" class="back-link">← Back to Products</a>
             </div>
@@ -102,6 +108,15 @@ $currentSize = isset($product['size']) ? $product['size'] : '';
                 });
             });
         </script>
+
+        <script>
+        // Update hidden input setiap klik size
+        document.querySelectorAll('.size-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('selectedSize').value = btn.dataset.size;
+            });
+        });
+    </script>
     </body>
 </html>
 

@@ -11,7 +11,7 @@ $size = $_POST['size'];
 $qty = isset($_POST['qty']) ? intval($_POST['qty']) : 1;
 
 //ambil data produk
-$stmt = $mysqli->prepare("SELECT id, name, price FROM product WHERE id = ?");
+$stmt = $mysqli->prepare("SELECT id, name, price FROM products WHERE id = ?");
 $stmt->bind_param("i", $product_id);
 $stmt->execute();
 $product = $stmt->get_result()->fetch_assoc();
@@ -32,7 +32,7 @@ $key = $product_id . "_" . $size;
 if(isset($_SESSION['cart'][$key])) {
     $_SESSION['cart'][$key]['qty'] += $qty;
 }else{
-    $SESSION['cart'][$key] = [
+    $_SESSION['cart'][$key] = [
         "id" => $product['id'],
         "name" => $product['name'],
         "size" => $size,
@@ -41,6 +41,13 @@ if(isset($_SESSION['cart'][$key])) {
     ];
 }
 
-header("Location: listCart.php");
+header("Location: ../cart/listCart.php");
 exit;
 ?>
+
+//foreach 
+insert tabel transaksi
+
+//foreach insert
+//insert
+//insert
