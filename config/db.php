@@ -4,7 +4,7 @@
 $DB_HOST = "localhost";   // default XAMPP
 $DB_USER = "root";        // default XAMPP
 $DB_PASS = "";            // default XAMPP (kosong)
-$DB_NAME = "2_toko"; // sesuaikan dengan nama database kamu
+$DB_NAME = "2_toko"; // sesuaikan nama database
 
 $mysqli = new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
 
