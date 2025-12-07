@@ -1,57 +1,86 @@
 <?php
 session_start();
+
+require_once __DIR__ . '/../config/db.php';
+
+if(!isset($_SESSION['user_id'])) {
+    die("Silakan login terlebih dahulu.");
+}
+
+$user_id = $_SESSION['user_id'];
+
+$query = "
+SELECT cart.id AS cart_id, products.name, products.price, products.image, 
+cart.size, cart.quantity 
+FROM cart
+JOIN products ON cart.product_id = products.id
+WHERE cart.user_id = ?
+";
+
+$stmt = $mysqli->prepare($query);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+$cart = $result->fetch_all(MYSQLI_ASSOC);
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Your Cart</title>
-    <link rel="stylesheet" href="../styles/Cart.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="../styles/cart.css?v=<?= time() ?>">
 </head>
 
 <body>
 
-<h2>Your Shopping Cart</h2>
+<h2 class="cart-title">Your Shopping Cart</h2>
 
-<?php if (empty($_SESSION['cart'])): ?>
-
-<p>Your cart is empty.</p>
-
+<?php if (count($cart) === 0): ?>
+    <p class="empty-cart">Your cart is empty.</p>
 <?php else: ?>
 
-<table border="1" cellpadding="10">
-    <tr>
-        <th>Product</th>
-        <th>Size</th>
-        <th>Qty</th>
-        <th>Price</th>
-        <th>Total</th>
-        <th>Action</th>
-    </tr>
+<div class="cart-container">
+    <?php foreach ($cart as $item): ?>
+    <div class="cart-card">
+        <!-- Gambar -->
+        <img src="../assets/products/<?= $item['image'] ?>" class="cart-img">
 
-    <?php foreach ($_SESSION['cart'] as $key => $item): ?>
-    <tr>
-        <td><?= $item['name'] ?></td>
-        <td><?= $item['size'] ?></td>
+        <div class="cart-info">
 
-        <td>
-            <form action="update.php" method="POST" style="display:flex; gap:6px">
+            <!-- Nama Produk -->
+            <h3 class="cart-product-name"><?= $item['name'] ?></h3>
+
+            <!-- Size -->
+            <div class="cart-size">Size: <span><?= $item['size'] ?></span></div>
+
+            <!-- Kuantitas -->
+            <form action="update.php" method="POST" class="qty-form">
                 <input type="hidden" name="key" value="<?= $key ?>">
-                <input type="number" name="qty" value="<?= $item['qty'] ?>" min="1" style="width:60px">
-                <button type="submit">Update</button>
+
+                <button type="submit" name="action" value="minus" class="qty-btn">-</button>
+
+                <div class="qty-number"><?= $item['quantity'] ?></div>
+
+                <button type="submit" name="action" value="plus" class="qty-btn">+</button>
             </form>
-        </td>
 
-        <td>Rp <?= number_format($item['price'], 0, ',', '.') ?></td>
-        <td>Rp <?= number_format($item['qty'] * $item['price'], 0, ',', '.') ?></td>
+            <!-- Harga -->
+            <div class="cart-price">Rp <?= number_format($item['price'], 0, ',', '.') ?></div>
 
-        <td>
-            <a href="delete.php?key=<?= $key ?>">Delete</a>
-        </td>
-    </tr>
+            <!-- Total -->
+            <div class="cart-total">
+                Total: <span>Rp <?=number_format($item['price'] * $item['quantity'], 0, ',', '.') ?></span>
+            </div>
+        </div>
+
+        <a href="delete.php?id=<?= $item['cart_id'] ?>" class="delete-btn">Delete</a>
+
+    </div>
     <?php endforeach; ?>
 
-</table>
+</div>
 
 <?php endif; ?>
 

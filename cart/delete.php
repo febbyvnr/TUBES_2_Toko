@@ -1,15 +1,16 @@
 <?php
 session_start();
+require_once __DIR__ . '/../config/db.php';
 
-if(!isset($_GET['key'])) {
+if(!isset($_GET['id'])) {
     die("Invalid request");
 }
 
-$key = $_GET['key'];
+$cart_id = intval($_GET['id']);
 
-if(isset($_SESSION['cart']['key'])) {
-    unset($_SESSION['cart'][$key]);
-}
+$stmt = $mysqli->prepare("DELETE FROM cart WHERE id = ?");
+$stmt->bind_param("i", $cart_id);
+$stmt->execute();
 
 header("Location: listCart.php");
 exit;

@@ -90,6 +90,21 @@ $currentSize = isset($product['size']) ? $product['size'] : '';
                     <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
                     <input type="hidden" name="size" id="selectedSize" value="<?= $currentSize ?>">
                     <input type="hidden" name="qty" value="1">
+                    
+                    <!-- 
+                    <input type="hidden" name="size" id="selectedSize" value="">  
+                    -->
+
+                    <!--Quantity-->
+                    <div class="qty-wrapper">
+                        <span class="qty-label">Quantity: </span>
+
+                        <div class="qty-control">
+                            <button type="button" class="qty-btn" id="minusBtn">-</button>
+                            <input type="text" class="qty-input" id="qtyDisplay" value="1" readonly>
+                            <button type="button" class="qty-btn" id="plusBtn">+</button>
+                        </div>
+                    </div>
 
                     <button type="submit" class="add-cart-btn">Add to Cart</button>
                 </form>
@@ -99,6 +114,7 @@ $currentSize = isset($product['size']) ? $product['size'] : '';
             
         </main>
 
+        <!--Size JS -->
         <script>
             document.querySelectorAll('.size-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -116,7 +132,31 @@ $currentSize = isset($product['size']) ? $product['size'] : '';
                 document.getElementById('selectedSize').value = btn.dataset.size;
             });
         });
-    </script>
+        </script>
+
+        <!-- Quantity JS -->
+        <script>
+            const minusBtn = document.getElementById('minusBtn');
+            const plusBtn = document.getElementById('plusBtn');
+            const qtyDisplay = document.getElementById('qtyDisplay');
+            const qtyInput = document.getElementById('qtyInput');
+
+            minusBtn.addEventListener('click', () => {
+                let qty = parseInt(qtyDisplay.value);
+                if(qty > 1) {
+                    qty--;
+                    qtyDisplay.value = qty;
+                    qtyInput.value = qty;
+                }
+            });
+
+            plusBtn.addEventListener('click', () => {
+                let qty = parseInt(qtyDisplay.value);
+                qty++;
+                qtyDisplay.value = qty;
+                qtyInput.value = qty;
+            });
+        </script>
     </body>
 </html>
 
