@@ -37,7 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-/* --- ambil gambar-gambar produk untuk slideshow --- */
 $slides = [];
 if ($res = $mysqli->query("
     SELECT image 
@@ -47,7 +46,6 @@ if ($res = $mysqli->query("
     LIMIT 8
 ")) {
     while ($row = $res->fetch_assoc()) {
-        // pakai path absolut biar aman
         $slides[] = '/TUBES_2_Toko/assets/products/' . rawurlencode($row['image']);
     }
     $res->free();
@@ -138,7 +136,7 @@ $slidesJson = json_encode($slides);
       el.style.backgroundImage = "url('" + slides[idx] + "')";
       el.style.opacity = 1;
     }, 400);
-  }, 8000); // ganti tiap 10 detik
+  }, 8000); // ganti tiap 8 detik
 })();
 </script>
 </body>

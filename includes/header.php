@@ -44,6 +44,7 @@ if ($currentUser) {
     }
 }
 ?>
+
 <header style="background: #fff; border-bottom: 1px solid #ddd;">
   <div style="max-width: var(--container); margin: 0 auto; padding: 0 20px;
         display: flex; align-items: center; justify-content: space-between; padding: 16px 0;">
@@ -71,6 +72,7 @@ if ($currentUser) {
            title="Cart"
            style="font-size:22px; text-decoration:none; color:#333;">
            🛒
+           <!-- <i class="bi bi-cart4"></i> -->
         </a>
 
         <!-- PROFILE AREA -->
@@ -166,6 +168,7 @@ if ($currentUser) {
            id="guest-cart-link"
            style="font-size:22px; text-decoration:none; color:#333;">
            🛒
+           <!-- <i class="bi bi-cart4"></i> -->
         </a>
       <?php endif; ?>
     </div>

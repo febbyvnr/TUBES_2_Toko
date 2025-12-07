@@ -15,8 +15,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $digits = preg_replace('/\D+/', '', $phone);
     $profileFile = null;
 
-    // --- validation ---
-
     // username
     if ($username === '') {
         $errors[] = 'Username is required.';
@@ -101,7 +99,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // insert if OK
     if (empty($errors)) {
         $hash = password_hash($password, PASSWORD_DEFAULT);
         $role = 'user';
@@ -124,14 +121,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errors[] = 'Database query failed: ' . $mysqli->error;
         }
     } else {
-        // if any error, delete uploaded file
+        // error, delete uploaded file
         if ($profileFile) {
             @unlink(__DIR__ . '/../assets/profile/' . $profileFile);
         }
     }
 }
 
-/* --- slideshow images (same as login) --- */
+/* --- slideshow images (kyk login) --- */
 $slides = [];
 if ($res = $mysqli->query("
     SELECT image
@@ -181,7 +178,7 @@ $slidesJson = json_encode($slides);
 
         <form method="post" enctype="multipart/form-data" class="auth-form-fields">
 
-            <!-- Row: username + email -->
+            <!-- username + email -->
             <div class="form-row">
             <label class="auth-label">
                 Username
@@ -203,7 +200,7 @@ $slidesJson = json_encode($slides);
             </label>
             </div>
 
-            <!-- Row: password + confirm -->
+            <!-- password + confirm -->
             <div class="form-row">
             <label class="auth-label">
                 Password
@@ -224,7 +221,7 @@ $slidesJson = json_encode($slides);
             </label>
             </div>
 
-            <!-- Row: phone + profile photo -->
+            <!-- phone + profile photo -->
             <div class="form-row">
             <label class="auth-label">
                 Phone
@@ -245,7 +242,7 @@ $slidesJson = json_encode($slides);
             </label>
             </div>
 
-            <!-- Address full width -->
+            <!-- Address full -->
             <label class="auth-label">
             Address
             <textarea
