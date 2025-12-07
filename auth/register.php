@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($f['error'] === UPLOAD_ERR_OK) {
             $ext = strtolower(pathinfo($f['name'], PATHINFO_EXTENSION));
             if (!in_array($ext, ['jpg','jpeg','png'])) $errors[] = 'Hanya diperbolehkan gambar JPG/PNG.';
-            elseif ($f['size'] > 2 * 1024 * 1024) $errors[] = 'Ukuran file maksimal 2MB.';
+            else if ($f['size'] > 64 * 1024 * 1024) $errors[] = 'Ukuran file maksimal 64MB.';
             else {
                 $profileFile = uniqid('pf_') . '.' . $ext;
                 $dest = __DIR__ . '/../assets/profile/' . $profileFile;

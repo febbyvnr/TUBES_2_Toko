@@ -64,7 +64,6 @@ function renderProductCard($row)
         <!-- Filter & Sort Form -->
         <form method="get" class="filters" style="margin-bottom:18px; display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
             <?php
-            // load distinct categories and sizes for filter selects
             $cats = [];
             // $sizes = [];
             if ($cres = $mysqli->query("SELECT DISTINCT IFNULL(category, '') AS category FROM products")) {
@@ -138,7 +137,6 @@ function renderProductCard($row)
 
         <div class="cards">
         <?php
-        // Build SQL with filters
         $conditions = [];
         if ($qLastStock === 1) {
             $conditions[] = "stock < 100";
@@ -170,11 +168,9 @@ function renderProductCard($row)
                 if ($_GET['sort'] === 'price_desc') $order = 'ORDER BY price DESC';
         }
 
-        // Pagination setup
         $perPage = 30;
         $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 
-        // total count for current filters
         $countSql = "SELECT COUNT(*) AS cnt FROM products " . $where;
         $total = 0;
         if ($cres = $mysqli->query($countSql)) {
