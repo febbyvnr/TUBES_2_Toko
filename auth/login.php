@@ -5,21 +5,29 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $identifier = trim($_POST['identifier'] ?? ''); // username or email
-    $password = $_POST['password'] ?? '';
+    $password   = $_POST['password'] ?? '';
+
     if ($identifier === '' || $password === '') {
         $error = 'Isi username/email dan password.';
     } else {
-        $stmt = $mysqli->prepare("SELECT id, username, password, profile_photo FROM user WHERE username = ? OR email = ? LIMIT 1");
+        $stmt = $mysqli->prepare("
+            SELECT id, username, password, profile_photo 
+            FROM user 
+            WHERE username = ? OR email = ? 
+            LIMIT 1
+        ");
         if ($stmt) {
             $stmt->bind_param('ss', $identifier, $identifier);
             $stmt->execute();
-            $res = $stmt->get_result();
+            $res  = $stmt->get_result();
             $user = $res->fetch_assoc();
             $stmt->close();
+
             if ($user && password_verify($password, $user['password'])) {
-                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['user_id']  = $user['id'];
                 $_SESSION['username'] = $user['username'];
-                header('Location: /TUBES_2_Toko/index.php'); exit;
+                header('Location: /TUBES_2_Toko/index.php');
+                exit;
             } else {
                 $error = 'Login gagal: username/email atau password salah.';
             }
@@ -28,6 +36,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
+/* --- ambil gambar-gambar produk untuk slideshow --- */
+$slides = [];
+if ($res = $mysqli->query("
+    SELECT image 
+    FROM products 
+    WHERE image IS NOT NULL AND image <> '' 
+    ORDER BY added DESC 
+    LIMIT 8
+")) {
+    while ($row = $res->fetch_assoc()) {
+        // pakai path absolut biar aman
+        $slides[] = '/TUBES_2_Toko/assets/products/' . rawurlencode($row['image']);
+    }
+    $res->free();
+}
+$slidesJson = json_encode($slides);
 ?>
 <!doctype html>
 <html lang="en">
@@ -35,21 +60,81 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Login — Feyora</title>
-  <link rel="stylesheet" href="../styles/Login.css">
+  <link rel="stylesheet" href="../styles/Login.css?v=<?=time()?>">
 </head>
 <body>
 <?php include __DIR__ . '/../includes/header.php'; ?>
-<main class="container" style="padding:28px 20px;">
-  <h2>Login</h2>
-  <?php if ($error): ?>
-    <div class="muted" style="color:#b00;margin-bottom:12px;"><?=htmlspecialchars($error)?></div>
-  <?php endif; ?>
-  <form method="post" style="max-width:420px;">
-    <label>Username or Email<br><input name="identifier" value="<?=htmlspecialchars($_POST['identifier'] ?? '')?>"></label><br>
-    <label>Password<br><input type="password" name="password"></label><br>
-    <div style="margin:8px 0; color:#666;">Belum punya akun? <a href="register.php">Daftar</a></div>
-    <button class="btn-primary" type="submit">Login</button>
-  </form>
+
+<main class="auth-layout">
+  <!-- KIRI: SLIDESHOW GAMBAR PRODUK -->
+  <section class="auth-visual">
+    <div id="login-hero"
+      class="auth-visual-image"
+      style="background-image:url('<?= htmlspecialchars($slides[0] ?? "/TUBES_2_Toko/assets/products/placeholder.png") ?>');">
+    </div>
+
+    <div class="auth-visual-overlay">
+      <h1>Welcome Back</h1>
+      <p>Masuk untuk melanjutkan koleksi favoritmu dan selesaikan pesanan dengan cepat.</p>
+    </div>
+  </section>
+
+  <!-- KANAN: FORM LOGIN -->
+  <section class="auth-form">
+    <div class="auth-form-inner">
+      <h2 class="auth-title">Login</h2>
+      <?php if ($error): ?>
+        <div class="auth-error"><?= htmlspecialchars($error) ?></div>
+      <?php endif; ?>
+
+      <form method="post" class="auth-form-fields">
+        <label class="auth-label">
+          Username atau Email
+          <input
+            class="auth-input"
+            name="identifier"
+            value="<?= htmlspecialchars($_POST['identifier'] ?? '') ?>"
+            autocomplete="username"
+          >
+        </label>
+
+        <label class="auth-label">
+          Password
+          <input
+            class="auth-input"
+            type="password"
+            name="password"
+            autocomplete="current-password"
+          >
+        </label>
+
+        <div class="auth-meta">
+          <span>Belum punya akun? <a href="register.php">Daftar</a></span>
+        </div>
+
+        <button class="btn-primary auth-submit" type="submit">Login</button>
+      </form>
+    </div>
+  </section>
 </main>
+
+<script>
+(function () {
+  const slides = <?= $slidesJson ?: '[]' ?>;
+  const el = document.getElementById('login-hero');
+  if (!el || !slides || slides.length <= 1) return;
+
+  let idx = 0;
+  setInterval(function () {
+    idx = (idx + 1) % slides.length;
+
+    el.style.opacity = 0;
+    setTimeout(function () {
+      el.style.backgroundImage = "url('" + slides[idx] + "')";
+      el.style.opacity = 1;
+    }, 400);
+  }, 8000); // ganti tiap 10 detik
+})();
+</script>
 </body>
 </html>
