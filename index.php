@@ -112,13 +112,11 @@ if ($fres = $mysqli->query($sqlFeat)) {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
 
-  <!-- pastikan base mengarah ke folder project di server -->
   <base href="/TUBES_2_Toko/">
 
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <title>FEYORA — Home</title>
 
-  <!-- cache buster tetap oke -->
   <link rel="stylesheet" href="styles/HomePage.css?v=<?=time()?>">
 </head>
 <body>
