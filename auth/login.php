@@ -75,13 +75,18 @@ $slidesJson = json_encode($slides);
 
     <div class="auth-visual-overlay">
       <h1>Welcome Back</h1>
-      <p>Masuk untuk melanjutkan koleksi favoritmu dan selesaikan pesanan dengan cepat.</p>
+      <p>Sign in to continue your favorite collections and complete orders quickly</p>
     </div>
   </section>
 
   <!-- KANAN: FORM LOGIN -->
   <section class="auth-form">
     <div class="auth-form-inner">
+       <div style="text-align:center; margin-bottom:18px;">
+            <img src="/TUBES_2_Toko/assets/Logo Feyora.png" 
+                alt="Feyora Logo"
+                style="width:150px; height:auto; opacity:0.9;">
+        </div>
       <h2 class="auth-title">Login</h2>
       <?php if ($error): ?>
         <div class="auth-error"><?= htmlspecialchars($error) ?></div>
@@ -89,7 +94,7 @@ $slidesJson = json_encode($slides);
 
       <form method="post" class="auth-form-fields">
         <label class="auth-label">
-          Username atau Email
+          Username or Email
           <input
             class="auth-input"
             name="identifier"
@@ -109,7 +114,7 @@ $slidesJson = json_encode($slides);
         </label>
 
         <div class="auth-meta">
-          <span>Belum punya akun? <a href="register.php">Daftar</a></span>
+          <span>Don't have an account yet? <a href="register.php">Register now</a></span>
         </div>
 
         <button class="btn-primary auth-submit" type="submit">Login</button>
