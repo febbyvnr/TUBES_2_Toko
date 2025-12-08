@@ -55,6 +55,7 @@ body {
               url('https://via.placeholder.com/1400x520') center/cover no-repeat;
   border-radius: 12px;
   margin: 28px auto;
+  min-height: 600px;
 }
 
 .hero-inner {

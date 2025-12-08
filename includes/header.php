@@ -53,7 +53,7 @@ if ($currentUser) {
       <div style="display: flex; align-items: center; gap: 6px; font-weight: 700;
                   font-size: x-large; font-family: 'Poppins', sans-serif; color: #ff2d7a;">
         <img src="/TUBES_2_Toko/assets/Logo Feyora.png" 
-             style="width:40px; height:auto;">
+             style="width: 100px; height:auto; margin-left: 30px;">
       </div>
     </a>
 
