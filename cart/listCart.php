@@ -39,66 +39,57 @@ $cart = $result->fetch_all(MYSQLI_ASSOC);
 <body>
 <?php include __DIR__ . '/../includes/header.php'; ?>
 
-<main class="cart-page container">
+<main class="cart-page">
+  <div class="container">
     <h2 class="cart-title">Your Shopping Cart</h2>
 
     <?php if (count($cart) === 0): ?>
-        <p class="empty-cart">Your cart is empty.</p>
+      <p class="empty-cart">Your cart is empty.</p>
     <?php else: ?>
 
-    <div class="cart-container">
+      <div class="cart-container">
         <?php foreach ($cart as $item): ?>
-        <div class="cart-card">
-            <!-- Gambar -->
+          <div class="cart-card">
             <img
-                src="assets/products/<?= htmlspecialchars($item['image']) ?>"
-                alt="<?= htmlspecialchars($item['name']) ?>"
-                class="cart-img"
+              src="assets/products/<?= htmlspecialchars($item['image']) ?>"
+              alt="<?= htmlspecialchars($item['name']) ?>"
+              class="cart-img"
             >
 
             <div class="cart-info">
-                <!-- Nama Produk -->
-                <h3 class="cart-product-name"><?= htmlspecialchars($item['name']) ?></h3>
+              <h3 class="cart-product-name"><?= htmlspecialchars($item['name']) ?></h3>
 
-                <!-- Size -->
-                <div class="cart-size">
-                    Size: <span><?= htmlspecialchars($item['size']) ?></span>
-                </div>
+              <div class="cart-size">
+                Size: <span><?= htmlspecialchars($item['size']) ?></span>
+              </div>
 
-                <!-- Kuantitas -->
-                <form action="cart/update.php" method="POST" class="qty-form">
-                    <!-- NOTE: kalau di update.php kamu pakai id, bisa ganti name/key sesuai kebutuhan -->
-                    <input type="hidden" name="cart_id" value="<?= (int)$item['cart_id'] ?>">
+              <form action="cart/update.php" method="POST" class="qty-form">
+                <input type="hidden" name="cart_id" value="<?= (int)$item['cart_id'] ?>">
+                <input type="hidden" name="quantity" value="<?= (int)$item['quantity'] ?>">
 
-                    <input type="hidden" name="quantity" value="<?= $item['quantity'] ?>">
+                <button type="submit" name="action" value="minus" class="qty-btn">-</button>
+                <div class="qty-number"><?= (int)$item['quantity'] ?></div>
+                <button type="submit" name="action" value="plus" class="qty-btn">+</button>
+              </form>
 
-                    <button type="submit" name="action" value="minus" class="qty-btn">-</button>
+              <div class="cart-price">
+                Rp <?= number_format($item['price'], 0, ',', '.') ?>
+              </div>
 
-                    <div class="qty-number"><?= (int)$item['quantity'] ?></div>
-
-                    <button type="submit" name="action" value="plus" class="qty-btn">+</button>
-                </form>
-
-                <!-- Harga -->
-                <div class="cart-price">
-                    Rp <?= number_format($item['price'], 0, ',', '.') ?>
-                </div>
-
-                <!-- Total -->
-                <div class="cart-total">
-                    Total:
-                    <span>
-                        Rp <?= number_format($item['price'] * $item['quantity'], 0, ',', '.') ?>
-                    </span>
-                </div>
+              <div class="cart-total">
+                Total:
+                <span>Rp <?= number_format($item['price'] * $item['quantity'], 0, ',', '.') ?></span>
+              </div>
             </div>
 
             <a href="cart/delete.php?id=<?= (int)$item['cart_id'] ?>" class="delete-btn">Delete</a>
-        </div>
+          </div>
         <?php endforeach; ?>
-    </div>
-            <a href="product/listProduct.php" class="back-link">← Back to Products</a>
+      </div>
+
+      <a href="product/listProduct.php" class="back-link">← Back to Products</a>
     <?php endif; ?>
+  </div>
 </main>
 </body>
 </html>
