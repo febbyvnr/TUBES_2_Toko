@@ -31,7 +31,7 @@ $cart = $result->fetch_all(MYSQLI_ASSOC);
 <!doctype html>
 <html lang="en">
 <?php
-  // pakai head.php global
+  // head.php global
   $pageTitle   = 'Your Cart — FEYORA';
   $extraStyles = '<link rel="stylesheet" href="styles/cart.css?v=' . time() . '">';
   include __DIR__ . '/../includes/head.php';
@@ -41,7 +41,13 @@ $cart = $result->fetch_all(MYSQLI_ASSOC);
 
 <main class="cart-page">
   <div class="container">
-    <h2 class="cart-title">Your Shopping Cart</h2>
+
+    <!-- HEADER CART: back + title -->
+    <div class="cart-header">
+      <a href="product/listProduct.php" class="back-link">← Back to Products</a>
+      <h2 class="cart-title">Your Shopping Cart</h2>
+      <div class="cart-header-spacer"></div>
+    </div>
 
     <?php if (count($cart) === 0): ?>
       <p class="empty-cart">Your cart is empty.</p>
@@ -50,12 +56,14 @@ $cart = $result->fetch_all(MYSQLI_ASSOC);
       <div class="cart-container">
         <?php foreach ($cart as $item): ?>
           <div class="cart-card">
+            <!-- gambar -->
             <img
               src="assets/products/<?= htmlspecialchars($item['image']) ?>"
               alt="<?= htmlspecialchars($item['name']) ?>"
               class="cart-img"
             >
 
+            <!-- info kiri -->
             <div class="cart-info">
               <h3 class="cart-product-name"><?= htmlspecialchars($item['name']) ?></h3>
 
@@ -64,10 +72,10 @@ $cart = $result->fetch_all(MYSQLI_ASSOC);
               </div>
 
               <form action="cart/update.php" method="POST" class="qty-form">
-                <input type="hidden" name="cart_id" value="<?= (int)$item['cart_id'] ?>">
+                <input type="hidden" name="cart_id"   value="<?= (int)$item['cart_id'] ?>">
                 <input type="hidden" name="quantity" value="<?= (int)$item['quantity'] ?>">
 
-                <button type="submit" name="action" value="minus" class="qty-btn">-</button>
+                <button type="submit" name="action" value="minus" class="qty-btn">−</button>
                 <div class="qty-number"><?= (int)$item['quantity'] ?></div>
                 <button type="submit" name="action" value="plus" class="qty-btn">+</button>
               </form>
@@ -75,19 +83,22 @@ $cart = $result->fetch_all(MYSQLI_ASSOC);
               <div class="cart-price">
                 Rp <?= number_format($item['price'], 0, ',', '.') ?>
               </div>
+            </div>
 
-              <div class="cart-total">
-                Total:
-                <span>Rp <?= number_format($item['price'] * $item['quantity'], 0, ',', '.') ?></span>
+            <!-- total di tengah -->
+            <div class="cart-summary">
+              <div class="cart-summary-label">Total</div>
+              <div class="cart-summary-value">
+                Rp <?= number_format($item['price'] * $item['quantity'], 0, ',', '.') ?>
               </div>
             </div>
 
+            <!-- tombol delete kanan -->
             <a href="cart/delete.php?id=<?= (int)$item['cart_id'] ?>" class="delete-btn">Delete</a>
           </div>
         <?php endforeach; ?>
       </div>
 
-      <a href="product/listProduct.php" class="back-link">← Back to Products</a>
     <?php endif; ?>
   </div>
 </main>
