@@ -70,6 +70,8 @@ $cart = $result->fetch_all(MYSQLI_ASSOC);
                     <!-- NOTE: kalau di update.php kamu pakai id, bisa ganti name/key sesuai kebutuhan -->
                     <input type="hidden" name="cart_id" value="<?= (int)$item['cart_id'] ?>">
 
+                    <input type="hidden" name="quantity" value="<?= $item['quantity'] ?>">
+
                     <button type="submit" name="action" value="minus" class="qty-btn">-</button>
 
                     <div class="qty-number"><?= (int)$item['quantity'] ?></div>
@@ -95,7 +97,7 @@ $cart = $result->fetch_all(MYSQLI_ASSOC);
         </div>
         <?php endforeach; ?>
     </div>
-
+            <a href="product/listProduct.php" class="back-link">← Back to Products</a>
     <?php endif; ?>
 </main>
 </body>
