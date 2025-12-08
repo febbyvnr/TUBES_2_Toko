@@ -40,9 +40,4 @@ exit;
 
 ?>
 
-//foreach 
-insert tabel transaksi
 
-//foreach insert
-//insert
-//insert
