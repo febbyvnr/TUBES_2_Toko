@@ -93,12 +93,51 @@ $cart = $result->fetch_all(MYSQLI_ASSOC);
                 </div>
             </div>
 
+            <form action="selectCheckout.php" method="POST" style="display:inline;">
+                <input type="hidden" name="cart_id" value="<?= $item['cart_id'] ?>">
+                <button class="select-btn">Select</button>
+            </form>
             <a href="cart/delete.php?id=<?= (int)$item['cart_id'] ?>" class="delete-btn">Delete</a>
         </div>
         <?php endforeach; ?>
     </div>
             <a href="product/listProduct.php" class="back-link">← Back to Products</a>
     <?php endif; ?>
+
+    <!-- Checkout -->
+    <div class="checkout-summary">
+        <div class="summary-title">Ringkasan Checkout</div>
+
+        <div class="summary-list">
+        <?php
+        $total = 0;
+        if (isset($_SESSION['checkout']) && count($_SESSION['checkout']) > 0):
+            foreach ($_SESSION['checkout'] as $c):
+                $total += $c['price'] * $c['quantity'];
+        ?>
+            <div class="summary-item">
+                <span><?= $c['name'] ?> x<?= $c['quantity'] ?></span>
+                <span>Rp <?= number_format($c['price'] * $c['quantity'],0,',','.') ?></span>
+            </div>
+        <?php endforeach; else: ?>
+            <p style="color:#888;">Belum ada barang dipilih</p>
+        <?php endif; ?>
+        </div>
+
+        <div class="summary-total">
+            Total Belanja: Rp <?= number_format($total, 0, ',', '.') ?>
+        </div>
+
+        <form action="checkout.php" method="POST">
+            <button class="checkout-btn" <?= $total == 0 ? 'disabled' : '' ?>>
+                Checkout
+            </button>
+        </form>
+
+    </div>
+
+</div>
+
 </main>
 </body>
 </html>

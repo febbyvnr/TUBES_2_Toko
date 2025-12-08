@@ -6,7 +6,7 @@ body {
 
 .cart-title {
     text-align: center;
-    font-size: 28px; margin-bottom: 20px;
+    font-size: 28px; margin-bottom: 20px; 
     color: #444;
 }
 
@@ -106,16 +106,17 @@ body {
 }
 
 .delete-btn {
-    background: #ff4d4d;
-    color: white;
-    padding: 10px 16px;
+    background: #f5f5f5;
+    color: #E5007A;
+    border-color: #E5007A;
+    padding: 10px 8px;
     border-radius: 8px;
     text-decoration: none;
     font-size: 14px;
 }
 
 .delete-btn:hover {
-    background: #e60000;
+    background:#555;
 }
 
 .back-link {
@@ -126,4 +127,79 @@ body {
     font-size: 14px;
     color: #555;
     text-decoration: none;
+}
+
+.cart-page {
+    display: flex;
+    gap: 25px;
+    align-items: flex-start;
+}
+
+.cart-container {
+    width: 70%;
+}
+
+.checkout-summary {
+    width: 30%;
+    padding: 20px;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 20px;
+}
+
+.summary-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.summary-list {
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 15px;
+    margin-bottom: 10px;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 15px;
+    margin-bottom: 8px;
+}
+
+.summary-total {
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+.checkout-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    background: #222;
+    color: white;
+    cursor: pointer;
+}
+
+.checkout-btn:hover {
+    background: #444;
+}
+
+.select-btn {
+    background: #E5007A;
+    color:#eee;
+    border-color: #E5007A;
+    padding: 10px 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.select-btn:hover {
+    background: #be0263;
 }
