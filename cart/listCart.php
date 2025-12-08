@@ -190,9 +190,11 @@ $cart = $resultCart->fetch_all(MYSQLI_ASSOC);
         </div>
 
         <form action="checkout.php" method="POST">
-            <button class="checkout-btn" <?= ($total == 0) ? 'disabled' : '' ?>>
+            <button class="checkout-btn" 
+                <?= empty($_SESSION['checkout']) ? "onclick=\"alert('Pilih item dulu sebelum checkout!'); return false;\"" : '' ?>>
                 Checkout
             </button>
+
         </form>
 
         <form method="POST">
