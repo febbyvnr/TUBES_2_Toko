@@ -2,6 +2,12 @@
 session_start();
 require_once __DIR__ . '/../config/db.php';
 
+if (isset($_POST['cancel_checkout'])) {
+    unset($_SESSION['checkout']);
+    header("Location: listCart.php");
+    exit;
+}
+
 if (!isset($_SESSION['user_id'])) {
     header('Location: /TUBES_2_Toko/auth/login.php?redirect=' . urlencode('/TUBES_2_Toko/cart/listCart.php'));
     exit;
@@ -9,7 +15,44 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = (int) $_SESSION['user_id'];
 
-$query = "
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_id'])) {
+
+    $selected_id = (int) $_POST['cart_id'];
+
+    $querySelect = "
+        SELECT cart.id AS cart_id,
+               products.name,
+               products.price,
+               products.image,
+               cart.size,
+               cart.quantity
+        FROM cart
+        JOIN products ON cart.product_id = products.id
+        WHERE cart.id = ? AND cart.user_id = ?
+    ";
+
+    $stmt = $mysqli->prepare($querySelect);
+    $stmt->bind_param("ii", $selected_id, $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $item = $result->fetch_assoc();
+
+    if ($item) {
+        if (!isset($_SESSION['checkout'])) {
+            $_SESSION['checkout'] = [];
+        }
+
+        $_SESSION['checkout'][$selected_id] = $item;
+    }
+
+    header("Location: listCart.php");
+    exit;
+}
+
+// =============================
+// 2. SELECT ALL CART ITEMS
+// =============================
+$queryCart = "
     SELECT cart.id AS cart_id,
            products.name,
            products.price,
@@ -21,12 +64,11 @@ $query = "
     WHERE cart.user_id = ?
 ";
 
-$stmt = $mysqli->prepare($query);
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$result = $stmt->get_result();
-
-$cart = $result->fetch_all(MYSQLI_ASSOC);
+$stmtCart = $mysqli->prepare($queryCart);
+$stmtCart->bind_param("i", $user_id);
+$stmtCart->execute();
+$resultCart = $stmtCart->get_result();
+$cart = $resultCart->fetch_all(MYSQLI_ASSOC);
 ?>
 <!doctype html>
 <html lang="en">
@@ -39,12 +81,13 @@ $cart = $result->fetch_all(MYSQLI_ASSOC);
 <body>
 <?php include __DIR__ . '/../includes/header.php'; ?>
 
-<main class="cart-page container">
-    <h2 class="cart-title">Your Shopping Cart</h2>
+<h2 class="cart-title">Your Shopping Cart</h2>
 
-    <?php if (count($cart) === 0): ?>
+<main class="cart-page container">
+   
+    <!-- <?php if (count($cart) === 0): ?>
         <p class="empty-cart">Your cart is empty.</p>
-    <?php else: ?>
+    <?php else: ?> -->
 
     <div class="cart-container">
         <?php foreach ($cart as $item): ?>
@@ -93,7 +136,7 @@ $cart = $result->fetch_all(MYSQLI_ASSOC);
                 </div>
             </div>
 
-            <form action="selectCheckout.php" method="POST" style="display:inline;">
+            <form method="POST" style="display:inline;">
                 <input type="hidden" name="cart_id" value="<?= $item['cart_id'] ?>">
                 <button class="select-btn">Select</button>
             </form>
@@ -101,12 +144,11 @@ $cart = $result->fetch_all(MYSQLI_ASSOC);
         </div>
         <?php endforeach; ?>
     </div>
-            <a href="product/listProduct.php" class="back-link">← Back to Products</a>
     <?php endif; ?>
 
     <!-- Checkout -->
     <div class="checkout-summary">
-        <div class="summary-title">Ringkasan Checkout</div>
+        <div class="summary-title">Item Checkout</div>
 
         <div class="summary-list">
         <?php
@@ -133,11 +175,16 @@ $cart = $result->fetch_all(MYSQLI_ASSOC);
                 Checkout
             </button>
         </form>
-
+        
+        <form method="POST">
+        <button class="cancelCheckout-btn" name="cancel_checkout">
+            Batal Checkout
+        </button>
+        </form>
     </div>
 
 </div>
-
 </main>
+    <a href="product/listProduct.php" class="back-link">← Back to Products</a>
 </body>
 </html>
