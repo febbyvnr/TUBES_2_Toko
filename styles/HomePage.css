@@ -193,8 +193,8 @@ body {
 }
 
 .categories .cards {
-  scrollbar-width: none;       /* Firefox */
-  -ms-overflow-style: none;    /* IE / Edge lama */
+  scrollbar-width: none;  
+  -ms-overflow-style: none; 
 }
 
 .categories .cards::-webkit-scrollbar {
@@ -241,7 +241,7 @@ body {
   background-position: center;
 }
 
-/* Caption di bawah gambar, tanpa background hitam */
+/* Caption di bawah gambar */
 .categories .card-caption {
   padding: 10px 12px 14px;
   font-weight: 600;
@@ -250,13 +250,11 @@ body {
   background: #fff;
 }
 
-/* Hover effect */
 .categories .card:hover {
   transform: translateY(-4px);
   box-shadow: 0 10px 22px rgba(0,0,0,0.08);
 }
 
-/* Kartu kategori */
 .card {
   background: #fff;
   border-radius: 12px;
