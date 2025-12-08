@@ -7,6 +7,7 @@ body {
 .cart-title {
     text-align: center;
     font-size: 28px; margin-bottom: 20px;
+    color: #444;
 }
 
 .empty-cart {
@@ -49,6 +50,7 @@ body {
 .cart-product-name {
     margin: 0;
     font-size: 20px; font-weight: 600;
+    color: #060031;
 }
 
 .cart-size {
@@ -58,6 +60,7 @@ body {
 
 .cart-size span {
     font-weight: bold;
+    color:#060031;
 }
 
 .qty-form {
@@ -83,16 +86,19 @@ body {
     font-size: 18px;
     width: 26px;
     text-align: center;
+    color: #060031;
 }
 
 .cart-price {
     font-size: 16px;
     font-weight: 600;
+    color: #E5007A;
 }
 
 .cart-total {
     font-size: 16px;
     margin-top: 4px;
+    color: #060031;
 }
 
 .cart-total span {
