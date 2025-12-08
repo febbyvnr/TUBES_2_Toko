@@ -71,8 +71,8 @@ if ($currentUser) {
            href="/TUBES_2_Toko/cart/listCart.php" 
            title="Cart"
            style="font-size:22px; text-decoration:none; color:#333;">
-           🛒
-           <!-- <i class="bi bi-cart4"></i> -->
+           <!-- 🛒 -->
+           <i class="bi bi-cart4"></i>
         </a>
 
         <!-- PROFILE AREA -->
@@ -167,8 +167,8 @@ if ($currentUser) {
            href="/TUBES_2_Toko/cart/listCart.php"
            id="guest-cart-link"
            style="font-size:22px; text-decoration:none; color:#333;">
-           🛒
-           <!-- <i class="bi bi-cart4"></i> -->
+           <!-- 🛒 -->
+           <i class="bi bi-cart4"></i>
         </a>
       <?php endif; ?>
     </div>

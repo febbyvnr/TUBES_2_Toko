@@ -3,6 +3,8 @@ require_once __DIR__ . '/../config/db.php';
 if (session_status() === PHP_SESSION_NONE) session_start();
 
 $error = '';
+$activationLink = null; // NEW: untuk simpan link aktivasi kalau akun belum aktif
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $identifier = trim($_POST['identifier'] ?? ''); // username or email
     $password   = $_POST['password'] ?? '';
@@ -11,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Isi username/email dan password.';
     } else {
         $stmt = $mysqli->prepare("
-            SELECT id, username, password, profile_photo 
+            SELECT id, username, password, profile_photo, is_active, activation_token  -- NEW
             FROM user 
             WHERE username = ? OR email = ? 
             LIMIT 1
@@ -24,10 +26,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->close();
 
             if ($user && password_verify($password, $user['password'])) {
-                $_SESSION['user_id']  = $user['id'];
-                $_SESSION['username'] = $user['username'];
-                header('Location: /TUBES_2_Toko/index.php');
-                exit;
+
+                // CEK SUDAH AKTIF ATAU BELUM
+                if ((int)$user['is_active'] !== 1) {
+                    // NEW: kalau punya activation_token, buat link aktivasi
+                    if (!empty($user['activation_token'])) {
+                        $baseUrl = 'http://localhost/TUBES_2_Toko/auth';
+                        $activationLink = $baseUrl . '/activate.php?token=' . urlencode($user['activation_token']);
+                        $error = 'Akun Anda belum aktif. Silakan aktivasi akun dengan tombol di bawah ini.';
+                    } else {
+                        // kalau token kosong (misal dihapus), suruh kontak admin
+                        $error = 'Akun Anda belum aktif dan link aktivasi tidak tersedia. Silakan hubungi admin.';
+                    }
+                } else {
+                    // aktif boleh login
+                    $_SESSION['user_id']  = $user['id'];
+                    $_SESSION['username'] = $user['username'];
+                    header('Location: /TUBES_2_Toko/index.php');
+                    exit;
+                }
+
             } else {
                 $error = 'Login gagal: username/email atau password salah.';
             }
@@ -86,8 +104,30 @@ $slidesJson = json_encode($slides);
                 style="width:150px; height:auto; opacity:0.9;">
         </div>
       <h2 class="auth-title">Login</h2>
+
       <?php if ($error): ?>
         <div class="auth-error"><?= htmlspecialchars($error) ?></div>
+      <?php endif; ?>
+
+      <?php if ($activationLink): ?>  <!-- NEW: tombol aktivasi kalau akun belum aktif -->
+        <div class="auth-success" style="margin-bottom:14px;">
+          <div>Belum menerima email aktivasi? Anda bisa aktivasi langsung lewat tombol berikut.</div>
+          <div style="margin-top:10px;">
+            <a href="<?= htmlspecialchars($activationLink) ?>"
+               style="
+                 display:inline-block;
+                 background:#2BAF74;
+                 padding:10px 22px;
+                 color:#fff;
+                 border-radius:999px;
+                 text-decoration:none;
+                 font-weight:600;
+                 font-size:14px;
+               ">
+               Aktivasi Akun
+            </a>
+          </div>
+        </div>
       <?php endif; ?>
 
       <form method="post" class="auth-form-fields">

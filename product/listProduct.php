@@ -6,10 +6,10 @@ function resolveImage($row)
     $possible = ['image', 'image_name', 'img', 'gambar'];
     foreach ($possible as $key) {
         if (!empty($row[$key])) {
-            return '../assets/products/' . $row[$key];
+            return 'assets/products/' . $row[$key];
         }
     }
-    return '../assets/products/placeholder.png';
+    return 'assets/products/placeholder.png';
 }
 
 function resolveTitle($row)
@@ -46,14 +46,17 @@ function renderProductCard($row)
 ?>
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Products — FEYORA</title>
-    <link rel="stylesheet" href="../styles/ListProduct.css?v=<?=time()?>">
-    <link rel="stylesheet" href="../styles/HomePage.css?v=<?=time()?>">
-</head>
+<?php
+  // judul halaman
+  $pageTitle = 'Products — FEYORA';
 
+  // CSS khusus halaman ini (pakai path ABSOLUTE ke root project)
+  $extraStyles = '
+    <link rel="stylesheet" href="/TUBES_2_Toko/styles/ListProduct.css?v=' . time() . '">
+  ';
+
+  include __DIR__ . '/../includes/head.php';
+?>
 <body>
 <?php include __DIR__ . '/../includes/header.php'; ?>
 
@@ -130,7 +133,7 @@ function renderProductCard($row)
                 <span style="visibility: hidden;">__</span>
                 <div class="filter-actions">
                     <button type="submit" class="btn-primary">Apply</button>
-                    <a href="listProduct.php" class="reset-link">Reset</a>
+                    <a href="product/listProduct.php" class="reset-link">Reset</a>
                 </div>
             </label>
         </form>
@@ -194,9 +197,9 @@ function renderProductCard($row)
                 elseif (!empty($row['gambar'])) $imageName = $row['gambar'];
 
                 if (empty($imageName)) {
-                        $imagePath = '../assets/products/placeholder.png';
+                        $imagePath = 'assets/products/placeholder.png';
                 } else {
-                        $imagePath = '../assets/products/' . $imageName;
+                        $imagePath = 'assets/products/' . $imageName;
                 }
 
                 $title = !empty($row['name']) ? htmlspecialchars($row['name']) : (!empty($row['title']) ? htmlspecialchars($row['title']) : 'Untitled Product');
@@ -208,7 +211,7 @@ function renderProductCard($row)
                 }
 
                 echo "        <div class=\"product-card\">\n";
-                echo "          <a href=\"detailProduct.php?id=" . urlencode($row['id']) . "\">\n";
+                echo "          <a href=\"product/detailProduct.php?id=" . urlencode($row['id']) . "\">\n";
                 echo "            <div class=\"product-media\" style=\"background-image:url('${imagePath}');\"></div>\n";
                 echo "          </a>\n";
                 echo "          <div class=\"product-info\">\n";

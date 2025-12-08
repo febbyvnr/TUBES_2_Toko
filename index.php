@@ -10,11 +10,9 @@ function resolveImageFromRow(array $row): string
     if ($imageName === '') {
         return 'assets/products/placeholder.png';
     }
-    // base href sudah /TUBES_2_Toko/ jadi cukup relative path
     return 'assets/products/' . $imageName;
 }
 
-// Ambil distinct kategori
 $categoryCards = [];
 $featuredStudio = [];
 
@@ -37,10 +35,8 @@ if ($cres = $mysqli->query($sqlCat)) {
     while ($crow = $cres->fetch_assoc()) {
         $cat = $crow['category'];
 
-        // default image
         $imagePath = 'assets/products/placeholder.png';
 
-        // cari satu produk di kategori ini yang punya gambar
         $stmt = $mysqli->prepare("
             SELECT image
             FROM products
@@ -65,7 +61,6 @@ if ($cres = $mysqli->query($sqlCat)) {
         $categoryCards[] = [
             'category' => $cat,
             'image'    => $imagePath,
-            // link ke listProduct + filter category
             'link'     => 'product/listProduct.php?category=' . urlencode($cat),
         ];
     }
@@ -108,28 +103,12 @@ if ($fres = $mysqli->query($sqlFeat)) {
 ?>
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+<?php
+  $pageTitle   = 'FEYORA — Home'; 
+  $extraStyles = '';
 
-  <base href="/TUBES_2_Toko/">
-
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <title>FEYORA — Home</title>
-
-  <!-- BOOTSTRAP CSS, mau pake buat icon cart -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
-        rel="stylesheet" 
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" 
-        crossorigin="anonymous">
-
-  <link rel="stylesheet" href="styles/HomePage.css?v=<?=time()?>">
-
-  <!-- BOOTSTRAP JS (kalo dipake nanti) -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" 
-          integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" 
-          crossorigin="anonymous"></script>
-</head>
+  include __DIR__ . '/includes/head.php';
+?>
 <body>
   <?php include __DIR__ . '/includes/header.php'; ?>
   <main>

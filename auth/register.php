@@ -3,6 +3,7 @@ require_once __DIR__ . '/../config/db.php';
 if (session_status() === PHP_SESSION_NONE) session_start();
 
 $errors = [];
+$successMessage = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username  = trim($_POST['username']  ?? '');
@@ -102,17 +103,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errors)) {
         $hash = password_hash($password, PASSWORD_DEFAULT);
         $role = 'user';
+
+        // === AKTIVASI ===
+        $activation_token = bin2hex(random_bytes(32)); // token random
+        $is_active = 0;
+
         $stmt = $mysqli->prepare("
-            INSERT INTO user (username, email, password, phone, address, profile_photo, role)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO user (username, email, password, phone, address, profile_photo, role, activation_token, is_active)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
         if ($stmt) {
-            $stmt->bind_param('sssssss', $username, $email, $hash, $phone, $address, $profileFile, $role);
+            $stmt->bind_param(
+                'ssssssssi',
+                $username,
+                $email,
+                $hash,
+                $phone,
+                $address,
+                $profileFile,
+                $role,
+                $activation_token,
+                $is_active
+            );
+
             if ($stmt->execute()) {
-                $_SESSION['user_id']  = $stmt->insert_id;
-                $_SESSION['username'] = $username;
-                header('Location: /TUBES_2_Toko/index.php');
-                exit;
+                // === GBS LOGIN, EMAIL AKTIVASI DL ===
+
+                // base URL sesuai project
+                $baseUrl = 'http://localhost/TUBES_2_Toko/auth';
+                $activationLink = $baseUrl . '/activate.php?token=' . urlencode($activation_token);
+
+                $subject = 'Account Activation';
+                $message = "Hi $username,\n\n"
+                    . "Terima kasih telah mendaftar di Feyora.\n"
+                    . "Untuk mengaktifkan akun Anda, silakan klik link berikut:\n\n"
+                    . $activationLink . "\n\n"
+                    . "Jika Anda tidak merasa mendaftar di Feyora, abaikan email ini.\n\n"
+                    . "Salam,\nTim Feyora";
+
+                // alamat  pengirim
+                $headers  = "From: Feyora <no-reply@feyora.test>\r\n";
+                $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+
+                if (@mail($email, $subject, $message, $headers)) {
+                    $successMessage = 'Pendaftaran berhasil. Silakan cek email Anda untuk aktivasi akun.';
+                    $_POST = [];
+                } else {
+                    $successMessage = '
+                        Akun berhasil dibuat. Silakan aktivasi akun dengan klik link di bawah ini
+                        <div style="margin-top:12px;">
+                            <a href="' . $activationLink . '" 
+                                class="btn-primary" 
+                                style="display:inline-block; background:#DEBB3; padding:10px 20px; border-radius:999px; text-decoration:none; color:#fff;">
+                                Aktivasi Akun
+                            </a>
+                        </div>
+                    ';
+                    $_POST = [];
+                }
             } else {
                 $errors[] = 'Failed to save to database: ' . $stmt->error;
             }
@@ -146,12 +194,12 @@ $slidesJson = json_encode($slides);
 ?>
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Register — Feyora</title>
-  <link rel="stylesheet" href="../styles/Register.css?v=<?=time()?>">
-</head>
+<?php
+  // head.php global buat top nav bar
+  $pageTitle   = 'Register — FEYORA';
+  $extraStyles = '<link rel="stylesheet" href="styles/Register.css?v=' . time() . '">';
+  include __DIR__ . '/../includes/head.php';
+?>
 <body>
 <?php include __DIR__ . '/../includes/header.php'; ?>
 
@@ -166,8 +214,6 @@ $slidesJson = json_encode($slides);
                 style="width:150px; height:auto; opacity:0.9;">
         </div>
 
-        <h2 class="auth-title">Create Account</h2>
-
         <?php if (!empty($errors)): ?>
             <div class="auth-error">
             <?php foreach ($errors as $e): ?>
@@ -176,6 +222,13 @@ $slidesJson = json_encode($slides);
             </div>
         <?php endif; ?>
 
+        <?php if (!empty($successMessage)): ?>
+            <div class="auth-success">
+                <?= $successMessage ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if (empty($successMessage)): // kalau sudah sukses, form disembunyikan ?>
         <form method="post" enctype="multipart/form-data" class="auth-form-fields">
 
             <!-- username + email -->
@@ -257,6 +310,8 @@ $slidesJson = json_encode($slides);
 
             <button class="btn-primary auth-submit" type="submit">Register</button>
         </form>
+        <?php endif; ?>
+
         </div>
     </section>
     <!-- RIGHT: SLIDESHOW -->

@@ -12,11 +12,12 @@ if(!isset($_POST['product_id'])) {
 
 $user_id = $_SESSION['user_id'];
 $product_id = intval($_POST['product_id']);
+$size = trim($_POST['size']);
 $qty = isset($_POST['qty']) ? intval($_POST['qty']) : 1;
 
 //cek apakah item sudah ada di cart
-$stmt = $mysqli->prepare("SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ?");
-$stmt->bind_param("ii", $user_id, $product_id);
+$stmt = $mysqli->prepare("SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ? AND size=?");
+$stmt->bind_param("iis", $user_id, $product_id, $size);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -30,19 +31,13 @@ if($result->num_rows > 0) {
     $update->execute();
 } else {
     //insert baru
-    $insert = $mysqli->prepare("INSERT INTO cart (user_id, product_id, quantity) VALUES (?,?,?)");
-    $insert->bind_param("iii", $user_id, $product_id, $qty);
+    $insert = $mysqli->prepare("INSERT INTO cart (user_id, product_id, size, quantity) VALUES (?,?,?,?)");
+    $insert->bind_param("iisi", $user_id, $product_id, $size, $qty);
     $insert->execute();
 }
 
 header("Location: listCart.php");
 exit;
-
 ?>
 
-//foreach 
-insert tabel transaksi
 
-//foreach insert
-//insert
-//insert
