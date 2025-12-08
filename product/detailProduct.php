@@ -1,6 +1,9 @@
 <?php
 
 require_once __DIR__ . '/../config/db.php';
+if (session_status() === PHP_SESSION_NONE) session_start();
+
+$isLoggedIn = !empty($_SESSION['user_id']);
 
 //Ambil ID
 if (!isset($_GET['id'])) {
@@ -89,24 +92,23 @@ $currentSize = isset($product['size']) ? $product['size'] : '';
                 <form action="../cart/add.php" method="POST" id="cartForm">
                     <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
                     <input type="hidden" name="size" id="selectedSize" value="<?= $currentSize ?>">
-                    <input type="hidden" name="qty" value="1">
+                    <!-- tambahkan id supaya bisa di-update dari JS -->
+                    <input type="hidden" name="qty" id="qtyInput" value="1">
                     
-                    <!-- 
-                    <input type="hidden" name="size" id="selectedSize" value="">  
-                    -->
-
-                    <!--Quantity-->
+                    <!-- Quantity -->
                     <div class="qty-wrapper">
-                        <span class="qty-label">Quantity: </span>
+                        <span class="qty-label">Quantity:</span>
 
                         <div class="qty-control">
                             <button type="button" class="qty-btn" id="minusBtn">-</button>
-                            <input type="text" class="qty-input" id="qtyDisplay" value="1" readonly>
+                            <input type="text" class="qty-input" id="qtyDisplay" value="1">
                             <button type="button" class="qty-btn" id="plusBtn">+</button>
                         </div>
                     </div>
 
-                    <button type="submit" class="add-cart-btn">Add to Cart</button>
+                    <button type="submit" class="add-cart-btn" id="addCartBtn"
+                        <?= $isLoggedIn ? '' : 'data-require-login="1"' ?>
+                    >Add to Cart</button>
                 </form>
 
                 <a href="listProduct.php" class="back-link">← Back to Products</a>
@@ -114,47 +116,156 @@ $currentSize = isset($product['size']) ? $product['size'] : '';
             
         </main>
 
+        <!-- POPUP LOGIN DULU SBLM ADD TO CART -->
+        <div id="login-required-popup"
+            style="
+                display:none;
+                position:fixed;
+                inset:0;
+                background:rgba(0,0,0,0.35);
+                z-index:9999;
+                align-items:center;
+                justify-content:center;">
+        <div style="
+                background:#fff;
+                border-radius:10px;
+                padding:20px 22px;
+                max-width:320px;
+                width:90%;
+                box-shadow:0 8px 30px rgba(0,0,0,0.25);
+                text-align:center;">
+            <h4 style="margin-top:0; margin-bottom:10px; color:#222;">Anda Belum Login</h4>
+            <p style="margin:0 0 18px; color:#555; font-size:14px;">
+            Silakan login terlebih dahulu untuk menambahkan produk ke keranjang.
+            </p>
+            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:10px;">
+            <button type="button"
+                    id="login-popup-close"
+                    style="
+                        padding:8px 14px;
+                        border-radius:6px;
+                        border:1px solid #ccc;
+                        background:#f5f5f5;
+                        cursor:pointer;
+                        font-size:13px;">
+                Tutup
+            </button>
+            <button type="button"
+                    id="login-popup-go"
+                    style="
+                        padding:8px 14px;
+                        border-radius:6px;
+                        border:none;
+                        background:#ff2d7a;
+                        color:#fff;
+                        cursor:pointer;
+                        font-size:13px;
+                        font-weight:600;">
+                Login
+            </button>
+            </div>
+        </div>
+        </div>
+
         <!--Size JS -->
         <script>
-            document.querySelectorAll('.size-btn').forEach(btn => {
+            // POPUP BELUM LOGIN
+            const addCartBtn   = document.getElementById('addCartBtn');
+            const loginPopup   = document.getElementById('login-required-popup');
+            const popupClose   = document.getElementById('login-popup-close');
+            const popupGoLogin = document.getElementById('login-popup-go');
+            if (addCartBtn && addCartBtn.dataset.requireLogin === '1') {
+                addCartBtn.addEventListener('click', function (e) {
+                    e.preventDefault(); // jangan submit form
+                    if (loginPopup) {
+                        loginPopup.style.display = 'flex';
+                    }
+                });
+            }
+            if (popupClose && loginPopup) {
+                popupClose.addEventListener('click', function () {
+                    loginPopup.style.display = 'none';
+                });
+            }
+            if (popupGoLogin) {
+                popupGoLogin.addEventListener('click', function () {
+                    // optional: kirim redirect balik ke produk ini
+                    const currentUrl = window.location.href;
+                    window.location.href = '/TUBES_2_Toko/auth/login.php?redirect=' + encodeURIComponent(currentUrl);
+                });
+            }
+
+            // tutup kalau klik area gelap
+            if (loginPopup) {
+                loginPopup.addEventListener('click', function (e) {
+                    if (e.target === loginPopup) {
+                        loginPopup.style.display = 'none';
+                    }
+                });
+            }
+
+            // SIZE HANDLING
+            const sizeButtons       = document.querySelectorAll('.size-btn');
+            const selectedSizeInput = document.getElementById('selectedSize');
+            const cartForm          = document.getElementById('cartForm');
+            sizeButtons.forEach(btn => {
                 btn.addEventListener('click', () => {
-                    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    console.log("Selected size:", btn.dataset.size);
+                // reset semua
+                sizeButtons.forEach(b => b.classList.remove('active', 'error'));
+                // aktifkan yang dipilih
+                btn.classList.add('active');
+                // simpan ke hidden input
+                selectedSizeInput.value = btn.dataset.size;
                 });
             });
-        </script>
 
-        <script>
-        // Update hidden input setiap klik size
-        document.querySelectorAll('.size-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.getElementById('selectedSize').value = btn.dataset.size;
-            });
-        });
-        </script>
-
-        <!-- Quantity JS -->
-        <script>
-            const minusBtn = document.getElementById('minusBtn');
-            const plusBtn = document.getElementById('plusBtn');
-            const qtyDisplay = document.getElementById('qtyDisplay');
-            const qtyInput = document.getElementById('qtyInput');
-
-            minusBtn.addEventListener('click', () => {
-                let qty = parseInt(qtyDisplay.value);
-                if(qty > 1) {
-                    qty--;
-                    qtyDisplay.value = qty;
-                    qtyInput.value = qty;
+            // VALIDASI SEBELUM SUBMIT -> size wajib dipilih
+            cartForm.addEventListener('submit', function (e) {
+                if (!selectedSizeInput.value) {
+                e.preventDefault(); // cegah submit
+                sizeButtons.forEach(b => b.classList.add('error'));
+                alert('Please select a size before adding to cart.');
                 }
             });
 
-            plusBtn.addEventListener('click', () => {
-                let qty = parseInt(qtyDisplay.value);
-                qty++;
+            // QUANTITY HANDLING
+            const minusBtn   = document.getElementById('minusBtn');
+            const plusBtn    = document.getElementById('plusBtn');
+            const qtyDisplay = document.getElementById('qtyDisplay');
+            const qtyInput   = document.getElementById('qtyInput'); // hidden input
+
+            function setQty(val) {
+                let qty = parseInt(val, 10);
+                if (isNaN(qty) || qty < 1) {
+                    qty = 1;
+                }
                 qtyDisplay.value = qty;
-                qtyInput.value = qty;
+                qtyInput.value   = qty;
+            }
+
+            // -
+            minusBtn.addEventListener('click', () => {
+                let current = parseInt(qtyDisplay.value, 10) || 1;
+                if (current > 1) {
+                    setQty(current - 1);
+                }
+            });
+
+            // +
+            plusBtn.addEventListener('click', () => {
+                let current = parseInt(qtyDisplay.value, 10) || 1;
+                setQty(current + 1);
+            });
+
+            // ketik manual
+            qtyDisplay.addEventListener('input', () => {
+                // buang karakter non-angka
+                qtyDisplay.value = qtyDisplay.value.replace(/[^\d]/g, '');
+            });
+
+            // saat input kehilangan fokus, normalisasi (min 1)
+            qtyDisplay.addEventListener('blur', () => {
+                setQty(qtyDisplay.value);
             });
         </script>
     </body>

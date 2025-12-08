@@ -10,12 +10,12 @@ if(!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 
 $query = "
-SELECT cart.id AS cart_id, products.name, products.price, products.image, 
-cart.size, cart.quantity 
-FROM cart
-JOIN products ON cart.product_id = products.id
-WHERE cart.user_id = ?
-";
+    SELECT cart.id AS cart_id, products.name, products.price, products.image, 
+    cart.size, cart.quantity 
+    FROM cart
+    JOIN products ON cart.product_id = products.id
+    WHERE cart.user_id = ?
+    ";
 
 $stmt = $mysqli->prepare($query);
 $stmt->bind_param("i", $user_id);
