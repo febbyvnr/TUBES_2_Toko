@@ -176,40 +176,7 @@ if ($fres = $mysqli->query($sqlFeat)) {
       <?php endif; ?>
     </section>
 
-    <footer class="site-footer">
-      <div class="container footer-grid">
-        <div class="col">
-          <div class="brand">FEYORA</div>
-          <p class="muted">Timeless tops, designed for the modern woman.</p>
-        </div>
-        <div class="col">
-          <strong>Shop</strong>
-          <ul>
-            <li><a href="#">New In</a></li>
-            <li><a href="#">Tops</a></li>
-            <li><a href="#">Blouses</a></li>
-            <li><a href="#">Sale</a></li>
-          </ul>
-        </div>
-        <div class="col">
-          <strong>About</strong>
-          <ul>
-            <li><a href="#">Our Story</a></li>
-            <li><a href="#">Careers</a></li>
-            <li><a href="#">Sustainability</a></li>
-          </ul>
-        </div>
-        <div class="col">
-          <strong>Support</strong>
-          <ul>
-            <li><a href="#">Contact Us</a></li>
-            <li><a href="#">FAQ</a></li>
-            <li><a href="#">Shipping & Returns</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="container copyright">© 2024 Aura. All rights reserved.</div>
-    </footer>
+    <?php include __DIR__ . '/includes/footer.php'; ?>
   </main>
 </body>
 </html>

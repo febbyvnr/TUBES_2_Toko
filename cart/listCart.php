@@ -206,9 +206,7 @@ $cart = $resultCart->fetch_all(MYSQLI_ASSOC);
     </div> 
 
 </div> 
+<!-- <?php include __DIR__ . '/../includes/footer.php'; ?> -->
 </main>
-
-<a href="product/listProduct.php" class="back-link">← Back to Products</a>
-
 </body>
 </html>

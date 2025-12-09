@@ -258,5 +258,6 @@ $currentSize = isset($product['size']) ? $product['size'] : '';
             setQty(qtyDisplay.value);
         });
     </script>
+    <?php include __DIR__ . '/../includes/footer.php'; ?>
 </body>
 </html>
