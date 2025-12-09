@@ -109,7 +109,7 @@ $slidesJson = json_encode($slides);
         <div class="auth-error"><?= htmlspecialchars($error) ?></div>
       <?php endif; ?>
 
-      <?php if ($activationLink): ?>  <!-- NEW: tombol aktivasi kalau akun belum aktif -->
+      <?php if ($activationLink): ?>  <!--  OPSIONAL NNT MIKIRNY : tombol aktivasi kalau akun belum aktif -->
         <div class="auth-success" style="margin-bottom:14px;">
           <div>Belum menerima email aktivasi? Anda bisa aktivasi langsung lewat tombol berikut.</div>
           <div style="margin-top:10px;">

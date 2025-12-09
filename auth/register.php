@@ -2,6 +2,11 @@
 require_once __DIR__ . '/../config/db.php';
 if (session_status() === PHP_SESSION_NONE) session_start();
 
+require __DIR__ . '/../vendor/autoload.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 $errors = [];
 $successMessage = null;
 
@@ -145,18 +150,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $headers  = "From: Feyora <no-reply@feyora.test>\r\n";
                 $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
 
-                if (@mail($email, $subject, $message, $headers)) {
+                // if (@mail($email, $subject, $message, $headers)) {
+                //     $successMessage = 'Pendaftaran berhasil. Silakan cek email Anda untuk aktivasi akun.';
+                //     $_POST = [];
+                // } else {
+                //     $successMessage = '
+                //         Akun berhasil dibuat. Silakan aktivasi akun dengan klik link di bawah ini
+                //         <div style="margin-top:12px;">
+                //             <a href="' . $activationLink . '" 
+                //                 class="btn-primary" 
+                //                 style="display:inline-block; background:#DEBB3; padding:10px 20px; border-radius:999px; text-decoration:none; color:#fff;">
+                //                 Aktivasi Akun
+                //             </a>
+                //         </div>
+                //     ';
+                //     $_POST = [];
+                // }
+                // === KIRIM EMAIL PAKAI PHPMailer ===
+                $mail = new PHPMailer(true);
+
+                try {
+                    // Server settings
+                    $mail->isSMTP();
+                    $mail->Host       = 'smtp.gmail.com';      // ganti kalau pakai SMTP lain
+                    $mail->SMTPAuth   = true;
+                    $mail->Username   = 'febiann819@gmail.com';
+                    $mail->Password   = 'aqchvuzclwwjytrj';      // App Password Gmail / password SMTP
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                    $mail->Port       = 587;
+
+                    // Pengirim & penerima
+                    $mail->setFrom('febiann819@gmail.com', 'Feyora'); // pengirim
+                    $mail->addAddress($email, $username);            // penerima (user)
+
+                    // Konten
+                    $mail->Subject = $subject;
+                    $mail->Body    = $message;
+                    $mail->AltBody = $message;
+
+                    $mail->send();
+
+                    // kalau sukses kirim email
                     $successMessage = 'Pendaftaran berhasil. Silakan cek email Anda untuk aktivasi akun.';
                     $_POST = [];
-                } else {
+
+                } catch (Exception $e) {
+                    // kalau gagal kirim email, tetap buat akun & kasih link manual
                     $successMessage = '
-                        Akun berhasil dibuat. Silakan aktivasi akun dengan klik link di bawah ini
+                        Akun berhasil dibuat, tetapi email aktivasi tidak dapat dikirim.<br>
+                        Silakan aktivasi akun dengan klik link di bawah ini:
                         <div style="margin-top:12px;">
                             <a href="' . $activationLink . '" 
                                 class="btn-primary" 
                                 style="display:inline-block; background:#DEBB3; padding:10px 20px; border-radius:999px; text-decoration:none; color:#fff;">
                                 Aktivasi Akun
                             </a>
+                        </div>
+                        <div style="margin-top:8px; font-size:12px; color:#666;">
+                            (Error mailer: ' . htmlspecialchars($mail->ErrorInfo) . ')
                         </div>
                     ';
                     $_POST = [];
