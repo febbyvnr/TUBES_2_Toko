@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $activationLink = $baseUrl . '/activate.php?token=' . urlencode($user['activation_token']);
                         $error = 'Akun Anda belum aktif. Silakan aktivasi akun dengan tombol di bawah ini.';
                     } else {
-                        // kalau token kosong (misal dihapus), suruh kontak admin
+                        // kalau token kosong, suruh kontak admin - boongan doang
                         $error = 'Akun Anda belum aktif dan link aktivasi tidak tersedia. Silakan hubungi admin.';
                     }
                 } else {
@@ -61,7 +61,7 @@ if ($res = $mysqli->query("
     FROM products 
     WHERE image IS NOT NULL AND image <> '' 
     ORDER BY added DESC 
-    LIMIT 8
+    LIMIT 20
 ")) {
     while ($row = $res->fetch_assoc()) {
         $slides[] = '/TUBES_2_Toko/assets/products/' . rawurlencode($row['image']);
@@ -74,7 +74,7 @@ $slidesJson = json_encode($slides);
 <html lang="en">
 <?php
   // head.php global buat top nav bar
-  $pageTitle   = 'Login — FEYORA';
+  $pageTitle   = 'Login | FEYORA';
   $extraStyles = '<link rel="stylesheet" href="styles/Login.css?v=' . time() . '">';
   include __DIR__ . '/../includes/head.php';
 ?>
@@ -111,7 +111,7 @@ $slidesJson = json_encode($slides);
 
       <?php if ($activationLink): ?>  <!--  OPSIONAL NNT MIKIRNY : tombol aktivasi kalau akun belum aktif -->
         <div class="auth-success" style="margin-bottom:14px;">
-          <div>Belum menerima email aktivasi? Anda bisa aktivasi langsung lewat tombol berikut.</div>
+          <div>Haven't received the activation email? Activate it directly using the button below.</div>
           <div style="margin-top:10px;">
             <a href="<?= htmlspecialchars($activationLink) ?>"
                style="
@@ -124,7 +124,7 @@ $slidesJson = json_encode($slides);
                  font-weight:600;
                  font-size:14px;
                ">
-               Aktivasi Akun
+               Account Activation
             </a>
           </div>
         </div>

@@ -216,7 +216,7 @@ if ($res = $mysqli->query("
     FROM products
     WHERE image IS NOT NULL AND image <> ''
     ORDER BY added DESC
-    LIMIT 8
+    LIMIT 20
 ")) {
     while ($row = $res->fetch_assoc()) {
         $slides[] = '/TUBES_2_Toko/assets/products/' . rawurlencode($row['image']);
@@ -229,7 +229,7 @@ $slidesJson = json_encode($slides);
 <html lang="en">
 <?php
   // head.php global buat top nav bar
-  $pageTitle   = 'Register — FEYORA';
+  $pageTitle   = 'Register | FEYORA';
   $extraStyles = '<link rel="stylesheet" href="styles/Register.css?v=' . time() . '">';
   include __DIR__ . '/../includes/head.php';
 ?>

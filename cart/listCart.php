@@ -2,9 +2,14 @@
 session_start();
 require_once __DIR__ . '/../config/db.php';
 
+// =========  ============
+if (!isset($_SESSION['checkout_ids'])) {
+    $_SESSION['checkout_ids'] = [];
+}
+
 // ========= BATAL CHECKOUT ============
 if (isset($_POST['cancel_checkout'])) {
-    unset($_SESSION['checkout']);
+    $_SESSION['checkout_ids'] = [];
     header("Location: listCart.php");
     exit;
 }
@@ -17,23 +22,19 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = (int) $_SESSION['user_id'];
 
-// ========= SELECT ITEM UNTUK CHECKOUT ============
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_id'])) {
+// ========= SELECT / UNSELECT ITEM UNTUK CHECKOUT ============
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_cart_id'])) {
 
-    $selected_id = (int) $_POST['cart_id'];
+    $selected_id = (int) $_POST['toggle_cart_id'];
+    $is_selected = ($_POST['selected'] ?? '0') === '1';
 
+    // opsional: cek apakah cart_id memang milik user ini
     $querySelect = "
-        SELECT cart.id AS cart_id,
-               products.name,
-               products.price,
-               products.image,
-               cart.size,
-               cart.quantity
+        SELECT cart.id
         FROM cart
-        JOIN products ON cart.product_id = products.id
         WHERE cart.id = ? AND cart.user_id = ?
+        LIMIT 1
     ";
-
     $stmt = $mysqli->prepare($querySelect);
     $stmt->bind_param("ii", $selected_id, $user_id);
     $stmt->execute();
@@ -41,10 +42,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_id'])) {
     $item = $result->fetch_assoc();
 
     if ($item) {
-        if (!isset($_SESSION['checkout'])) {
-            $_SESSION['checkout'] = [];
+        if (!isset($_SESSION['checkout_ids'])) {
+            $_SESSION['checkout_ids'] = [];
         }
-        $_SESSION['checkout'][$selected_id] = $item;
+
+        if ($is_selected) {
+            // centang → tambahkan ID ke list terpilih
+            $_SESSION['checkout_ids'][$selected_id] = true;
+        } else {
+            // uncheck → hapus dari list terpilih
+            unset($_SESSION['checkout_ids'][$selected_id]);
+        }
     }
 
     header("Location: listCart.php");
@@ -101,6 +109,24 @@ $cart = $resultCart->fetch_all(MYSQLI_ASSOC);
 
         <?php foreach ($cart as $item): ?>
             <div class="cart-card">
+                <!-- Checkbox pilih item (kiri) -->
+                <div class="cart-select">
+                    <form method="POST">
+                        <input type="hidden" name="toggle_cart_id" value="<?= (int)$item['cart_id'] ?>">
+                        <input type="hidden" name="selected"
+                            value="<?= isset($_SESSION['checkout_ids'][$item['cart_id']]) ? '1' : '0' ?>">
+
+                        <input
+                            type="checkbox"
+                            class="cart-select-checkbox"
+                            <?= isset($_SESSION['checkout_ids'][$item['cart_id']]) ? 'checked' : '' ?>
+                            onchange="
+                                this.form.selected.value = this.checked ? '1' : '0';
+                                this.form.submit();
+                            "
+                        >
+                    </form>
+                </div>
 
                 <!-- Gambar -->
                 <img
@@ -109,50 +135,45 @@ $cart = $resultCart->fetch_all(MYSQLI_ASSOC);
                     class="cart-img"
                 >
 
-                <!-- Informasi Produk (kiri) -->
+                <!-- Informasi Produk (kiri, + delete icon di pojok kanan atas) -->
                 <div class="cart-info">
-                    <h3 class="cart-product-name"><?= htmlspecialchars($item['name']) ?></h3>
+                    <div class="cart-info-header">
+                        <h3 class="cart-product-name"><?= htmlspecialchars($item['name']) ?></h3>
+                    </div>
 
                     <div class="cart-size">
                         Size: <span><?= htmlspecialchars($item['size']) ?></span>
                     </div>
 
-                    <!-- Qty -->
-                    <form action="cart/update.php" method="POST" class="qty-form">
-                        <input type="hidden" name="cart_id"   value="<?= (int)$item['cart_id'] ?>">
-                        <input type="hidden" name="quantity" value="<?= (int)$item['quantity'] ?>">
+                    <div class="cart-info-bottom">
+                        <!-- Qty -->
+                        <form action="cart/update.php" method="POST" class="qty-form">
+                            <input type="hidden" name="cart_id"   value="<?= (int)$item['cart_id'] ?>">
+                            <input type="hidden" name="quantity" value="<?= (int)$item['quantity'] ?>">
 
-                        <button type="submit" name="action" value="minus" class="qty-btn">−</button>
-                        <div class="qty-number"><?= (int)$item['quantity'] ?></div>
-                        <button type="submit" name="action" value="plus" class="qty-btn">+</button>
-                    </form>
+                            <button type="submit" name="action" value="minus" class="qty-btn">−</button>
+                            <div class="qty-number"><?= (int)$item['quantity'] ?></div>
+                            <button type="submit" name="action" value="plus" class="qty-btn">+</button>
+                        </form>
 
-                    <div class="cart-price">
-                        Rp <?= number_format($item['price'], 0, ',', '.') ?>
+                        <div class="cart-price">
+                            Rp <?= number_format($item['price'], 0, ',', '.') ?>
+                        </div>
                     </div>
                 </div>
 
-                <!-- SELECT + DELETE (kanan) -->
-                <div class="cart-actions">
-                    <form method="POST">
-                        <input type="hidden" name="cart_id" value="<?= $item['cart_id'] ?>">
-                        <button class="select-btn">Select</button>
-                    </form>
-
-                    <a href="cart/delete.php?id=<?= (int)$item['cart_id'] ?>" class="delete-btn">
-                        Delete
-                    </a>
-                </div>
-
-
-                <!-- Total di tengah -->
+                <!-- Kolom kanan: Total + Delete -->
                 <div class="cart-summary">
                     <div class="cart-summary-label">Total</div>
                     <div class="cart-summary-value">
                         Rp <?= number_format($item['price'] * $item['quantity'], 0, ',', '.') ?>
+                        <a href="cart/delete.php?id=<?= (int)$item['cart_id'] ?>" 
+                            class="delete-icon-btn summary-delete"
+                            title="Hapus dari keranjang">
+                            <i class="bi bi-trash3"></i>
+                        </a>
                     </div>
                 </div>
-
             </div>
         <?php endforeach; ?>
 
@@ -166,35 +187,40 @@ $cart = $resultCart->fetch_all(MYSQLI_ASSOC);
          CHECKOUT SIDEBAR (Kanan)
     ============================== -->
     <div class="checkout-summary">
-
         <div class="summary-title">Item Checkout</div>
-
         <div class="summary-list">
-        <?php
-        $total = 0;
-        if (!empty($_SESSION['checkout'])):
-            foreach ($_SESSION['checkout'] as $c):
-                $total += $c['price'] * $c['quantity'];
-        ?>
-            <div class="summary-item">
-                <span><?= $c['name'] ?> x<?= $c['quantity'] ?></span>
-                <span>Rp <?= number_format($c['price'] * $c['quantity'], 0, ',', '.') ?></span>
-            </div>
-        <?php endforeach; else: ?>
-            <p style="color:#888;">Belum ada barang dipilih</p>
-        <?php endif; ?>
-        </div>
+            <?php
+            $total = 0;
+            $selectedIds = $_SESSION['checkout_ids'] ?? [];
 
-        <div class="summary-total">
-            Total Belanja: Rp <?= number_format($total, 0, ',', '.') ?>
-        </div>
+            if (!empty($cart) && !empty($selectedIds)):
+                foreach ($cart as $c):
+                    if (empty($selectedIds[$c['cart_id']])) continue;
+
+                    $lineTotal = $c['price'] * $c['quantity'];
+                    $total += $lineTotal;
+            ?>
+                    <div class="summary-item">
+                        <span><?= htmlspecialchars($c['name']) ?> x<?= (int)$c['quantity'] ?></span>
+                        <span>Rp <?= number_format($lineTotal, 0, ',', '.') ?></span>
+                    </div>
+            <?php
+                endforeach;
+            else:
+            ?>
+                <p style="color:#888;">Belum ada barang dipilih</p>
+            <?php endif; ?>
+            </div>
+
+            <div class="summary-total">
+                Total Belanja: Rp <?= number_format($total, 0, ',', '.') ?>
+            </div>
 
         <form action="checkout.php" method="POST">
             <button class="checkout-btn" 
-                <?= empty($_SESSION['checkout']) ? "onclick=\"alert('Pilih item dulu sebelum checkout!'); return false;\"" : '' ?>>
+                <?= empty($_SESSION['checkout_ids']) ? "onclick=\"alert('Pilih item dulu sebelum checkout!'); return false;\"" : '' ?>>
                 Checkout
             </button>
-
         </form>
 
         <form method="POST">
@@ -206,7 +232,7 @@ $cart = $resultCart->fetch_all(MYSQLI_ASSOC);
     </div> 
 
 </div> 
-<!-- <?php include __DIR__ . '/../includes/footer.php'; ?> -->
 </main>
+<?php include __DIR__ . '/../includes/footer.php'; ?>
 </body>
 </html>
