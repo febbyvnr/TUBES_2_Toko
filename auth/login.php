@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Isi username/email dan password.';
     } else {
         $stmt = $mysqli->prepare("
-            SELECT id, username, password, profile_photo, is_active, activation_token  -- NEW
+            SELECT id, username, password, profile_photo, is_active, activation_token, role
             FROM user 
             WHERE username = ? OR email = ? 
             LIMIT 1
@@ -42,7 +42,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // aktif boleh login
                     $_SESSION['user_id']  = $user['id'];
                     $_SESSION['username'] = $user['username'];
-                    header('Location: /TUBES_2_Toko/index.php');
+                    $_SESSION['role']     = $user['role'];   // simpan juga role di session
+
+                    // kalau admin → ke dashboard admin
+                    if ($user['role'] === 'admin') {
+                        header('Location: /TUBES_2_Toko/admin/dashboard.php');
+                    } else {
+                        // user biasa → ke homepage
+                        header('Location: /TUBES_2_Toko/index.php');
+                    }
                     exit;
                 }
 
@@ -152,7 +160,9 @@ $slidesJson = json_encode($slides);
         </label>
 
         <div class="auth-meta">
-          <span>Don't have an account yet? <a href="register.php">Register now</a></span>
+          <span>Don't have an account yet? 
+            <a href="/TUBES_2_Toko/auth/register.php">Register now</a>
+          </span>
         </div>
 
         <button class="btn-primary auth-submit" type="submit">Login</button>
