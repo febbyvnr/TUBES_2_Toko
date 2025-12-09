@@ -179,5 +179,6 @@ $slidesJson = json_encode($slides);
   }, 8000); // ganti tiap 8 detik
 })();
 </script>
+<?php include __DIR__ . '/../includes/footer.php'; ?>
 </body>
 </html>

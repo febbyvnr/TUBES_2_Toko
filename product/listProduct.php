@@ -278,5 +278,5 @@ function renderProductCard($row)
 
     </section>
 
-  <footer class="site-footer">
+  <?php include __DIR__ . '/../includes/footer.php'; ?>
         

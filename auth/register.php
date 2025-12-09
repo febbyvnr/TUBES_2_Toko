@@ -344,5 +344,6 @@ $slidesJson = json_encode($slides);
   }, 8000);
 })();
 </script>
+<?php include __DIR__ . '/../includes/footer.php'; ?>
 </body>
 </html>
