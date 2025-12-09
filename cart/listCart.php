@@ -139,8 +139,8 @@ $cart = $resultCart->fetch_all(MYSQLI_ASSOC);
                         <button class="select-btn">Select</button>
                     </form>
 
-                  <a href="cart/delete.php?id=<?= (int)$item['cart_id'] ?>" class="delete-btn">
-                    Delete
+                    <a href="cart/delete.php?id=<?= (int)$item['cart_id'] ?>" class="delete-btn">
+                        Delete
                     </a>
                 </div>
 
