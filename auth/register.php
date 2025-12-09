@@ -140,39 +140,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $subject = 'Account Activation';
                 $message = "Hi $username,\n\n"
-                    . "Terima kasih telah mendaftar di Feyora.\n"
-                    . "Untuk mengaktifkan akun Anda, silakan klik link berikut:\n\n"
+                    . "Thank you for joining us at Feyora!\n"
+                    . "To activate your account, please click the link below : \n\n"
                     . $activationLink . "\n\n"
-                    . "Jika Anda tidak merasa mendaftar di Feyora, abaikan email ini.\n\n"
-                    . "Salam,\nTim Feyora";
+                    . "If you don't feel like signing up for Feyora, please ignore this email.\n\n"
+                    . "Regards,\nFeyora Team";
 
                 // alamat  pengirim
                 $headers  = "From: Feyora <no-reply@feyora.test>\r\n";
                 $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
-
-                // if (@mail($email, $subject, $message, $headers)) {
-                //     $successMessage = 'Pendaftaran berhasil. Silakan cek email Anda untuk aktivasi akun.';
-                //     $_POST = [];
-                // } else {
-                //     $successMessage = '
-                //         Akun berhasil dibuat. Silakan aktivasi akun dengan klik link di bawah ini
-                //         <div style="margin-top:12px;">
-                //             <a href="' . $activationLink . '" 
-                //                 class="btn-primary" 
-                //                 style="display:inline-block; background:#DEBB3; padding:10px 20px; border-radius:999px; text-decoration:none; color:#fff;">
-                //                 Aktivasi Akun
-                //             </a>
-                //         </div>
-                //     ';
-                //     $_POST = [];
-                // }
-                // === KIRIM EMAIL PAKAI PHPMailer ===
                 $mail = new PHPMailer(true);
 
                 try {
-                    // Server settings
+                    // Server settings ==== PAS HOSTING INI DIUBAH ====
                     $mail->isSMTP();
-                    $mail->Host       = 'smtp.gmail.com';      // ganti kalau pakai SMTP lain
+                    $mail->Host       = 'smtp.gmail.com';      // ganti kl pk SMTP lain
                     $mail->SMTPAuth   = true;
                     $mail->Username   = 'febiann819@gmail.com';
                     $mail->Password   = 'aqchvuzclwwjytrj';      // App Password Gmail / password SMTP
@@ -191,19 +173,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $mail->send();
 
                     // kalau sukses kirim email
-                    $successMessage = 'Pendaftaran berhasil. Silakan cek email Anda untuk aktivasi akun.';
+                    $successMessage = 'Registration successful. Please check your email for account activation.';
                     $_POST = [];
 
                 } catch (Exception $e) {
                     // kalau gagal kirim email, tetap buat akun & kasih link manual
                     $successMessage = '
-                        Akun berhasil dibuat, tetapi email aktivasi tidak dapat dikirim.<br>
-                        Silakan aktivasi akun dengan klik link di bawah ini:
+                        The account was successfully created, but the activation email could not be sent.
+                        Please activate your account by clicking the link below:
                         <div style="margin-top:12px;">
                             <a href="' . $activationLink . '" 
                                 class="btn-primary" 
                                 style="display:inline-block; background:#DEBB3; padding:10px 20px; border-radius:999px; text-decoration:none; color:#fff;">
-                                Aktivasi Akun
+                                Account Activation
                             </a>
                         </div>
                         <div style="margin-top:8px; font-size:12px; color:#666;">

@@ -72,12 +72,12 @@ $slidesJson = json_encode($slides);
 ?>
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Login — Feyora</title>
-  <link rel="stylesheet" href="../styles/Login.css?v=<?=time()?>">
-</head>
+<?php
+  // head.php global buat top nav bar
+  $pageTitle   = 'Login — FEYORA';
+  $extraStyles = '<link rel="stylesheet" href="styles/Login.css?v=' . time() . '">';
+  include __DIR__ . '/../includes/head.php';
+?>
 <body>
 <?php include __DIR__ . '/../includes/header.php'; ?>
 
