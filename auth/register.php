@@ -2,6 +2,11 @@
 require_once __DIR__ . '/../config/db.php';
 if (session_status() === PHP_SESSION_NONE) session_start();
 
+require __DIR__ . '/../vendor/autoload.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 $errors = [];
 $successMessage = null;
 
@@ -135,28 +140,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $subject = 'Account Activation';
                 $message = "Hi $username,\n\n"
-                    . "Terima kasih telah mendaftar di Feyora.\n"
-                    . "Untuk mengaktifkan akun Anda, silakan klik link berikut:\n\n"
+                    . "Thank you for joining us at Feyora!\n"
+                    . "To activate your account, please click the link below : \n\n"
                     . $activationLink . "\n\n"
-                    . "Jika Anda tidak merasa mendaftar di Feyora, abaikan email ini.\n\n"
-                    . "Salam,\nTim Feyora";
+                    . "If you don't feel like signing up for Feyora, please ignore this email.\n\n"
+                    . "Regards,\nFeyora Team";
 
                 // alamat  pengirim
                 $headers  = "From: Feyora <no-reply@feyora.test>\r\n";
                 $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+                $mail = new PHPMailer(true);
 
-                if (@mail($email, $subject, $message, $headers)) {
-                    $successMessage = 'Pendaftaran berhasil. Silakan cek email Anda untuk aktivasi akun.';
+                try {
+                    // Server settings ==== PAS HOSTING INI DIUBAH ====
+                    $mail->isSMTP();
+                    $mail->Host       = 'smtp.gmail.com';      // ganti kl pk SMTP lain
+                    $mail->SMTPAuth   = true;
+                    $mail->Username   = 'febiann819@gmail.com';
+                    $mail->Password   = 'aqchvuzclwwjytrj';      // App Password Gmail / password SMTP
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                    $mail->Port       = 587;
+
+                    // Pengirim & penerima
+                    $mail->setFrom('febiann819@gmail.com', 'Feyora'); // pengirim
+                    $mail->addAddress($email, $username);            // penerima (user)
+
+                    // Konten
+                    $mail->Subject = $subject;
+                    $mail->Body    = $message;
+                    $mail->AltBody = $message;
+
+                    $mail->send();
+
+                    // kalau sukses kirim email
+                    $successMessage = 'Registration successful. Please check your email for account activation.';
                     $_POST = [];
-                } else {
+
+                } catch (Exception $e) {
+                    // kalau gagal kirim email, tetap buat akun & kasih link manual
                     $successMessage = '
-                        Akun berhasil dibuat. Silakan aktivasi akun dengan klik link di bawah ini
+                        The account was successfully created, but the activation email could not be sent.
+                        Please activate your account by clicking the link below:
                         <div style="margin-top:12px;">
                             <a href="' . $activationLink . '" 
                                 class="btn-primary" 
                                 style="display:inline-block; background:#DEBB3; padding:10px 20px; border-radius:999px; text-decoration:none; color:#fff;">
-                                Aktivasi Akun
+                                Account Activation
                             </a>
+                        </div>
+                        <div style="margin-top:8px; font-size:12px; color:#666;">
+                            (Error mailer: ' . htmlspecialchars($mail->ErrorInfo) . ')
                         </div>
                     ';
                     $_POST = [];
@@ -183,7 +216,7 @@ if ($res = $mysqli->query("
     FROM products
     WHERE image IS NOT NULL AND image <> ''
     ORDER BY added DESC
-    LIMIT 8
+    LIMIT 20
 ")) {
     while ($row = $res->fetch_assoc()) {
         $slides[] = '/TUBES_2_Toko/assets/products/' . rawurlencode($row['image']);
@@ -196,7 +229,7 @@ $slidesJson = json_encode($slides);
 <html lang="en">
 <?php
   // head.php global buat top nav bar
-  $pageTitle   = 'Register — FEYORA';
+  $pageTitle   = 'Register | FEYORA';
   $extraStyles = '<link rel="stylesheet" href="styles/Register.css?v=' . time() . '">';
   include __DIR__ . '/../includes/head.php';
 ?>

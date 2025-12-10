@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Isi username/email dan password.';
     } else {
         $stmt = $mysqli->prepare("
-            SELECT id, username, password, profile_photo, is_active, activation_token  -- NEW
+            SELECT id, username, password, profile_photo, is_active, activation_token, role
             FROM user 
             WHERE username = ? OR email = ? 
             LIMIT 1
@@ -35,14 +35,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $activationLink = $baseUrl . '/activate.php?token=' . urlencode($user['activation_token']);
                         $error = 'Akun Anda belum aktif. Silakan aktivasi akun dengan tombol di bawah ini.';
                     } else {
-                        // kalau token kosong (misal dihapus), suruh kontak admin
+                        // kalau token kosong, suruh kontak admin - boongan doang
                         $error = 'Akun Anda belum aktif dan link aktivasi tidak tersedia. Silakan hubungi admin.';
                     }
                 } else {
                     // aktif boleh login
                     $_SESSION['user_id']  = $user['id'];
                     $_SESSION['username'] = $user['username'];
-                    header('Location: /TUBES_2_Toko/index.php');
+                    $_SESSION['role']     = $user['role'];   // simpan juga role di session
+
+                    // kalau admin → ke dashboard admin
+                    if ($user['role'] === 'admin') {
+                        header('Location: /TUBES_2_Toko/admin/dashboard.php');
+                    } else {
+                        // user biasa → ke homepage
+                        header('Location: /TUBES_2_Toko/index.php');
+                    }
                     exit;
                 }
 
@@ -61,7 +69,7 @@ if ($res = $mysqli->query("
     FROM products 
     WHERE image IS NOT NULL AND image <> '' 
     ORDER BY added DESC 
-    LIMIT 8
+    LIMIT 20
 ")) {
     while ($row = $res->fetch_assoc()) {
         $slides[] = '/TUBES_2_Toko/assets/products/' . rawurlencode($row['image']);
@@ -72,12 +80,12 @@ $slidesJson = json_encode($slides);
 ?>
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Login — Feyora</title>
-  <link rel="stylesheet" href="../styles/Login.css?v=<?=time()?>">
-</head>
+<?php
+  // head.php global buat top nav bar
+  $pageTitle   = 'Login | FEYORA';
+  $extraStyles = '<link rel="stylesheet" href="styles/Login.css?v=' . time() . '">';
+  include __DIR__ . '/../includes/head.php';
+?>
 <body>
 <?php include __DIR__ . '/../includes/header.php'; ?>
 
@@ -109,9 +117,9 @@ $slidesJson = json_encode($slides);
         <div class="auth-error"><?= htmlspecialchars($error) ?></div>
       <?php endif; ?>
 
-      <?php if ($activationLink): ?>  <!-- NEW: tombol aktivasi kalau akun belum aktif -->
+      <?php if ($activationLink): ?>  <!--  OPSIONAL NNT MIKIRNY : tombol aktivasi kalau akun belum aktif -->
         <div class="auth-success" style="margin-bottom:14px;">
-          <div>Belum menerima email aktivasi? Anda bisa aktivasi langsung lewat tombol berikut.</div>
+          <div>Haven't received the activation email? Activate it directly using the button below.</div>
           <div style="margin-top:10px;">
             <a href="<?= htmlspecialchars($activationLink) ?>"
                style="
@@ -124,7 +132,7 @@ $slidesJson = json_encode($slides);
                  font-weight:600;
                  font-size:14px;
                ">
-               Aktivasi Akun
+               Account Activation
             </a>
           </div>
         </div>
@@ -152,7 +160,9 @@ $slidesJson = json_encode($slides);
         </label>
 
         <div class="auth-meta">
-          <span>Don't have an account yet? <a href="register.php">Register now</a></span>
+          <span>Don't have an account yet? 
+            <a href="/TUBES_2_Toko/auth/register.php">Register now</a>
+          </span>
         </div>
 
         <button class="btn-primary auth-submit" type="submit">Login</button>
