@@ -189,7 +189,7 @@ $cart = $resultCart->fetch_all(MYSQLI_ASSOC);
             Total Belanja: Rp <?= number_format($total, 0, ',', '.') ?>
         </div>
 
-        <form action="checkout.php" method="POST">
+        <form action="order/checkout.php" method="POST">
             <button class="checkout-btn" 
                 <?= empty($_SESSION['checkout']) ? "onclick=\"alert('Pilih item dulu sebelum checkout!'); return false;\"" : '' ?>>
                 Checkout
