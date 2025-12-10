@@ -10,17 +10,26 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
-// Ambil data cart
+$selected = $_SESSION['checkout_ids'] ?? [];
+
+if (empty($selected)) {
+    header("Location: ../cart/listCart.php");
+    exit;
+}
+
+$ids = implode(",", array_map('intval', array_keys($selected))); 
+
 $query = $mysqli->prepare("
     SELECT c.id AS cart_id, c.quantity, c.size,
            p.id AS product_id, p.name, p.price, p.image
     FROM cart c
     JOIN products p ON c.product_id = p.id
-    WHERE c.user_id = ?
+    WHERE c.user_id = $user_id
+    AND c.id IN ($ids)
 ");
-$query->bind_param("i", $user_id);
 $query->execute();
 $result = $query->get_result();
+
 
 $items = [];
 $total = 0;
