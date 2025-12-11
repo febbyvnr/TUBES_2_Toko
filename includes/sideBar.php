@@ -33,13 +33,6 @@
         </li>
 
         <li>
-            <a href="/TUBES_2_Toko/admin/report.php"
-                class="<?= basename($_SERVER['PHP_SELF']) === 'report.php' ? 'active' : '' ?>">
-                    <i class="bi bi-file-bar-graph"></i> Reports
-            </a>
-        </li>
-
-        <li>
             <a href="/TUBES_2_Toko/auth/logout.php" class="logout">
                 <i class="bi bi-box-arrow-right"></i> Logout
             </a>
