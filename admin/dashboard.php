@@ -350,9 +350,6 @@ if ($res = $mysqli->query($sqlProducts)) {
 
                 <!-- Actions -->
                 <td class="cell-actions">
-                  <a href="/TUBES_2_Toko/product/detailProduct.php?id=<?= (int)$p['id'] ?>" title="View">
-                    <i class="bi bi-eye"></i>
-                  </a>
                   <a href="/TUBES_2_Toko/admin/editProduct.php?id=<?= (int)$p['id'] ?>" title="Edit">
                     <i class="bi bi-pencil"></i>
                   </a>

@@ -31,5 +31,5 @@
       </ul>
     </div>
   </div>
-  <div class="container copyright">© 2024 Aura. All rights reserved.</div>
+  <div class="container copyright">© 2025 Fèyora. Febian Nurwanto | Adela Natalia Yolis | Brigita Dwi Yuliarti Sat | Jocelyn Angie Arnova.</div>
 </footer>
