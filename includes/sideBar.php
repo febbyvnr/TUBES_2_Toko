@@ -33,9 +33,9 @@
         </li>
 
         <li>
-            <a href="/TUBES_2_Toko/admin/analytics.php"
-               class="<?= basename($_SERVER['PHP_SELF']) === 'analytics.php' ? 'active' : '' ?>">
-                <i class="bi bi-file-bar-graph"></i> Reports
+            <a href="/TUBES_2_Toko/admin/report.php"
+                class="<?= basename($_SERVER['PHP_SELF']) === 'report.php' ? 'active' : '' ?>">
+                    <i class="bi bi-file-bar-graph"></i> Reports
             </a>
         </li>
 
