@@ -216,6 +216,12 @@
   cursor: pointer;
 }
 
+.table-pagination a.page-btn,
+.table-pagination a.page-number {
+  text-decoration: none;
+  color: inherit;
+}
+
 /* Table */
 .admin-table-card {
   background: #fff;
@@ -272,11 +278,6 @@
   color: black;
 }
 
-.cell-sku {
-  font-size: 13px;
-  color: #777;
-}
-
 .cell-stock .stock-badge {
   display: inline-block;
   padding: 3px 8px;
@@ -324,6 +325,7 @@
 td.cell-actions {
     padding-left: 0;
     padding-right: 0;
+    vertical-align: middle;
 }
 
 .cell-actions {
@@ -350,11 +352,12 @@ td.cell-actions {
   color: #e3007b;
 }
 
-.admin-filter-form {
+.filter-form {
   display: flex;
-  width: 100%;
-  gap: 12px;
   align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
 }
 
 .filter-select {
@@ -418,37 +421,26 @@ td.cell-actions {
   color: #fff;
 }
 
+/* Kolom: checkbox | product | stock | price | status | actions */
 .admin-table th:nth-child(1),
 .admin-table td:nth-child(1) {
-  width: 35%; /* checkbox */
+  width: 5%;  /* checkbox */
+  text-align: center;
 }
 
 .admin-table th:nth-child(2),
 .admin-table td:nth-child(2) {
   width: 45%; /* Product Name */
-  text-align: center;
+  text-align: left;
 }
 
 .admin-table th:nth-child(3),
-.admin-table td:nth-child(3) {
-  width: 13.75%; /* Stock */
-  text-align: center;
-}
-
+.admin-table td:nth-child(3),
 .admin-table th:nth-child(4),
-.admin-table td:nth-child(4) {
-  width: 13.75%; /* Price */
-  text-align: center;
-}
-
+.admin-table td:nth-child(4),
 .admin-table th:nth-child(5),
-.admin-table td:nth-child(5) {
-  width: 13.75%; /* Status */
-  text-align: center;
-}
-
+.admin-table td:nth-child(5),
 .admin-table th:nth-child(6),
 .admin-table td:nth-child(6) {
-  width: 13.75%; /* Actions */
   text-align: center;
 }
