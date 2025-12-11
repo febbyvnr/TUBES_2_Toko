@@ -23,13 +23,13 @@ if (!$resUser || $resUser['role'] !== 'admin') {
 
 $adminName = $resUser['username'] ?? 'Admin';
 
-// ====== STATISTIK RINGKAS ======
+// ====== STATISTIK RINGKAS (untuk cards) ======
 $totalProducts         = 0;
 $totalCustomers        = 0;
 $totalActiveCustomers  = 0;
 $totalLowStock         = 0;
 
-// total produk
+// total produk (semua, tidak terpengaruh filter)
 if ($res = $mysqli->query("SELECT COUNT(*) AS c FROM products")) {
     $row = $res->fetch_assoc();
     $totalProducts = (int)$row['c'];
@@ -57,7 +57,94 @@ if ($res = $mysqli->query("SELECT COUNT(*) AS c FROM products WHERE stock > 0 AN
     $res->free();
 }
 
-// ====== LIST PRODUK TERBARU (untuk tabel) ======
+// ====== LIST CATEGORY UNTUK FILTER ======
+$categories = [];
+if ($res = $mysqli->query("
+    SELECT DISTINCT IFNULL(category,'') AS category
+    FROM products
+    WHERE category IS NOT NULL AND category <> ''
+    ORDER BY category
+")) {
+    while ($row = $res->fetch_assoc()) {
+        if ($row['category'] !== '') {
+            $categories[] = $row['category'];
+        }
+    }
+    $res->free();
+}
+
+// ====== BACA FILTER & SORT & SEARCH DARI QUERY STRING ======
+$qSort     = isset($_GET['sort'])     ? $_GET['sort']     : 'newest';
+$qCategory = isset($_GET['category']) ? trim($_GET['category']) : '';
+$qStock    = isset($_GET['stock'])    ? trim($_GET['stock'])    : 'all'; // all|in|low|out
+$qSearch   = isset($_GET['q'])        ? trim($_GET['q'])        : '';
+
+// ====== SORTING ======
+switch ($qSort) {
+    case 'oldest':
+        $order = 'ORDER BY id ASC';
+        break;
+    case 'price_asc':
+        $order = 'ORDER BY price ASC';
+        break;
+    case 'price_desc':
+        $order = 'ORDER BY price DESC';
+        break;
+    case 'newest':
+    default:
+        $order = 'ORDER BY id DESC';
+        $qSort = 'newest';
+        break;
+}
+
+// ====== BANGUN WHERE DARI CATEGORY + STOCK + SEARCH ======
+$conditions = [];
+
+// category filter
+if ($qCategory !== '') {
+    $catEsc = $mysqli->real_escape_string($qCategory);
+    $conditions[] = "category = '" . $catEsc . "'";
+}
+
+// stock filter
+if ($qStock === 'in') {
+    $conditions[] = "stock > 50";
+} elseif ($qStock === 'low') {
+    $conditions[] = "stock > 0 AND stock <= 50";
+} elseif ($qStock === 'out') {
+    $conditions[] = "stock <= 0";
+}
+
+// search by name
+if ($qSearch !== '') {
+    $qEsc = $mysqli->real_escape_string($qSearch);
+    $conditions[] = "name LIKE '%" . $qEsc . "%'";
+}
+
+$where = '';
+if (count($conditions) > 0) {
+    $where = 'WHERE ' . implode(' AND ', $conditions);
+}
+
+// ====== PAGINATION (untuk tabel) ======
+$perPage = 20;
+$page    = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+if ($page < 1) $page = 1;
+
+// hitung total data SETELAH filter (untuk pagination & "Showing x of y")
+$filteredTotal = 0;
+if ($res = $mysqli->query("SELECT COUNT(*) AS c FROM products $where")) {
+    $row = $res->fetch_assoc();
+    $filteredTotal = (int)$row['c'];
+    $res->free();
+}
+
+$totalPages = max(1, (int)ceil($filteredTotal / $perPage));
+if ($page > $totalPages) $page = $totalPages;
+
+$offset = ($page - 1) * $perPage;
+
+// ====== AMBIL DATA PRODUK (PAGE INI SAJA) ======
 function resolveProductImage(array $row): string {
     if (!empty($row['image'])) {
         return '/TUBES_2_Toko/assets/products/' . rawurlencode($row['image']);
@@ -69,14 +156,15 @@ $products = [];
 $sqlProducts = "
     SELECT id, name, price, stock, image
     FROM products
-    ORDER BY id DESC
-    LIMIT 20
+    $where
+    $order
+    LIMIT $perPage OFFSET $offset
 ";
+
 if ($res = $mysqli->query($sqlProducts)) {
     while ($row = $res->fetch_assoc()) {
         $row['image_url'] = resolveProductImage($row);
 
-        // status simple
         if ($row['stock'] <= 0) {
             $row['status'] = 'Out of Stock';
         } elseif ($row['stock'] <= 50) {
@@ -146,15 +234,56 @@ if ($res = $mysqli->query($sqlProducts)) {
 
       <!-- Filter bar -->
       <section class="admin-filterbar">
-        <div class="filter-search">
-          <i class="bi bi-search"></i>
-          <input type="text" placeholder="Search by product name..." />
-        </div>
-        <div class="filter-group">
-          <button class="filter-pill">Category: All <i class="bi bi-chevron-down"></i></button>
-          <button class="filter-pill">Stock: All <i class="bi bi-chevron-down"></i></button>
-          <button class="filter-pill">Sort: Newest <i class="bi bi-chevron-down"></i></button>
-        </div>
+        <form method="get" class="filter-form">
+          <div class="filter-search">
+            <i class="bi bi-search"></i>
+            <input
+              type="text"
+              name="q"
+              placeholder="Search by product name..."
+              value="<?= htmlspecialchars($qSearch) ?>"
+            />
+          </div>
+
+          <div class="filter-group">
+            <!-- CATEGORY -->
+            <select name="category" class="filter-pill filter-select">
+              <option value="">Category: All</option>
+              <?php foreach ($categories as $cat): ?>
+                <option value="<?= htmlspecialchars($cat) ?>"
+                  <?= $qCategory === $cat ? 'selected' : '' ?>>
+                  <?= htmlspecialchars($cat) ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+
+            <!-- STOCK -->
+            <select name="stock" class="filter-pill filter-select">
+              <option value="all"  <?= $qStock === 'all'  ? 'selected' : '' ?>>Stock: All</option>
+              <option value="in"   <?= $qStock === 'in'   ? 'selected' : '' ?>>In Stock (&gt; 50)</option>
+              <option value="low"  <?= $qStock === 'low'  ? 'selected' : '' ?>>Low Stock (1–50)</option>
+              <option value="out"  <?= $qStock === 'out'  ? 'selected' : '' ?>>Out of Stock</option>
+            </select>
+
+            <!-- SORT -->
+            <select name="sort" class="filter-pill filter-select">
+              <option value="newest" <?= $qSort === 'newest' ? 'selected' : '' ?>>
+                Sort: Newest
+              </option>
+              <option value="oldest" <?= $qSort === 'oldest' ? 'selected' : '' ?>>
+                Sort: Oldest
+              </option>
+              <option value="price_asc" <?= $qSort === 'price_asc' ? 'selected' : '' ?>>
+                Price: Low → High
+              </option>
+              <option value="price_desc" <?= $qSort === 'price_desc' ? 'selected' : '' ?>>
+                Price: High → Low
+              </option>
+            </select>
+
+            <button type="submit" class="filter-apply-btn">Apply</button>
+          </div>
+        </form>
       </section>
 
       <!-- Table -->
@@ -176,7 +305,7 @@ if ($res = $mysqli->query($sqlProducts)) {
           <?php if (empty($products)): ?>
             <tr>
               <td colspan="6" style="text-align:center; padding:20px; color:#777;">
-                Belum ada produk yang terdaftar.
+                Belum ada produk yang sesuai filter.
               </td>
             </tr>
           <?php else: ?>
@@ -240,15 +369,71 @@ if ($res = $mysqli->query($sqlProducts)) {
 
         <div class="admin-table-footer">
           <div class="table-info">
-            Showing <?= count($products) ?> of <?= $totalProducts ?> products
+            Showing <?= count($products) ?> of <?= $filteredTotal ?> products
           </div>
+
+          <?php if ($totalPages > 1): ?>
           <div class="table-pagination">
-            <button class="page-btn disabled">Previous</button>
-            <button class="page-number active">1</button>
-            <button class="page-number">2</button>
-            <button class="page-number">3</button>
-            <button class="page-btn">Next</button>
+            <?php
+              // base URL ke file ini
+              $baseUrl = '/TUBES_2_Toko/admin/dashboard.php';
+
+              // base params (bawa semua filter kecuali page)
+              $baseParams = $_GET;
+              unset($baseParams['page']);
+
+              // Prev
+              if ($page > 1) {
+                  $baseParams['page'] = $page - 1;
+                  $urlPrev = $baseUrl . '?' . http_build_query($baseParams);
+                  echo '<a class="page-btn" href="'. htmlspecialchars($urlPrev) .'">Previous</a>';
+              } else {
+                  echo '<span class="page-btn disabled">Previous</span>';
+              }
+
+              // window halaman
+              $start = max(1, $page - 2);
+              $end   = min($totalPages, $page + 2);
+
+              if ($start > 1) {
+                  $baseParams['page'] = 1;
+                  $urlFirst = $baseUrl . '?' . http_build_query($baseParams);
+                  echo '<a class="page-number" href="'. htmlspecialchars($urlFirst) .'">1</a>';
+                  if ($start > 2) {
+                      echo '<span class="page-number disabled">...</span>';
+                  }
+              }
+
+              for ($p = $start; $p <= $end; $p++) {
+                  $baseParams['page'] = $p;
+                  $url = $baseUrl . '?' . http_build_query($baseParams);
+                  if ($p == $page) {
+                      echo '<span class="page-number active">'. $p .'</span>';
+                  } else {
+                      echo '<a class="page-number" href="'. htmlspecialchars($url) .'">'. $p .'</a>';
+                  }
+              }
+
+              if ($end < $totalPages) {
+                  if ($end < $totalPages - 1) {
+                      echo '<span class="page-number disabled">...</span>';
+                  }
+                  $baseParams['page'] = $totalPages;
+                  $urlLast = $baseUrl . '?' . http_build_query($baseParams);
+                  echo '<a class="page-number" href="'. htmlspecialchars($urlLast) .'">'. $totalPages .'</a>';
+              }
+
+              // Next
+              if ($page < $totalPages) {
+                  $baseParams['page'] = $page + 1;
+                  $urlNext = $baseUrl . '?' . http_build_query($baseParams);
+                  echo '<a class="page-btn" href="'. htmlspecialchars($urlNext) .'">Next</a>';
+              } else {
+                  echo '<span class="page-btn disabled">Next</span>';
+              }
+            ?>
           </div>
+          <?php endif; ?>
         </div>
       </section>
 
