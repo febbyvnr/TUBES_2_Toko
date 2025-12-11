@@ -1,20 +1,16 @@
 <?php
 session_start();
-require_once "../config/db.php";
+require_once __DIR__ . '/../config/db.php';
 
-if (!isset($_POST['order_id']) || !isset($_POST['status'])) {
-    die("Data tidak lengkap.");
+if (!isset($_GET['id'])) {
+    die("Missing transaction ID");
 }
 
-$order_id = intval($_POST['order_id']);
-$status   = $mysqli->real_escape_string($_POST['status']);
+$trx_id = intval($_GET['id']);
 
-$mysqli->query("
-    UPDATE orders 
-    SET status = '$status'
-    WHERE id = $order_id
-");
+$update = $mysqli->prepare("UPDATE transactions SET status = 'success' WHERE id = ?");
+$update->bind_param("i", $trx_id);
+$update->execute();
 
-header("Location: view.php?id=" . $order_id . "&update=success");
+header("Location: paymentSuccess.php?transaction_id=" . $trx_id);
 exit;
-?>

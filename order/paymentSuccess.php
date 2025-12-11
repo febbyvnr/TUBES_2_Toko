@@ -2,12 +2,13 @@
 session_start();
 require_once __DIR__ . '/../config/db.php';
 
-$trx_id = $_GET['trx'] ?? null;
+$trx_id = $_GET['transaction_id'] ?? null;
 
 if (!$trx_id) {
     die("Invalid transaction ID");
 }
 
+// Ambil data transaksi
 $stmt = $mysqli->prepare("
     SELECT total_price, date_created, status
     FROM transactions
@@ -18,6 +19,16 @@ $stmt->execute();
 $result = $stmt->get_result();
 $trx = $result->fetch_assoc();
 $stmt->close();
+
+if (!$trx) {
+    die("Transaction not found");
+}
+
+$status_display = trim($trx['status']);
+
+if ($status_display === "" || $status_display === null || $status_display === "Order Created") {
+    $status_display = "pending";
+}
 
 ?>
 <!DOCTYPE html>
@@ -42,12 +53,13 @@ $stmt->close();
     <p>Your transaction has been completed.</p>
     
     <h3>Transaction Details</h3>
+
     <p><b>ID:</b> <?= $trx_id ?></p>
     <p><b>Total:</b> Rp <?= number_format($trx['total_price'],0,',','.') ?></p>
     <p><b>Date:</b> <?= $trx['date_created'] ?></p>
-    <p><b>Status:</b> <?= ucfirst($trx['status']) ?></p>
+    <p><b>Status:</b> <?= ucfirst($status_display) ?></p>
 
-    <a href="../products/index.php">Continue Shopping</a>
+    <a href="/TUBES_2_Toko/index.php">Continue Shopping</a>
 </div>
 
 </body>

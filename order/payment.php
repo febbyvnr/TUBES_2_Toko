@@ -54,8 +54,9 @@ $total = $subtotal + $shipping_cost + $admin_fee;
 
             <div class="address-left">
                 <b><?= $shipping['firstname'] . " " . $shipping['lastname'] ?></b><br>
-                <span>(+62) 895 xxxx xxxx</span>
+                <span><?= htmlspecialchars($shipping['email']) ?></span>
             </div>
+
 
             <div class="address-right">
                 <?= $shipping['address'] ?>,
@@ -137,6 +138,7 @@ $total = $subtotal + $shipping_cost + $admin_fee;
             <form id="paymentForm" action="processPayment.php" method="POST">
                 <input type="hidden" name="method" id="method" value="cod">
                 <input type="hidden" name="total_price" value="<?= $total ?>">
+                <input type="hidden" name="ewallet_type" id="ewallet_type">
             </form>
         </div>
 
@@ -160,34 +162,31 @@ $total = $subtotal + $shipping_cost + $admin_fee;
 
 </div>
 
-<!-- ===================== JAVASCRIPT ===================== -->
+<!-- ===================== jsc ===================== -->
 <script>
 function selectMethod(method) {
-
-    // Set selected payment method
     document.getElementById("method").value = method;
 
-    // Highlight selected button
-    document.querySelectorAll(".method-btn")
-        .forEach(btn => btn.classList.remove("active"));
+    // update UI
+    document.querySelectorAll(".method-btn").forEach(btn => btn.classList.remove("active"));
     document.getElementById("btn-" + method).classList.add("active");
 
-    // Hide all method details
+    // hide all detail boxes
     document.getElementById("detail-cod").style.display = "none";
     document.getElementById("detail-bank").style.display = "none";
     document.getElementById("detail-ewallet").style.display = "none";
 
-    // Show selected method detail
-    if(method === "cod"){
-        document.getElementById("detail-cod").style.display = "block";
-    }
-    else if(method === "bank"){
-        document.getElementById("detail-bank").style.display = "block";
-    }
-    else if(method === "ewallet"){
-        document.getElementById("detail-ewallet").style.display = "block";
-    }
+    // show selected detail
+    document.getElementById("detail-" + method).style.display = "block";
 }
+
+// KETIKA PILIH E-WALLET
+document.querySelectorAll("input[name='ewallet_type']").forEach(radio => {
+    radio.addEventListener("change", function () {
+        document.getElementById("ewallet_type").value = this.value;
+    });
+});
+
 </script>
 
 

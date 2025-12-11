@@ -16,7 +16,7 @@ if (!$shipping) {
     exit;
 }
 
-// Tangkap metode pembayaran
+// capture metode pembayaran
 $payment_method = $_POST['method'] ?? null;
 $total_price = $_POST['total_price'] ?? 0;
 
@@ -35,7 +35,7 @@ $stmt->execute();
 $transaction_id = $mysqli->insert_id;
 $stmt->close();
 
-// 2. Ambil semua item keranjang yang di-checkout
+// 2. Ambil semua item keranjang yang dicheckout
 $ids = implode(",", array_map('intval', array_keys($selected)));
 
 $query = $mysqli->prepare("
@@ -50,7 +50,7 @@ $query->bind_param("i", $user_id);
 $query->execute();
 $result = $query->get_result();
 
-// 3. Insert ke detail_transactions
+// 3. Insert ke detail_transaction
 while ($row = $result->fetch_assoc()) {
     $stmt2 = $mysqli->prepare("
         INSERT INTO detail_transaction (transaction_id, product_id, size, price, quantity)
@@ -71,10 +71,39 @@ while ($row = $result->fetch_assoc()) {
 // 4. Hapus item dari cart
 $mysqli->query("DELETE FROM cart WHERE user_id = $user_id AND id IN ($ids)");
 
-// 5. Bersihkan checkout session
 unset($_SESSION['checkout_ids']);
 unset($_SESSION['shipping']);
 
-// 6. Redirect ke payment success
-header("Location: paymentSuccess.php?trx=" . $transaction_id);
-exit;
+// 5. REDIRECT BERDASARKAN METODE PEMBAYARAN
+if ($payment_method === "bank") {
+    header("Location: transferBank.php?transaction_id=" . $transaction_id);
+    exit;
+}
+
+$wallet_type = $_POST['ewallet_type'] ?? null;
+
+if ($payment_method === "ewallet") {
+    if (!$wallet_type) {
+        die("Please select an E-Wallet type!");
+    }
+
+    header("Location: ewallet.php?transaction_id=$transaction_id&type=$wallet_type");
+    exit;
+}
+
+if ($payment_method === "cod") {
+    $stmt3 = $mysqli->prepare("UPDATE transactions SET status='success' WHERE id=?");
+    $stmt3->bind_param("i", $transaction_id);
+    $stmt3->execute();
+
+    header("Location: paymentSuccess.php?transaction_id=" . $transaction_id);
+    exit;
+}
+
+
+
+
+// // 6. Redirect ke payment success
+
+// header("Location: paymentSuccess.php?trx=" . $transaction_id);
+// exit;

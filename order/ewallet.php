@@ -7,8 +7,9 @@ if (!isset($_GET['transaction_id'])) {
 }
 
 $transaction_id = intval($_GET['transaction_id']);
+$wallet_type = $_GET['type'] ?? "Dana"; // default Dana jika tidak ada
 
-// Ambil data transaksi dari database
+// Ambil data transaksi
 $stmt = $mysqli->prepare("SELECT total_price, date_created FROM transactions WHERE id = ?");
 $stmt->bind_param("i", $transaction_id);
 $stmt->execute();
@@ -23,17 +24,30 @@ $trx = $result->fetch_assoc();
 // Total pembayaran
 $total = $trx['total_price'];
 
-// Generate Virtual Account (ga disimpan database)
-$va_number = "126" . str_pad($transaction_id, 10, "0", STR_PAD_LEFT);
+// Generate nomor pembayaran E-Wallet (tidak disimpan ke DB)
+$wallet_number = "08" . str_pad($transaction_id, 10, "5", STR_PAD_LEFT);
 
-// Deadline pembayaran = 24 jam dari date_created
+// Deadline pembayaran (24 jam)
 $deadline = date("d M Y, H:i", strtotime("+24 hours", strtotime($trx['date_created'])));
+
+// Tentukan logo berdasarkan e-wallet
+$logo = "";
+if ($wallet_type == "Dana") {
+    $logo = "/TUBES_2_Toko/assets/dana.png";
+}
+if ($wallet_type == "OVO") {
+    $logo = "/TUBES_2_Toko/assets/ovo.png";
+}
+if ($wallet_type == "Gopay") {
+    $logo = "/TUBES_2_Toko/assets/gopay.png";
+}
+
 ?>
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Pembayaran - Transfer Bank</title>
+<title>Pembayaran - E-Wallet</title>
 
 <style>
 body {
@@ -71,13 +85,13 @@ body {
     font-weight: bold;
 }
 
-.bank-box {
+.wallet-box {
     border-top: 1px solid #eee;
     padding-top: 25px;
     margin-top: 20px;
 }
 
-.va-number {
+.wallet-number {
     font-size: 26px;
     color: #ff2d7a;
     font-weight: bold;
@@ -99,14 +113,6 @@ body {
     margin: 10px 0;
 }
 
-hr {
-    border: none;
-    height: 1px;
-    background: #eee;
-    margin: 20px 0;
-}
-
-/* BUTTON CHECK STATUS DI DALAM CONTAINER, KANAN BAWAH */
 .check-status-wrapper {
     margin-top: 25px;
     text-align: right;
@@ -130,19 +136,19 @@ hr {
 </style>
 
 <script>
-// COPY VA NUMBER
-function copyVA() {
-    navigator.clipboard.writeText("<?= $va_number ?>");
-    alert("Nomor VA disalin!");
+function copyWallet() {
+    navigator.clipboard.writeText("<?= $wallet_number ?>");
+    alert("Nomor E-Wallet disalin!");
 }
 </script>
 
 </head>
+
 <body>
 
 <div class="container">
 
-    <div class="section-title">Pembayaran</div>
+    <div class="section-title">Pembayaran E-Wallet (<?= htmlspecialchars($wallet_type) ?>)</div>
 
     <div class="row">
         <span>Total Pembayaran</span>
@@ -158,30 +164,41 @@ function copyVA() {
         Jatuh tempo <?= $deadline ?>
     </div>
 
-    <div class="bank-box">
+    <!-- NOMOR PEMBAYARAN -->
+    <div class="wallet-box">
         <div style="display:flex; align-items:center; gap:10px; font-size:20px;">
-            <img src="/TUBES_2_Toko/assets/bca.png" width =70px;>
-            <b>Bank BCA</b>
+            <img src="<?= $logo ?>" width="38">
+            <b><?= htmlspecialchars($wallet_type) ?></b>
         </div>
 
-        <p style="margin:15px 0 5px;">No. Rekening (Virtual Account)</p>
-        <span class="va-number"><?= $va_number ?></span>
-        <span class="copy-btn" onclick="copyVA()">SALIN</span>
+        <p style="margin:15px 0 5px;">Nomor Pembayaran</p>
+        <span class="wallet-number"><?= $wallet_number ?></span>
+        <span class="copy-btn" onclick="copyWallet()">SALIN</span>
     </div>
 
     <hr>
 
+    <!-- INSTRUKSI -->
     <div class="instructions">
-        <h3>Petunjuk Transfer mBanking</h3>
+        <h3>Cara Membayar via <?= htmlspecialchars($wallet_type) ?></h3>
 
-        <div class="step">1. Pilih <b>m-Transfer > BCA Virtual Account</b></div>
-        <div class="step">2. Masukkan nomor Virtual Account <b><?= $va_number ?></b> lalu klik <b>Send</b></div>
-        <div class="step">3. Periksa nama Merchant dan Total Tagihan</div>
-        <div class="step">4. Masukkan PIN m-BCA dan pilih OK</div>
-        <div class="step">5. Jika gagal, coba cek limit ATM / iBanking</div>
+        <?php if ($wallet_type === "Dana"): ?>
+            <div class="step">1. Buka aplikasi <b>DANA</b></div>
+            <div class="step">2. Pilih menu <b>Kirim</b></div>
+        <?php elseif ($wallet_type === "OVO"): ?>
+            <div class="step">1. Buka aplikasi <b>OVO</b></div>
+            <div class="step">2. Pilih menu <b>Transfer</b></div>
+        <?php else: ?>
+            <div class="step">1. Buka aplikasi <b>Gopay</b></div>
+            <div class="step">2. Pilih menu <b>Bayar / Transfer</b></div>
+        <?php endif; ?>
+
+        <div class="step">3. Masukkan nomor tujuan <b><?= $wallet_number ?></b></div>
+        <div class="step">4. Masukkan nominal pembayaran</div>
+        <div class="step">5. Klik <b>Bayar</b> untuk menyelesaikan transaksi</div>
     </div>
 
-    <!-- check status button bawah kanan -->
+    <!-- CHECK STATUS BUTTON -->
     <div class="check-status-wrapper">
         <a href="updateStatus.php?id=<?= $transaction_id ?>">
             <button class="check-status-btn">Check Status</button>
@@ -193,7 +210,7 @@ function copyVA() {
 </div>
 
 <script>
-// COUNTDOWN (24 hours dari date_created)
+// COUNTDOWN 24 JAM
 var deadline = new Date("<?= date("Y-m-d H:i:s", strtotime("+24 hours", strtotime($trx['date_created']))) ?>").getTime();
 
 var x = setInterval(function() {
