@@ -68,7 +68,8 @@ while ($row = $result->fetch_assoc()) {
         <h2>Shipping Address</h2>
         <p>Enter your shipping details</p>
 
-        <form action="payment.php" method="POST">
+        <form id="goPayment" action="payment.php" method="POST"></form>
+
 
             <label>Email</label>
             <input type="email" name="email" placeholder="Enter your email" required>
@@ -114,9 +115,13 @@ while ($row = $result->fetch_assoc()) {
             </div>
 
             <div class="btn-row">
-                <a href="/TUBES_2_Toko/order/payment.php" class="btn-return">Return to cart</a>
-                <button type="submit" class="btn-submit">Continue to Payment</button>
+                <a href="/TUBES_2_Toko/cart/listCart.php" class="btn-return">Return to cart</a>
+
+                <button type="submit" class="btn-submit" form="goPayment">
+                    Continue to Payment
+                </button>
             </div>
+
 
         </form>
     </div>

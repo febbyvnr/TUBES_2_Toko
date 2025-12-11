@@ -53,7 +53,7 @@ $result = $query->get_result();
 // 3. Insert ke detail_transactions
 while ($row = $result->fetch_assoc()) {
     $stmt2 = $mysqli->prepare("
-        INSERT INTO detail_transactions (transactions_id, product_id, size, price, quantity)
+        INSERT INTO detail_transaction (transactions_id, product_id, size, price, quantity)
         VALUES (?, ?, ?, ?, ?)
     ");
     $stmt2->bind_param(
