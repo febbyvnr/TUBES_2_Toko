@@ -114,7 +114,7 @@ while ($row = $result->fetch_assoc()) {
             </div>
 
             <div class="btn-row">
-                <a href="/TUBES_2_Toko/cart/listCart.php" class="btn-return">Return to cart</a>
+                <a href="/TUBES_2_Toko/order/payment.php" class="btn-return">Return to cart</a>
                 <button type="submit" class="btn-submit">Continue to Payment</button>
             </div>
 
