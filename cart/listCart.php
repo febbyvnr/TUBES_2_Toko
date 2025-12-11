@@ -208,12 +208,12 @@ $cart = $resultCart->fetch_all(MYSQLI_ASSOC);
                 endforeach;
             else:
             ?>
-                <p style="color:#888;">Belum ada barang dipilih</p>
+                <p style="color:#888;">No products have been selected yet</p>
             <?php endif; ?>
             </div>
 
             <div class="summary-total">
-                Total Belanja: Rp <?= number_format($total, 0, ',', '.') ?>
+                Total : Rp <?= number_format($total, 0, ',', '.') ?>
             </div>
 
         <form action="order/checkout.php" method="POST">
@@ -225,7 +225,7 @@ $cart = $resultCart->fetch_all(MYSQLI_ASSOC);
 
         <form method="POST">
             <button class="cancelCheckout-btn" name="cancel_checkout">
-                Batal Checkout
+                Cancel
             </button>
         </form>
 
