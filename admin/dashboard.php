@@ -122,7 +122,7 @@ if ($res = $mysqli->query($sqlProducts)) {
     <main class="admin-content">
       <div class="admin-content-header">
         <h1 class="admin-page-title">Dashboard</h1>
-        <button class="btn-primary-admin" onclick="window.location.href='/TUBES_2_Toko/admin/addProduct.php'">
+        <button class="btn-primary-admin" onclick="window.location.href='/TUBES_2_Toko/admin/addProducts.php'">
           <i class="bi bi-plus-lg"></i> Add New Product
         </button>
       </div>
