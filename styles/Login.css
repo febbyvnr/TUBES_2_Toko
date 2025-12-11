@@ -13,13 +13,10 @@ body {
 .auth-layout {
   max-width: var(--container);
   margin: 32px auto;
-  padding: 0 20px;
-}
-
-.auth-layout {
+  padding: 0;
   display: flex;
   gap: 0;
-  border-radius: 16px;
+  border-radius: 20px;
   overflow: hidden;
   background: #fff;
   box-shadow: 0 10px 30px rgba(0,0,0,0.08);
@@ -40,12 +37,12 @@ body {
 
 .auth-visual {
   position: relative;
-  flex: 1.2;
-  height: 520px;
+  flex: 0.8;
+  /* min-height: 560px;
+  height: 100%; */
   border-radius: 20px 0 0 20px;
   overflow: hidden;
-  display: flex;
-  align-items: flex-end;
+  aspect-ratio: 3/4;
 }
 
 .auth-visual img {
@@ -94,7 +91,8 @@ body {
 
 .auth-form {
   flex: 1;
-  background: #faf7f8;
+  /* background: #faf7f8; */
+  background: white;
   display: flex;
   align-items: center;
   justify-content: center;

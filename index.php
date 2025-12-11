@@ -10,11 +10,9 @@ function resolveImageFromRow(array $row): string
     if ($imageName === '') {
         return 'assets/products/placeholder.png';
     }
-    // base href sudah /TUBES_2_Toko/ jadi cukup relative path
     return 'assets/products/' . $imageName;
 }
 
-// Ambil distinct kategori
 $categoryCards = [];
 $featuredStudio = [];
 
@@ -37,10 +35,8 @@ if ($cres = $mysqli->query($sqlCat)) {
     while ($crow = $cres->fetch_assoc()) {
         $cat = $crow['category'];
 
-        // default image
         $imagePath = 'assets/products/placeholder.png';
 
-        // cari satu produk di kategori ini yang punya gambar
         $stmt = $mysqli->prepare("
             SELECT image
             FROM products
@@ -65,7 +61,6 @@ if ($cres = $mysqli->query($sqlCat)) {
         $categoryCards[] = [
             'category' => $cat,
             'image'    => $imagePath,
-            // link ke listProduct + filter category
             'link'     => 'product/listProduct.php?category=' . urlencode($cat),
         ];
     }
@@ -108,17 +103,12 @@ if ($fres = $mysqli->query($sqlFeat)) {
 ?>
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+<?php
+  $pageTitle   = 'FEYORA — Home'; 
+  $extraStyles = '';
 
-  <base href="/TUBES_2_Toko/">
-
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <title>FEYORA — Home</title>
-
-  <link rel="stylesheet" href="styles/HomePage.css?v=<?=time()?>">
-</head>
+  include __DIR__ . '/includes/head.php';
+?>
 <body>
   <?php include __DIR__ . '/includes/header.php'; ?>
   <main>
@@ -186,40 +176,7 @@ if ($fres = $mysqli->query($sqlFeat)) {
       <?php endif; ?>
     </section>
 
-    <footer class="site-footer">
-      <div class="container footer-grid">
-        <div class="col">
-          <div class="brand">FEYORA</div>
-          <p class="muted">Timeless tops, designed for the modern woman.</p>
-        </div>
-        <div class="col">
-          <strong>Shop</strong>
-          <ul>
-            <li><a href="#">New In</a></li>
-            <li><a href="#">Tops</a></li>
-            <li><a href="#">Blouses</a></li>
-            <li><a href="#">Sale</a></li>
-          </ul>
-        </div>
-        <div class="col">
-          <strong>About</strong>
-          <ul>
-            <li><a href="#">Our Story</a></li>
-            <li><a href="#">Careers</a></li>
-            <li><a href="#">Sustainability</a></li>
-          </ul>
-        </div>
-        <div class="col">
-          <strong>Support</strong>
-          <ul>
-            <li><a href="#">Contact Us</a></li>
-            <li><a href="#">FAQ</a></li>
-            <li><a href="#">Shipping & Returns</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="container copyright">© 2024 Aura. All rights reserved.</div>
-    </footer>
+    <?php include __DIR__ . '/includes/footer.php'; ?>
   </main>
 </body>
 </html>
