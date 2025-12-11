@@ -15,7 +15,7 @@ if (empty($selected)) {
     exit;
 }
 
-$ids = implode(",", array_map('intval', array_keys($selected))); 
+$ids = implode(",", array_map('intval', array_keys($selected)));
 
 $query = $mysqli->prepare("
     SELECT c.id AS cart_id, c.quantity, c.size,
@@ -35,6 +35,27 @@ while ($row = $result->fetch_assoc()) {
     $items[] = $row;
     $total += $row['price'] * $row['quantity'];
 }
+
+/* ======================================================
+   HANDLE SUBMIT → SIMPAN SESSION → REDIRECT PAYMENT
+   ====================================================== */
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    $_SESSION['shipping'] = [
+        'email' => $_POST['email'],
+        'firstname' => $_POST['firstname'],
+        'lastname' => $_POST['lastname'],
+        'address' => $_POST['address'],
+        'city' => $_POST['city'],
+        'state' => $_POST['state'],
+        'zip' => $_POST['zip'],
+        'sameBilling' => isset($_POST['sameBilling']) ? true : false
+    ];
+
+    header("Location: payment.php");
+    exit;
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -68,8 +89,8 @@ while ($row = $result->fetch_assoc()) {
         <h2>Shipping Address</h2>
         <p>Enter your shipping details</p>
 
-        <form id="goPayment" action="payment.php" method="POST"></form>
-
+        <!-- FORM MULAI -->
+        <form action="" method="POST">
 
             <label>Email</label>
             <input type="email" name="email" placeholder="Enter your email" required>
@@ -85,13 +106,13 @@ while ($row = $result->fetch_assoc()) {
                 </div>
             </div>
 
-            <!-- Address with Use My Location -->
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
                 <label for="address" style="flex:1;">Address</label>
                 <label style="display:flex; align-items:center; gap:5px;">
                     <input type="checkbox" id="useLocation"> Use My Location
                 </label>
             </div>
+
             <input type="text" name="address" id="address" placeholder="Enter your address" required>
 
             <div class="form-row">
@@ -109,21 +130,23 @@ while ($row = $result->fetch_assoc()) {
                 </div>
             </div>
 
+            <!-- CHECKBOX BILLING -->
             <div style="margin: 10px 0 25px 0; display:flex; align-items:center; gap:10px;">
                 <input type="checkbox" id="sameBilling" name="sameBilling" style="width:18px; height:18px;">
-                <label for="sameBilling" style="font-size:15px; color:#444;">Billing address is the same as shipping</label>
+                <label for="sameBilling" style="font-size:15px; color:#444;">
+                    Billing address is the same as shipping
+                </label>
             </div>
 
             <div class="btn-row">
                 <a href="/TUBES_2_Toko/cart/listCart.php" class="btn-return">Return to cart</a>
 
-                <button type="submit" class="btn-submit" form="goPayment">
-                    Continue to Payment
-                </button>
+                <button type="submit" class="btn-submit">Continue to Payment</button>
             </div>
 
-
         </form>
+        <!-- FORM SELESAI -->
+
     </div>
 
     <div class="checkout-right">
@@ -165,7 +188,6 @@ useLocation.addEventListener('change', () => {
         }
         navigator.geolocation.getCurrentPosition(success, error);
     } else {
-        // Jika checkbox dilepas, kosongkan input
         addressInput.value = '';
     }
 });
@@ -174,7 +196,6 @@ function success(position) {
     const latitude = position.coords.latitude;
     const longitude = position.coords.longitude;
 
-    // Reverse geocoding OpenStreetMap
     fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`)
         .then(response => response.json())
         .then(data => {

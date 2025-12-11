@@ -3,107 +3,184 @@ session_start();
 require_once __DIR__ . '/../config/db.php';
 
 if (!isset($_GET['transaction_id'])) {
-    die("Transaction not found");
+    die("Transaction ID missing.");
 }
 
 $transaction_id = intval($_GET['transaction_id']);
 
-// Ambil data transaksi
-$q = $mysqli->query("SELECT * FROM transactions WHERE id = $transaction_id");
-$trx = $q->fetch_assoc();
+// Ambil data transaksi dari database
+$stmt = $mysqli->prepare("SELECT total_price, date_created FROM transactions WHERE id = ?");
+$stmt->bind_param("i", $transaction_id);
+$stmt->execute();
+$result = $stmt->get_result();
 
-if (!$trx) {
-    die("Invalid transaction ID");
+if ($result->num_rows === 0) {
+    die("Transaction not found.");
 }
 
-// TOTAL
-$total_price = $trx['total_price'];
+$trx = $result->fetch_assoc();
 
-// VA Number (contoh: generate dari transaction_id)
-$va_number = "1260" . str_pad($transaction_id, 10, "0", STR_PAD_LEFT);
+// Total pembayaran
+$total = $trx['total_price'];
 
-// JATUH TEMPO (24 JAM)
-$deadline = date("d M Y, H:i", strtotime("+24 hours"));
+// Generate Virtual Account (tanpa simpan database)
+$va_number = "126" . str_pad($transaction_id, 10, "0", STR_PAD_LEFT);
+
+// Deadline pembayaran = 24 jam dari date_created
+$deadline = date("d M Y, H:i", strtotime("+24 hours", strtotime($trx['date_created'])));
 ?>
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <title>Pembayaran - Transfer Bank</title>
-<link rel="stylesheet" href="../styles/payment.css">
-</head>
 
+<style>
+body {
+    font-family: Arial;
+    background: #faf7f9;
+    margin: 0;
+}
+
+.container {
+    width: 90%;
+    max-width: 800px;
+    margin: 30px auto;
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 0 10px #ddd;
+}
+
+.section-title {
+    font-size: 22px;
+    font-weight: bold;
+    color: #ff2d7a;
+    margin-bottom: 20px;
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    margin: 18px 0;
+    font-size: 18px;
+}
+
+.value-red {
+    color: #ff2d7a;
+    font-weight: bold;
+}
+
+.bank-box {
+    border-top: 1px solid #eee;
+    padding-top: 25px;
+    margin-top: 20px;
+}
+
+.va-number {
+    font-size: 26px;
+    color: #ff2d7a;
+    font-weight: bold;
+}
+
+.copy-btn {
+    color: #0099ff;
+    cursor: pointer;
+    margin-left: 15px;
+    font-weight: bold;
+}
+
+.instructions {
+    margin-top: 30px;
+    font-size: 16px;
+}
+
+.step {
+    margin: 10px 0;
+}
+
+hr {
+    border: none;
+    height: 1px;
+    background: #eee;
+    margin: 20px 0;
+}
+</style>
+
+<script>
+// COPY VA NUMBER
+function copyVA() {
+    navigator.clipboard.writeText("<?= $va_number ?>");
+    alert("Nomor VA disalin!");
+}
+</script>
+
+</head>
 <body>
 
-<div class="transfer-container">
+<div class="container">
 
-    <h2 class="page-title">Pembayaran</h2>
+    <div class="section-title">Pembayaran</div>
 
-    <!-- TOTAL PEMBAYARAN -->
-    <div class="transfer-box">
-        <div class="line">
-            <span>Total Pembayaran</span>
-            <span class="price">Rp <?= number_format($total_price) ?></span>
-        </div>
-
-        <div class="line">
-            <span>Bayar Dalam</span>
-            <span id="countdown" class="countdown">24 jam 00 menit 00 detik</span>
-        </div>
-
-        <div class="deadline">
-            Jatuh tempo <?= $deadline ?>
-        </div>
+    <div class="row">
+        <span>Total Pembayaran</span>
+        <span class="value-red">Rp<?= number_format($total, 0, ',', '.') ?></span>
     </div>
 
-    <!-- BANK INFORMATION -->
-    <div class="transfer-box">
-        
-        <div class="bank-title">
-            <img src="../assets/icons/bca.png" class="bank-icon">
-            Bank BCA
+    <div class="row">
+        <span>Bayar Dalam</span>
+        <span class="value-red" id="countdown">--</span>
+    </div>
+
+    <div style="font-size:14px; margin-top:-10px; text-align:right;">
+        Jatuh tempo <?= $deadline ?>
+    </div>
+
+    <div class="bank-box">
+        <div style="display:flex; align-items:center; gap:10px; font-size:20px;">
+            <img src="https://seeklogo.com/images/B/bca-bank-central-asia-logo-0CF2CA2844-seeklogo.com.png" width="32">
+            <b>Bank BCA</b>
         </div>
 
-        <div class="va-label">Nomor Rekening (VA)</div>
+        <p style="margin:15px 0 5px;">No. Rekening (Virtual Account)</p>
+        <span class="va-number"><?= $va_number ?></span>
+        <span class="copy-btn" onclick="copyVA()">SALIN</span>
+    </div>
 
-        <div class="va-box">
-            <span id="vaNumber"><?= $va_number ?></span>
-            <button class="btn-copy" onclick="copyVA()">SALIN</button>
-        </div>
+    <hr>
 
-        <div class="instruction-title">Petunjuk Transfer mBanking</div>
+    <div class="instructions">
+        <h3>Petunjuk Transfer mBanking</h3>
 
-        <ol class="instruction-list">
-            <li>Pilih <b>m-Transfer → BCA Virtual Account</b></li>
-            <li>Masukkan nomor Virtual Account <b><?= $va_number ?></b> lalu pilih <b>Send</b></li>
-            <li>Periksa informasi merchant & nama kamu</li>
-            <li>Masukkan PIN m-BCA lalu pilih <b>OK</b></li>
-        </ol>
-
+        <div class="step">1. Pilih <b>m-Transfer > BCA Virtual Account</b></div>
+        <div class="step">2. Masukkan nomor Virtual Account <b><?= $va_number ?></b> lalu klik <b>Send</b></div>
+        <div class="step">3. Periksa nama Merchant dan Total Tagihan</div>
+        <div class="step">4. Masukkan PIN m-BCA dan pilih OK</div>
+        <div class="step">5. Jika gagal, coba limit ATM / iBanking</div>
     </div>
 
 </div>
 
 <script>
-// COPY VA
-function copyVA() {
-    const text = document.getElementById("vaNumber").textContent;
-    navigator.clipboard.writeText(text);
-    alert("Nomor VA tersalin: " + text);
-}
+// COUNTDOWN (24 hours)
+var deadline = new Date("<?= date("Y-m-d H:i:s", strtotime("+24 hours", strtotime($trx['date_created']))) ?>").getTime();
 
-// COUNTDOWN 24 HOURS
-let seconds = 24 * 60 * 60;
+var x = setInterval(function() {
+    var now = new Date().getTime();
+    var distance = deadline - now;
 
-setInterval(() => {
-    seconds--;
+    if (distance < 0) {
+        document.getElementById("countdown").innerHTML = "Waktu Habis";
+        clearInterval(x);
+        return;
+    }
 
-    let h = Math.floor(seconds / 3600);
-    let m = Math.floor((seconds % 3600) / 60);
-    let s = seconds % 60;
+    var hours = Math.floor(distance / (1000 * 60 * 60));
+    var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    var seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
     document.getElementById("countdown").innerHTML =
-        `${h} jam ${m} menit ${s} detik`;
+        hours + " jam " + minutes + " menit " + seconds + " detik";
 
 }, 1000);
 </script>
