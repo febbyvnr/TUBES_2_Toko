@@ -1,7 +1,8 @@
 <footer class="site-footer">
   <div class="container footer-grid">
     <div class="col">
-      <div class="brand">FEYORA</div>
+      <img src="/TUBES_2_Toko/assets/Logo Feyora.png" 
+             style="width: 100px; height:auto; margin-left: 30px;">
       <p class="muted">Timeless tops, designed for the modern woman.</p>
     </div>
     <div class="col">
