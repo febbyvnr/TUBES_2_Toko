@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Login | FEYORA</title>
+
+  <link rel="stylesheet" href="../assets/styles/Login.css">
+</head>
+<body>
+
+<div id="header"></div>
+
+<main class="auth-layout">
+  <section class="auth-form">
+    <div class="auth-form-inner">
+
+      <h2>Login</h2>
+      <div id="msg-area"></div>
+
+      <form id="login-form" class="auth-form-fields">
+        <label class="auth-label">
+          Username or Email
+          <input class="auth-input" name="identifier" required>
+        </label>
+
+        <label class="auth-label">
+          Password
+          <input class="auth-input" type="password" name="password" required>
+        </label>
+
+        <button class="btn-primary auth-submit">Login</button>
+      </form>
+
+    </div>
+  </section>
+</main>
+
+<div id="footer"></div>
+
+<script>
+const BACKEND = "http://localhost/Feyora/backend";
+
+async function loadPart(id, url) {
+  document.getElementById(id).innerHTML = await (await fetch(url)).text();
+}
+loadPart("header", "../includes/header.html");
+loadPart("footer", "../includes/footer.html");
+
+document.getElementById("login-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+
+  const res = await fetch(`${BACKEND}/auth/login.php`, {
+    method: "POST",
+    body: fd,
+    credentials: "include"
+  });
+
+  const data = await res.json();
+  const msg = document.getElementById("msg-area");
+
+  if (!data.ok) {
+    if (data.activation_link) {
+      msg.innerHTML = `
+        <div class="auth-success">
+          Akun belum aktif.<br><br>
+          <a href="${data.activation_link}">Activate Account</a>
+        </div>`;
+    } else {
+      msg.innerHTML = `<div class="auth-error">${data.error}</div>`;
+    }
+    return;
+  }
+
+  window.location.href = "/frontend/index.html";
+});
+</script>
+
+</body>
+</html>

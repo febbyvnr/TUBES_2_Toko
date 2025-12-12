@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Products — FEYORA</title>
+
+  <link rel="stylesheet" href="/TUBES_2_Toko/styles/ListProduct.css">
+
+  <!-- kalau header kamu pakai icons -->
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+
+<body>
+  <div id="header"></div>
+
+  <main>
+    <section class="container product-list">
+      <h3 class="section-title">New Arrivals</h3>
+
+      <!-- FILTERS -->
+      <form id="filtersForm" class="filters"
+            style="margin-bottom:18px; display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+        <label class="filter-label">
+          Category
+          <select name="category" id="categorySelect">
+            <option value="">All</option>
+          </select>
+        </label>
+
+        <label class="filter-label">
+          Price min
+          <input type="number" step="1000" name="price_min" id="priceMin" placeholder="0">
+        </label>
+
+        <label class="filter-label">
+          Price max
+          <input type="number" step="1000" name="price_max" id="priceMax" placeholder="99999999">
+        </label>
+
+        <label class="filter-label">
+          Sort
+          <select name="sort" id="sortSelect">
+            <option value="">Newest</option>
+            <option value="price_asc">Price: Low → High</option>
+            <option value="price_desc">Price: High → Low</option>
+          </select>
+        </label>
+
+        <label class="filter-label" style="margin-left:auto">
+          <span style="visibility:hidden;">__</span>
+          <div class="filter-actions">
+            <button type="submit" class="btn-primary">Apply</button>
+            <a href="/TUBES_2_Toko/frontend/product/listProduct.html" class="reset-link">Reset</a>
+          </div>
+        </label>
+      </form>
+
+      <!-- GRID -->
+      <div class="cards" id="productGrid">
+        <!-- product cards injected -->
+      </div>
+
+      <!-- PAGINATION -->
+      <div class="pagination" id="pagination"></div>
+    </section>
+  </main>
+
+  <div id="footer"></div>
+
+  <script>
+    // ===== CONFIG =====
+    const BACKEND_BASE = "/TUBES_2_Toko/backend";
+    const API_LIST = `${BACKEND_BASE}/product/listProduct.php`; // JSON endpoint (nanti versi PHP-nya)
+
+    // ===== HEADER/FOOTER LOAD =====
+    async function loadPart(id, url) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      try {
+        const res = await fetch(url, { cache: "no-cache" });
+        el.innerHTML = await res.text();
+      } catch {}
+    }
+    loadPart("header", "/TUBES_2_Toko/frontend/includes/header.html");
+    loadPart("footer", "/TUBES_2_Toko/frontend/includes/footer.html");
+
+    // ===== HELPERS =====
+    function qs() {
+      return new URLSearchParams(window.location.search);
+    }
+
+    function setQuery(paramsObj) {
+      const p = qs();
+      Object.entries(paramsObj).forEach(([k, v]) => {
+        if (v === null || v === undefined || v === "") p.delete(k);
+        else p.set(k, String(v));
+      });
+      // reset page if filter changed
+      if ("category" in paramsObj || "price_min" in paramsObj || "price_max" in paramsObj || "sort" in paramsObj) {
+        p.delete("page");
+      }
+      window.location.search = p.toString();
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+      }[c]));
+    }
+
+    // ===== ELEMENTS =====
+    const grid = document.getElementById("productGrid");
+    const paginationEl = document.getElementById("pagination");
+    const form = document.getElementById("filtersForm");
+
+    const categorySelect = document.getElementById("categorySelect");
+    const priceMin = document.getElementById("priceMin");
+    const priceMax = document.getElementById("priceMax");
+    const sortSelect = document.getElementById("sortSelect");
+
+    // ===== INIT FILTERS FROM URL =====
+    function fillFormFromUrl(meta) {
+      const p = qs();
+      const cat = p.get("category") || "";
+      const min = p.get("price_min") || "";
+      const max = p.get("price_max") || "";
+      const sort = p.get("sort") || "";
+
+      // categories from api
+      categorySelect.innerHTML = `<option value="">All</option>` +
+        (meta.categories || []).map(c => {
+          const sel = (c === cat) ? "selected" : "";
+          return `<option value="${escapeHtml(c)}" ${sel}>${escapeHtml(c)}</option>`;
+        }).join("");
+
+      priceMin.value = min;
+      priceMax.value = max;
+      sortSelect.value = sort;
+    }
+
+    // ===== RENDER PRODUCTS =====
+    function renderProducts(items) {
+      if (!items || items.length === 0) {
+        grid.innerHTML = `<p class="muted" style="padding:10px 0;">No products found.</p>`;
+        return;
+      }
+
+      grid.innerHTML = items.map(p => {
+        const img = p.image_url || "/TUBES_2_Toko/assets/products/placeholder.png";
+        const title = escapeHtml(p.title || "Untitled Product");
+        const price = escapeHtml(p.price_text || "");
+
+        return `
+          <div class="product-card">
+            <a href="/TUBES_2_Toko/frontend/product/detailProduct.html?id=${encodeURIComponent(p.id)}">
+              <div class="product-media" style="background-image:url('${img}');"></div>
+            </a>
+            <div class="product-info">
+              <div class="product-title">${title}</div>
+              ${price ? `<div class="product-price">${price}</div>` : ``}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // ===== RENDER PAGINATION =====
+    function renderPagination(page, totalPages) {
+      if (!totalPages || totalPages <= 1) {
+        paginationEl.innerHTML = "";
+        return;
+      }
+
+      const p = qs();
+      paginationEl.innerHTML = "";
+
+      function pageLink(label, toPage, disabled = false, active = false) {
+        if (disabled) {
+          return `<span class="page-btn disabled">${label}</span>`;
+        }
+        if (active) {
+          return `<span class="page-btn active">${label}</span>`;
+        }
+        p.set("page", String(toPage));
+        const href = "?" + p.toString();
+        return `<a class="page-btn" href="${href}">${label}</a>`;
+      }
+
+      const prevDisabled = page <= 1;
+      const nextDisabled = page >= totalPages;
+
+      let html = "";
+      html += pageLink("&lt;", page - 1, prevDisabled);
+
+      const start = Math.max(1, page - 3);
+      const end = Math.min(totalPages, page + 3);
+
+      if (start > 1) {
+        html += pageLink("1", 1, false, page === 1);
+        if (start > 2) html += `<span class="page-btn disabled">...</span>`;
+      }
+
+      for (let i = start; i <= end; i++) {
+        html += pageLink(String(i), i, false, i === page);
+      }
+
+      if (end < totalPages) {
+        if (end < totalPages - 1) html += `<span class="page-btn disabled">...</span>`;
+        html += pageLink(String(totalPages), totalPages, false, page === totalPages);
+      }
+
+      html += pageLink("&gt;", page + 1, nextDisabled);
+
+      paginationEl.innerHTML = html;
+    }
+
+    // ===== LOAD DATA =====
+    async function loadProducts() {
+      const p = qs();
+      const url = `${API_LIST}?${p.toString()}`;
+
+      const res = await fetch(url, { credentials: "include" });
+      const data = await res.json();
+
+      if (!data.ok) {
+        grid.innerHTML = `<p class="muted">Failed to load products.</p>`;
+        paginationEl.innerHTML = "";
+        return;
+      }
+
+      fillFormFromUrl(data.meta || {});
+      renderProducts(data.data.items || []);
+      renderPagination(data.data.page, data.data.total_pages);
+    }
+
+    // ===== SUBMIT FILTERS =====
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      setQuery({
+        category: categorySelect.value,
+        price_min: priceMin.value,
+        price_max: priceMax.value,
+        sort: sortSelect.value
+      });
+    });
+
+    loadProducts();
+  </script>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>FEYORA — Home</title>
+
+  <link rel="stylesheet" href="assets/styles/main.css">
+  <link rel="stylesheet" href="assets/styles/header.css">
+  <link rel="stylesheet" href="assets/styles/footer.css">
+</head>
+
+<body>
+
+<div id="header"></div>
+
+<main>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container hero-inner">
+      <p class="lead">
+        Discover fresh styles and vibrant tops for the new season.
+        Effortless elegance, designed for you.
+      </p>
+      <a class="btn-primary" href="product/listProduct.html">Shop Now</a>
+    </div>
+  </section>
+
+  <!-- SHOP BY CATEGORY -->
+  <section class="container categories">
+    <h3 class="section-title">Shop by Category</h3>
+
+    <div class="category-carousel">
+      <div class="cards">
+
+        <div class="card">
+          <a href="product/listProduct.html?category=Blouses">
+            <div class="card-media"
+                 style="background-image:url('assets/products/blouse.jpg');"></div>
+            <div class="card-caption">Blouses</div>
+          </a>
+        </div>
+
+        <div class="card">
+          <a href="product/listProduct.html?category=Casual%20Tops">
+            <div class="card-media"
+                 style="background-image:url('assets/products/casualTops.jpg');"></div>
+            <div class="card-caption">Casual Tops</div>
+          </a>
+        </div>
+
+        <div class="card">
+          <a href="product/listProduct.html?category=Knitwear">
+            <div class="card-media"
+                 style="background-image:url('assets/products/knitwear.jpg');"></div>
+            <div class="card-caption">Knitwear</div>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED COLLECTION -->
+  <section class="container featured">
+    <h3 class="section-title">Featured Collection: Studio Collection</h3>
+
+    <div class="featured-carousel">
+      <div class="featured-track">
+
+        <a class="featured-card" href="product/detailProduct.html?id=1">
+          <div class="featured-media"
+               style="background-image:url('assets/products/studio1.jpg');"></div>
+          <div class="featured-meta">
+            <div class="featured-title">Studio Collection Dress</div>
+            <div class="featured-price">Rp 1.250.000</div>
+          </div>
+        </a>
+
+        <a class="featured-card" href="product/detailProduct.html?id=2">
+          <div class="featured-media"
+               style="background-image:url('assets/products/studio2.jpg');"></div>
+          <div class="featured-meta">
+            <div class="featured-title">Studio Collection Blazer</div>
+            <div class="featured-price">Rp 1.450.000</div>
+          </div>
+        </a>
+
+        <a class="featured-card" href="product/detailProduct.html?id=3">
+          <div class="featured-media"
+               style="background-image:url('assets/products/studio3.jpg');"></div>
+          <div class="featured-meta">
+            <div class="featured-title">Studio Collection Knit Top</div>
+            <div class="featured-price">Rp 980.000</div>
+          </div>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div id="footer"></div>
+
+<script>
+  async function loadPart(id, url) {
+    const el = document.getElementById(id);
+    const res = await fetch(url, { cache: "no-cache" });
+    el.innerHTML = await res.text();
+  }
+
+  loadPart("header", "includes/header.html");
+  loadPart("footer", "includes/footer.html");
+</script>
+
+</body>
+</html>
