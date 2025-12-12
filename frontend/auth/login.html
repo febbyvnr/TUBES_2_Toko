@@ -122,7 +122,7 @@
       }
 
       // sukses -> ke home
-      window.location.href = "/TUBES_2_Toko/index.html";
+      window.location.href = data.redirect || "/TUBES_2_Toko/index.html";
     } catch (err) {
       console.error(err);
       msg.innerHTML = `<div class="auth-error">Server error. Coba lagi.</div>`;
