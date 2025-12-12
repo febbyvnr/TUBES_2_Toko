@@ -51,7 +51,6 @@
                         background:#ddd;border:2px solid #ccc;
                         display:flex;align-items:center;justify-content:center;
                         font-weight:700;color:#555;overflow:hidden;">
-              US
             </div>
 
             <span id="profile-name" style="font-weight:500;color:#333;">
@@ -97,7 +96,10 @@ window.initHeaderAuth = async function () {
   const toggle = document.querySelector(".profile-toggle");
   const logout = document.getElementById("logout-link");
 
-  const initials = (n) => (n || "US").substring(0,2).toUpperCase();
+  const initials = (name) => {
+    if (!name) return "";
+    return name.trim().substring(0, 2).toUpperCase();
+  };
 
   function showGuest(){
     if (guest) guest.style.display="flex";
@@ -105,18 +107,21 @@ window.initHeaderAuth = async function () {
   }
 
   function showUser(u){
-    if (guest) guest.style.display="none";
-    if (user)  user.style.display="flex";
-    if (nameEl) nameEl.textContent = u.username || "User";
+    if (guest) guest.style.display = "none";
+    if (user)  user.style.display = "flex";
+
+    if (nameEl) nameEl.textContent = u.username || "";
 
     if (avatar) {
       avatar.innerHTML = "";
+
       if (u.profile_photo_url) {
         const img = document.createElement("img");
-        img.src = u.profile_photo_url;
-        img.style.width="100%";
-        img.style.height="100%";
-        img.style.objectFit="cover";
+        img.src = u.profile_photo_url; // sudah dari frontend/assets/profile/
+        img.alt = u.username || "User";
+        img.style.width = "100%";
+        img.style.height = "100%";
+        img.style.objectFit = "cover";
         avatar.appendChild(img);
       } else {
         avatar.textContent = initials(u.username);

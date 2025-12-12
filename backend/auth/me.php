@@ -32,7 +32,7 @@ if (!$user) {
 $photoUrl = null;
 if (!empty($user['profile_photo'])) {
   // pastikan folder sesuai project kamu
-  $photoUrl = '/TUBES_2_Toko/assets/profile/' . rawurlencode($user['profile_photo']);
+  $photoUrl = '/TUBES_2_Toko/frontend/assets/profile/' . rawurlencode($user['profile_photo']);
 }
 
 echo json_encode([
