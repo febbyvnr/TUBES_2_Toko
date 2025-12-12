@@ -172,22 +172,22 @@ $slidesJson = json_encode($slides);
 </main>
 
 <script>
-(function () {
-  const slides = <?= $slidesJson ?: '[]' ?>;
-  const el = document.getElementById('login-hero');
-  if (!el || !slides || slides.length <= 1) return;
+  (function () {
+    const slides = <?= $slidesJson ?: '[]' ?>;
+    const el = document.getElementById('login-hero');
+    if (!el || !slides || slides.length <= 1) return;
 
-  let idx = 0;
-  setInterval(function () {
-    idx = (idx + 1) % slides.length;
+    let idx = 0;
+    setInterval(function () {
+      idx = (idx + 1) % slides.length;
 
-    el.style.opacity = 0;
-    setTimeout(function () {
-      el.style.backgroundImage = "url('" + slides[idx] + "')";
-      el.style.opacity = 1;
-    }, 400);
-  }, 8000); // ganti tiap 8 detik
-})();
+      el.style.opacity = 0;
+      setTimeout(function () {
+        el.style.backgroundImage = "url('" + slides[idx] + "')";
+        el.style.opacity = 1;
+      }, 400);
+    }, 8000); // ganti tiap 8 detik
+  })();
 </script>
 <?php include __DIR__ . '/../includes/footer.php'; ?>
 </body>

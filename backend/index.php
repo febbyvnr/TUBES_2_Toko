@@ -28,8 +28,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 // helper buat path image
 function resolveImage(string $imageName): string {
   $imageName = trim($imageName);
-  if ($imageName === '') return '/TUBES_2_Toko/backend/assets/products/placeholder.png';
-  return '/TUBES_2_Toko/backend/assets/products/' . rawurlencode($imageName);
+  if ($imageName === '') return '/TUBES_2_Toko/frontend/assets/products/placeholder.png';
+  return '/TUBES_2_Toko/frontend/assets/products/' . rawurlencode($imageName);
 }
 
 $categoryCards = [];
@@ -48,7 +48,7 @@ if ($cres = $mysqli->query($sqlCat)) {
   while ($crow = $cres->fetch_assoc()) {
     $cat = $crow['category'];
 
-    $imagePath = '/TUBES_2_Toko/backend/assets/products/placeholder.png';
+    $imagePath = '/TUBES_2_Toko/frontend/assets/products/placeholder.png';
 
     $stmt = $mysqli->prepare("
       SELECT image

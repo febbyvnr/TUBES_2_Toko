@@ -2,33 +2,62 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Login | FEYORA</title>
 
-  <link rel="stylesheet" href="../assets/styles/Login.css">
+  <!-- pakai absolute biar aman -->
+  <link rel="stylesheet" href="/TUBES_2_Toko/frontend/styles/Login.css">
+  <link rel="stylesheet" href="/TUBES_2_Toko/frontend/styles/HomePage.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
 
 <div id="header"></div>
 
 <main class="auth-layout">
+  <!-- LEFT: SLIDESHOW / VISUAL -->
+  <section class="auth-visual">
+    <section class="auth-visual">
+      <div id="login-hero" class="auth-visual-image"></div>
+    </section>
+
+    <div class="auth-visual-overlay">
+      <h1>Welcome Back</h1>
+      <p>Sign in to continue your favorite collections and complete orders quickly.</p>
+    </div>
+  </section>
+
+  <!-- RIGHT: LOGIN FORM -->
   <section class="auth-form">
     <div class="auth-form-inner">
 
-      <h2>Login</h2>
+      <!-- kalau kamu punya logo -->
+      <div style="text-align:center; margin-bottom:18px;">
+        <img src="/TUBES_2_Toko/assets/Logo Feyora.png"
+             alt="Feyora Logo"
+             style="width:150px; height:auto; opacity:0.9;">
+      </div>
+
+      <h2 class="auth-title">Login</h2>
       <div id="msg-area"></div>
 
       <form id="login-form" class="auth-form-fields">
         <label class="auth-label">
           Username or Email
-          <input class="auth-input" name="identifier" required>
+          <input class="auth-input" name="identifier" autocomplete="username" required>
         </label>
 
         <label class="auth-label">
           Password
-          <input class="auth-input" type="password" name="password" required>
+          <input class="auth-input" type="password" name="password" autocomplete="current-password" required>
         </label>
 
-        <button class="btn-primary auth-submit">Login</button>
+        <div class="auth-meta">
+          <span>Don't have an account yet? <a href="/TUBES_2_Toko/frontend/auth/register.html">Register now</a></span>
+        </div>
+
+        <button class="btn-primary auth-submit" type="submit">Login</button>
       </form>
 
     </div>
@@ -38,43 +67,136 @@
 <div id="footer"></div>
 
 <script>
-const BACKEND = "http://localhost/Feyora/backend";
+  // ===== CONFIG =====
+  const API_LOGIN  = "/TUBES_2_Toko/backend/auth/login.php";
+  const API_SLIDES = "/TUBES_2_Toko/backend/home/home_api.php"; // ambil data.slides dari sini
 
-async function loadPart(id, url) {
-  document.getElementById(id).innerHTML = await (await fetch(url)).text();
-}
-loadPart("header", "../includes/header.html");
-loadPart("footer", "../includes/footer.html");
+  // ===== PARTIALS =====
+  async function loadPart(id, url) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    try {
+      const res = await fetch(url, { cache: "no-cache" });
+      if (!res.ok) throw new Error("Failed load " + url);
+      el.innerHTML = await res.text();
+    } catch (e) {
+      console.warn(e);
+    }
+  }
+  loadPart("header", "/TUBES_2_Toko/frontend/includes/header.html");
+  loadPart("footer", "/TUBES_2_Toko/frontend/includes/footer.html");
 
-document.getElementById("login-form").addEventListener("submit", async e => {
-  e.preventDefault();
-  const fd = new FormData(e.target);
+  // ===== LOGIN =====
+  document.getElementById("login-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  const res = await fetch(`${BACKEND}/auth/login.php`, {
-    method: "POST",
-    body: fd,
-    credentials: "include"
+    const fd = new FormData(e.target);
+    const msg = document.getElementById("msg-area");
+    msg.innerHTML = "";
+
+    try {
+      const res = await fetch(API_LOGIN, {
+        method: "POST",
+        body: fd,
+        credentials: "include"
+      });
+
+      const data = await res.json();
+
+      if (!data.ok) {
+        if (data.activation_link) {
+          msg.innerHTML = `
+            <div class="auth-error">
+              Akun belum aktif.
+              <div style="margin-top:10px;">
+                <a class="btn-primary" style="display:inline-block;text-decoration:none;"
+                   href="${data.activation_link}">
+                  Activate Account
+                </a>
+              </div>
+            </div>`;
+        } else {
+          msg.innerHTML = `<div class="auth-error">${data.error || "Login failed"}</div>`;
+        }
+        return;
+      }
+
+      // sukses -> ke home
+      window.location.href = "/TUBES_2_Toko/index.html";
+    } catch (err) {
+      console.error(err);
+      msg.innerHTML = `<div class="auth-error">Server error. Coba lagi.</div>`;
+    }
   });
 
-  const data = await res.json();
-  const msg = document.getElementById("msg-area");
+  // ===== SLIDESHOW =====
+  (async function initSlides() {
+    const el = document.getElementById("login-hero");
+    if (!el) return;
 
-  if (!data.ok) {
-    if (data.activation_link) {
-      msg.innerHTML = `
-        <div class="auth-success">
-          Akun belum aktif.<br><br>
-          <a href="${data.activation_link}">Activate Account</a>
-        </div>`;
-    } else {
-      msg.innerHTML = `<div class="auth-error">${data.error}</div>`;
+    try {
+      const res = await fetch(API_SLIDES, { credentials: "include" });
+      const json = await res.json();
+
+      const slides = (json && json.ok && json.data && Array.isArray(json.data.slides))
+        ? json.data.slides
+        : [];
+
+      if (!slides || slides.length === 0) return;
+
+      // pakai gambar pertama dulu
+      el.style.backgroundImage = `url('${slides[0]}')`;
+
+      if (slides.length <= 1) return;
+
+      let idx = 0;
+      setInterval(() => {
+        idx = (idx + 1) % slides.length;
+        el.style.opacity = 0;
+        setTimeout(() => {
+          el.style.backgroundImage = `url('${slides[idx]}')`;
+          el.style.opacity = 1;
+        }, 350);
+      }, 6000);
+    } catch (e) {
+      console.warn("Slides failed:", e);
     }
-    return;
-  }
-
-  window.location.href = "/frontend/index.html";
-});
+  })();
 </script>
+<script>
+(async function () {
+  const el = document.getElementById("login-hero");
+  if (!el) return;
 
+  const API = "/TUBES_2_Toko/backend/includes/sliderImages.php?limit=30";
+
+  try {
+    const res = await fetch(API, { cache: "no-cache" });
+    const json = await res.json();
+
+    if (!json.ok || !json.images || json.images.length === 0) return;
+
+    const slides = json.images;
+    let idx = 0;
+
+    el.style.backgroundImage = `url('${slides[0]}')`;
+    el.style.backgroundSize = "cover";
+    el.style.backgroundPosition = "center";
+    el.style.transition = "opacity .35s ease";
+
+    setInterval(() => {
+      idx = (idx + 1) % slides.length;
+      el.style.opacity = 0;
+      setTimeout(() => {
+        el.style.backgroundImage = `url('${slides[idx]}')`;
+        el.style.opacity = 1;
+      }, 350);
+    }, 6000);
+
+  } catch (e) {
+    console.error("sliderImages error:", e);
+  }
+})();
+</script>
 </body>
 </html>

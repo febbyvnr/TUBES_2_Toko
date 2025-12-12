@@ -3,101 +3,61 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Account Activation | FEYORA</title>
-
-  <!-- CSS -->
-  <link rel="stylesheet" href="../assets/styles/Register.css">
+  <title>Activating… | FEYORA</title>
+  <link rel="stylesheet" href="/TUBES_2_Toko/frontend/styles/HomePage.css">
+  <link rel="stylesheet" href="/TUBES_2_Toko/frontend/styles/Login.css">
 </head>
-
 <body>
 
-  <!-- HEADER (load via JS / include static kalau mau) -->
-  <div id="header"></div>
+<main class="auth-layout" style="min-height:60vh; display:flex; align-items:center; justify-content:center;">
+  <div class="auth-form-inner" style="max-width:520px; width:92%;">
+    <h2 class="auth-title">Activating your account…</h2>
+    <div id="msg-area" class="auth-meta" style="margin-top:10px;">Please wait.</div>
+  </div>
+</main>
 
-  <main class="auth-layout">
+<script>
+  const msg = document.getElementById("msg-area");
 
-    <!-- KIRI: SLIDESHOW -->
-    <section class="auth-visual">
-      <div id="activate-hero"
-           class="auth-visual-image"
-           style="background-image:url('../assets/products/placeholder.png');">
-      </div>
+  function getParam(name) {
+    return new URLSearchParams(window.location.search).get(name) || "";
+  }
 
-      <div class="auth-visual-overlay">
-        <h1>Activate Your Account</h1>
-        <p>
-          Thank you for joining Feyora.  
-          Complete your account activation to start shopping.
-        </p>
-      </div>
-    </section>
+  (async function activate() {
+    const token = getParam("token");
+    const ret   = (getParam("return") || "login").toLowerCase(); // "login" / "register"
 
-    <!-- KANAN: STATUS AKTIVASI -->
-    <section class="auth-form">
-      <div class="auth-form-inner">
-
-        <div style="text-align:center; margin-bottom:18px;">
-          <img src="../assets/Logo Feyora.png"
-               alt="Feyora Logo"
-               style="width:150px; height:auto; opacity:0.9;">
-        </div>
-
-        <h2 class="auth-title">Account Activation</h2>
-
-        <!-- MESSAGE AREA (diisi JS dari backend response) -->
-        <div id="activation-message"></div>
-
-        <!-- ACTION -->
-        <div id="activation-action" style="margin-top:14px;"></div>
-
-      </div>
-    </section>
-
-  </main>
-
-  <!-- FOOTER -->
-  <div id="footer"></div>
-
-  <script>
-    /**
-     * Contoh data dummy
-     * NANTI INI DIGANTI hasil fetch dari activate.php
-     */
-    const activationResult = {
-      status: 'success', // success | info | error
-      message: 'Your account has been successfully activated. Please login.'
-    };
-
-    const msgEl = document.getElementById('activation-message');
-    const actionEl = document.getElementById('activation-action');
-
-    if (activationResult.status === 'success' || activationResult.status === 'info') {
-      msgEl.innerHTML = `
-        <div class="auth-success">
-          ${activationResult.message}
-        </div>
-      `;
-      actionEl.innerHTML = `
-        <a href="login.html"
-           class="btn-primary auth-submit"
-           style="display:block; text-align:center; text-decoration:none;">
-          Go to Login
-        </a>
-      `;
-    } else {
-      msgEl.innerHTML = `
-        <div class="auth-error">
-          ${activationResult.message}
-        </div>
-      `;
-      actionEl.innerHTML = `
-        <div class="auth-meta">
-          <a href="login.html">Back to Login</a> ·
-          <a href="register.html">Register</a>
-        </div>
-      `;
+    if (!token) {
+      msg.innerHTML = `<div class="auth-error">Invalid activation link.</div>`;
+      return;
     }
-  </script>
+
+    const backTo =
+      ret === "register"
+        ? "/TUBES_2_Toko/frontend/auth/register.html"
+        : "/TUBES_2_Toko/frontend/auth/login.html";
+
+    try {
+      const url = `/TUBES_2_Toko/backend/auth/activate.php?token=${encodeURIComponent(token)}`;
+      const res = await fetch(url, { credentials: "include" });
+      const data = await res.json();
+
+      if (!data.ok) {
+        // gagal -> balik juga tapi kasih pesan error
+        const err = encodeURIComponent(data.error || "Activation failed");
+        window.location.href = `${backTo}?activated=0&msg=${err}`;
+        return;
+      }
+
+      // sukses -> balik + pesan sukses
+      const okMsg = encodeURIComponent(data.message || "Account activated. You can now login.");
+      window.location.href = `${backTo}?activated=1&msg=${okMsg}`;
+
+    } catch (e) {
+      window.location.href = `${backTo}?activated=0&msg=${encodeURIComponent("Server error. Please try again.")}`;
+    }
+  })();
+</script>
 
 </body>
 </html>

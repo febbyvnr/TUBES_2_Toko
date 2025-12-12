@@ -30,8 +30,7 @@ if (!$user || !password_verify($password, $user['password'])) {
 if ((int)$user['is_active'] !== 1) {
   echo json_encode([
     'ok' => false,
-    'activation_link' =>
-      "http://localhost/Feyora/backend/auth/activate.php?token=".$user['activation_token']
+    "activation_link" => "/TUBES_2_Toko/frontend/auth/activate.html?token=" . urlencode($user['activation_token'])
   ]);
   exit;
 }
