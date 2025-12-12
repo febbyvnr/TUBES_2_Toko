@@ -1,30 +1,30 @@
-<header class="site-header" style="background: #fff; border-bottom: 1px solid #ddd;">
+<header class="site-header" style="background:#fff; border-bottom:1px solid #ddd;">
   <div class="header-inner"
-       style="max-width: var(--container, 1200px); margin: 0 auto; padding: 16px 20px;
-              display: flex; align-items: center; justify-content: space-between;">
+       style="max-width: var(--container, 1200px); margin:0 auto; padding:16px 20px;
+              display:flex; align-items:center; justify-content:space-between;">
+
     <!-- LOGO -->
-    <a href="/TUBES_2_Toko/index.html"
-       style="text-decoration:none; color:inherit;">
-      <div style="display: flex; align-items: center; gap: 6px; font-weight: 700;
-                  font-size: x-large; font-family: 'Poppins', sans-serif; color: #ff2d7a;">
+    <a href="/TUBES_2_Toko/index.html" style="text-decoration:none; color:inherit;">
+      <div style="display:flex; align-items:center; gap:6px; font-weight:700;
+                  font-size:x-large; font-family:'Poppins', sans-serif; color:#ff2d7a;">
         <img src="/TUBES_2_Toko/frontend/assets/Logo Feyora.png"
-             style="width: 100px; height:auto; margin-left: 30px;"
+             style="width:100px; height:auto; margin-left:30px;"
              alt="Feyora logo">
       </div>
     </a>
 
     <!-- NAV -->
     <nav class="topnav">
-      <!-- link ke halaman frontend / atau langsung ke backend -->
-      <a href="http://localhost/TUBES_2_Toko/frontend/product/listProduct.html?sort=newest">New Arrivals</a>
-      <a href="http://localhost/TUBES_2_Toko/frontend/product/listProduct.html">Shop Now</a>
-      <a href="http://localhost/TUBES_2_Toko/frontend/product/listProduct.html?collection=studio">Studio Collection</a>
-      <a href="http://localhost/TUBES_2_Toko/frontend/product/listProduct.html?laststock=1">Last Stock</a>
+      <a href="/TUBES_2_Toko/frontend/product/listProduct.html?sort=newest">New Arrivals</a>
+      <a href="/TUBES_2_Toko/frontend/product/listProduct.html">Shop Now</a>
+      <a href="/TUBES_2_Toko/frontend/product/listProduct.html?collection=studio">Studio Collection</a>
+      <a href="/TUBES_2_Toko/frontend/product/listProduct.html?laststock=1">Last Stock</a>
     </nav>
 
-    <!-- ACTIONS (LOGIN / PROFILE / CART) -->
+    <!-- ACTIONS -->
     <div class="actions" style="display:flex; align-items:center; gap:16px;">
-      <!-- tampilan guest -->
+
+      <!-- GUEST -->
       <div id="header-guest" style="display:flex; align-items:center; gap:16px;">
         <a class="icon"
            id="login-link"
@@ -41,157 +41,205 @@
         </a>
       </div>
 
-      <!-- tampilan logged in -->
-      <div id="header-loggedin"
-           style="display:none; align-items:center; gap:16px;">
+      <!-- LOGGED IN -->
+      <div id="header-loggedin" style="display:none; align-items:center; gap:16px;">
         <a class="icon"
            id="user-cart-link"
-           href="#"
+           href="/TUBES_2_Toko/backend/cart/listCart.php"
            title="Cart"
            style="font-size:22px; text-decoration:none; color:#333;">
           <i class="bi bi-cart4"></i>
         </a>
 
-        <!-- PROFILE AREA -->
-        <div class="profile-menu"
-             style="position:relative; display:flex; align-items:center;">
+        <div class="profile-menu" style="position:relative; display:flex; align-items:center;">
           <button class="profile-toggle" type="button"
-                  style="
-                    display:flex;
-                    align-items:center;
-                    gap:8px;
-                    background:none;
-                    border:none;
-                    cursor:pointer;">
+                  style="display:flex; align-items:center; gap:10px; background:none; border:none; cursor:pointer;">
+            <!-- avatar / initials -->
             <div id="profile-avatar"
-                 class="profile-circle placeholder"
                  style="
-                    width:38px;
-                    height:38px;
-                    border-radius:50%;
-                    background:#ddd;
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    font-weight:bold;
-                    color:#555;
-                    border:2px solid #ccc;">
+                   width:38px; height:38px; border-radius:50%;
+                   background:#ddd; border:2px solid #ccc;
+                   display:flex; align-items:center; justify-content:center;
+                   font-weight:700; color:#555; overflow:hidden;">
               US
             </div>
-            <span id="profile-name"
-                  class="user-name"
-                  style="color:#333; font-weight:500;">
-              User
-            </span>
+
+            <span id="profile-name" style="color:#333; font-weight:500;">User</span>
           </button>
 
           <!-- DROPDOWN -->
-          <div class="profile-dropdown"
+          <div id="profile-dropdown"
                aria-hidden="true"
                style="
-                  display:none;
-                  position:absolute;
-                  top:48px;
-                  right:0;
-                  background:white;
-                  border-radius:8px;
-                  box-shadow:0 4px 14px rgba(0,0,0,0.12);
-                  padding:10px 0;
-                  min-width:160px;
-                  z-index:20;">
+                 display:none;
+                 position:absolute;
+                 top:48px; right:0;
+                 background:#fff;
+                 border-radius:8px;
+                 box-shadow:0 4px 14px rgba(0,0,0,0.12);
+                 padding:10px 0;
+                 min-width:170px;
+                 z-index:999;">
             <a id="profile-settings-link"
-               href="#"
-               style="
-                  display:block;
-                  padding:10px 16px;
-                  color:#333;
-                  text-decoration:none;">
+               href="/TUBES_2_Toko/backend/user/settingProfile.php"
+               style="display:block; padding:10px 16px; color:#333; text-decoration:none;">
               Settings
             </a>
-            <a id="logout-link" href="#">Logout</a>
 
-            <script>
-              document.getElementById('logout-link').addEventListener('click', async (e) => {
-                e.preventDefault();
-
-                // 1. panggil backend untuk hapus session
-                await fetch('http://localhost/TUBES_2_Toko/backend/auth/logout.php', {
-                  method: 'GET',
-                  credentials: 'include'
-                });
-
-                // 2. reload halaman biar header langsung update
-                window.location.reload();
-              });
-            </script>
+            <a id="logout-link"
+               href="#"
+               style="display:block; padding:10px 16px; color:#d00; text-decoration:none; font-weight:600;">
+              Logout
+            </a>
           </div>
         </div>
       </div>
+
     </div>
   </div>
 </header>
 
-<!-- FLASH SUCCESS -->
-<div id="flash-success"
-     style="
-        display:none;
-        max-width: var(--container, 1200px);
-        margin: 8px auto 0;
-        padding: 10px 16px;
-        border-radius: 8px;
-        background: #e7f9ee;
-        border: 1px solid #9bd4af;
-        color: #236b3d;
-        font-size: 14px;">
-</div>
-
-<!-- POPUP LOGIN DULU UNTUK CART -->
+<!-- POPUP LOGIN REQUIRED -->
 <div id="login-required-popup"
-     style="
-        display:none;
-        position:fixed;
-        inset:0;
-        background:rgba(0,0,0,0.35);
-        z-index:9999;
-        align-items:center;
-        justify-content:center;">
-  <div style="
-        background:#fff;
-        border-radius:10px;
-        padding:20px 22px;
-        max-width:320px;
-        width:90%;
-        box-shadow:0 8px 30px rgba(0,0,0,0.25);
-        text-align:center;">
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35);
+            z-index:9999; align-items:center; justify-content:center;">
+  <div style="background:#fff; border-radius:10px; padding:20px 22px; max-width:320px; width:90%;
+              box-shadow:0 8px 30px rgba(0,0,0,0.25); text-align:center;">
     <h4 style="margin-top:0; margin-bottom:10px; color:#222;">Anda Belum Login</h4>
     <p style="margin:0 0 18px; color:#555; font-size:14px;">
       Silakan login terlebih dahulu untuk melihat keranjang belanja Anda.
     </p>
     <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:10px;">
-      <button type="button"
-              id="login-popup-close"
-              style="
-                padding:8px 14px;
-                border-radius:6px;
-                border:1px solid #ccc;
-                background:#f5f5f5;
-                cursor:pointer;
-                font-size:13px;">
+      <button type="button" id="login-popup-close"
+              style="padding:8px 14px; border-radius:6px; border:1px solid #ccc;
+                     background:#f5f5f5; cursor:pointer; font-size:13px;">
         Tutup
       </button>
-      <button type="button"
-              id="login-popup-go"
-              style="
-                padding:8px 14px;
-                border-radius:6px;
-                border:none;
-                background:#ff2d7a;
-                color:#fff;
-                cursor:pointer;
-                font-size:13px;
-                font-weight:600;">
+      <button type="button" id="login-popup-go"
+              style="padding:8px 14px; border-radius:6px; border:none; background:#ff2d7a;
+                     color:#fff; cursor:pointer; font-size:13px; font-weight:600;">
         Login
       </button>
     </div>
   </div>
 </div>
+
+<script>
+/**
+ * Panggil fungsi ini dari PAGE SETELAH header.html selesai di-load:
+ *   await loadPart("header", ".../header.html");
+ *   initHeaderAuth();
+ */
+window.initHeaderAuth = async function initHeaderAuth() {
+  const API_ME     = "/TUBES_2_Toko/backend/auth/me.php";
+  const API_LOGOUT = "/TUBES_2_Toko/backend/auth/logout.php";
+
+  const guestWrap  = document.getElementById("header-guest");
+  const userWrap   = document.getElementById("header-loggedin");
+  const loginLink  = document.getElementById("login-link");
+
+  const avatarBox  = document.getElementById("profile-avatar");
+  const nameEl     = document.getElementById("profile-name");
+  const dropdown   = document.getElementById("profile-dropdown");
+  const toggleBtn  = document.querySelector(".profile-toggle");
+  const logoutBtn  = document.getElementById("logout-link");
+
+  const guestCart  = document.getElementById("guest-cart-link");
+  const popup      = document.getElementById("login-required-popup");
+  const btnClose   = document.getElementById("login-popup-close");
+  const btnGo      = document.getElementById("login-popup-go");
+
+  function initials(username) {
+    const s = (username || "User").trim();
+    const two = s.slice(0, 2).toUpperCase();
+    return two || "US";
+  }
+
+  function showGuest() {
+    if (guestWrap) guestWrap.style.display = "flex";
+    if (userWrap)  userWrap.style.display  = "none";
+  }
+
+  function showUser(user) {
+    if (guestWrap) guestWrap.style.display = "none";
+    if (userWrap)  userWrap.style.display  = "flex";
+
+    const uname = user?.username || "User";
+    if (nameEl) nameEl.textContent = uname;
+
+    // avatar
+    if (!avatarBox) return;
+
+    avatarBox.innerHTML = ""; // reset
+    avatarBox.style.background = "#ddd";
+
+    if (user?.profile_photo_url) {
+      const img = document.createElement("img");
+      img.src = user.profile_photo_url;
+      img.alt = "user";
+      img.style.width = "100%";
+      img.style.height = "100%";
+      img.style.objectFit = "cover";
+      avatarBox.appendChild(img);
+    } else {
+      avatarBox.textContent = initials(uname);
+      avatarBox.style.display = "flex";
+      avatarBox.style.alignItems = "center";
+      avatarBox.style.justifyContent = "center";
+    }
+  }
+
+  // popup cart for guest
+  if (guestCart && popup) {
+    guestCart.addEventListener("click", (e) => {
+      e.preventDefault();
+      popup.style.display = "flex";
+    });
+  }
+  if (btnClose && popup) btnClose.addEventListener("click", () => popup.style.display = "none");
+  if (btnGo) btnGo.addEventListener("click", () => window.location.href = "/TUBES_2_Toko/frontend/auth/login.html");
+  if (popup) popup.addEventListener("click", (e) => { if (e.target === popup) popup.style.display = "none"; });
+
+  // dropdown toggle
+  document.addEventListener("click", (e) => {
+    if (!dropdown || !toggleBtn) return;
+    if (toggleBtn.contains(e.target)) {
+      dropdown.style.display = (dropdown.style.display === "block") ? "none" : "block";
+    } else if (!dropdown.contains(e.target)) {
+      dropdown.style.display = "none";
+    }
+  });
+
+  // logout
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      try {
+        await fetch(API_LOGOUT, { credentials: "include" });
+      } catch {}
+      window.location.reload();
+    });
+  }
+
+  // ===== fetch me.php =====
+  try {
+    const res = await fetch(API_ME, { credentials: "include", cache: "no-cache" });
+    const data = await res.json();
+
+    if (data?.ok && data?.logged_in) {
+      showUser(data.user);
+    } else {
+      showGuest();
+    }
+  } catch (e) {
+    // fallback: treat as guest
+    showGuest();
+  }
+
+  // optional: jika login-link ada, tambahin redirect param
+  if (loginLink) {
+    const cur = window.location.href;
+    loginLink.href = "/TUBES_2_Toko/frontend/auth/login.html?redirect=" + encodeURIComponent(cur);
+  }
+};
+</script>

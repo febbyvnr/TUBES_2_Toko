@@ -5,8 +5,9 @@
   <title>Customers — Féyora</title>
 
   <!-- Global admin styles -->
-  <link rel="stylesheet" href="/TUBES_2_Toko/styles/adminDashboard.css">
-  <link rel="stylesheet" href="/TUBES_2_Toko/styles/customer.css">
+  <link rel="stylesheet" href="../styles/adminDashboard.css">
+  <link rel="stylesheet" href="../styles/customer.css">
+  <link rel="stylesheet" href="../styles/sideBar.css">
 
   <!-- Bootstrap Icons -->
   <link rel="stylesheet"
@@ -14,7 +15,7 @@
 </head>
 
 <body class="admin-body">
-
+<div id="sideBar"></div>
 <div class="admin-layout">
 
   <!-- SIDEBAR (nanti bisa static HTML / include manual) -->
@@ -234,6 +235,17 @@ function escapeHtml(str) {
 
 // INIT
 loadCustomers();
+</script>
+<script>
+  async function loadPart(id, url) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const res = await fetch(url, { cache: "no-cache" });
+    el.innerHTML = await res.text();
+  }
+
+  // load sidebar (INI YANG KURANG)
+  loadPart("sideBar", "/TUBES_2_Toko/frontend/includes/sideBar.html");
 </script>
 </body>
 </html>

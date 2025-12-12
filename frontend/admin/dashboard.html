@@ -6,266 +6,277 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="/TUBES_2_Toko/styles/adminDashboard.css">
+  <link rel="stylesheet" href="/TUBES_2_Toko/frontend/styles/adminDashboard.css">
+  <link rel="stylesheet" href="/TUBES_2_Toko/frontend/styles/sideBar.css">
   <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 
 <body class="admin-body">
+  <div id="sideBar"></div>
+  <div class="admin-layout">
 
-<div class="admin-layout">
+    <!-- SIDEBAR (load static / via JS kalau mau) -->
+    <div id="sidebar"></div>
 
-  <!-- SIDEBAR (load static / via JS kalau mau) -->
-  <div id="sidebar"></div>
+    <div class="admin-main">
 
-  <div class="admin-main">
-
-    <!-- TOPBAR -->
-    <header class="admin-topbar">
-      <div class="admin-breadcrumb">
-        <span>Home</span>
-        <span class="sep">/</span>
-        <span>Dashboard</span>
-      </div>
-
-      <div class="admin-topbar-right">
-        <span class="admin-welcome">Hi, Admin</span>
-        <div class="admin-avatar-small">AD</div>
-      </div>
-    </header>
-
-    <main class="admin-content">
-
-      <!-- HEADER -->
-      <div class="admin-content-header">
-        <h1 class="admin-page-title">Dashboard</h1>
-        <button class="btn-primary-admin">
-          <i class="bi bi-plus-lg"></i> Add New Product
-        </button>
-      </div>
-
-      <!-- STAT CARDS -->
-      <section class="admin-stats">
-        <div class="stat-card">
-          <div class="stat-label">Total Products</div>
-          <div class="stat-value">0</div>
+      <!-- TOPBAR -->
+      <header class="admin-topbar">
+        <div class="admin-breadcrumb">
+          <span>Home</span>
+          <span class="sep">/</span>
+          <span>Dashboard</span>
         </div>
-        <div class="stat-card">
-          <div class="stat-label">Customers</div>
-          <div class="stat-value">0</div>
-          <div class="stat-sub">0 active</div>
+
+        <div class="admin-topbar-right">
+          <span class="admin-welcome">Hi, Admin</span>
+          <div class="admin-avatar-small">AD</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-label">Low Stock (≤ 50)</div>
-          <div class="stat-value">0</div>
+      </header>
+
+      <main class="admin-content">
+
+        <!-- HEADER -->
+        <div class="admin-content-header">
+          <h1 class="admin-page-title">Dashboard</h1>
+          <button class="btn-primary-admin">
+            <i class="bi bi-plus-lg"></i> Add New Product
+          </button>
         </div>
-      </section>
 
-      <!-- FILTER BAR -->
-      <section class="admin-filterbar">
-        <form class="filter-form">
-
-          <div class="filter-search">
-            <i class="bi bi-search"></i>
-            <input type="text" placeholder="Search by product name..." />
+        <!-- STAT CARDS -->
+        <section class="admin-stats">
+          <div class="stat-card">
+            <div class="stat-label">Total Products</div>
+            <div class="stat-value">0</div>
           </div>
-
-          <div class="filter-group">
-            <select class="filter-pill filter-select">
-              <option>Category: All</option>
-            </select>
-
-            <select class="filter-pill filter-select">
-              <option>Stock: All</option>
-              <option>In Stock</option>
-              <option>Low Stock</option>
-              <option>Out of Stock</option>
-            </select>
-
-            <select class="filter-pill filter-select">
-              <option>Sort: Newest</option>
-              <option>Sort: Oldest</option>
-              <option>Price: Low → High</option>
-              <option>Price: High → Low</option>
-            </select>
-
-            <button type="submit" class="filter-apply-btn">Apply</button>
+          <div class="stat-card">
+            <div class="stat-label">Customers</div>
+            <div class="stat-value">0</div>
+            <div class="stat-sub">0 active</div>
           </div>
-
-        </form>
-      </section>
-
-      <!-- TABLE -->
-      <section class="admin-table-card">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th style="width:40px;"><input type="checkbox"></th>
-              <th>Product Name</th>
-              <th>Stock</th>
-              <th>Price</th>
-              <th>Status</th>
-              <th style="width:110px; text-align:center;">Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <!-- ROW CONTOH (DUMMY) -->
-            <tr>
-              <td><input type="checkbox"></td>
-              <td class="cell-product">
-                <img src="/TUBES_2_Toko/assets/products/placeholder.png" class="cell-thumb">
-                <span>Sample Product</span>
-              </td>
-              <td>
-                <span class="stock-badge stock-ok">100 In Stock</span>
-              </td>
-              <td>Rp 0</td>
-              <td>
-                <span class="status-pill status-published">Published</span>
-              </td>
-              <td class="cell-actions">
-                <a href="#"><i class="bi bi-pencil"></i></a>
-                <a href="#"><i class="bi bi-trash3"></i></a>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <!-- FOOTER TABLE -->
-        <div class="admin-table-footer">
-          <div class="table-info">
-            Showing 0 of 0 products
+          <div class="stat-card">
+            <div class="stat-label">Low Stock (≤ 50)</div>
+            <div class="stat-value">0</div>
           </div>
+        </section>
 
-          <div class="table-pagination">
-            <span class="page-btn disabled">Previous</span>
-            <span class="page-number active">1</span>
-            <span class="page-btn disabled">Next</span>
+        <!-- FILTER BAR -->
+        <section class="admin-filterbar">
+          <form class="filter-form">
+
+            <div class="filter-search">
+              <i class="bi bi-search"></i>
+              <input type="text" placeholder="Search by product name..." />
+            </div>
+
+            <div class="filter-group">
+              <select class="filter-pill filter-select">
+                <option>Category: All</option>
+              </select>
+
+              <select class="filter-pill filter-select">
+                <option>Stock: All</option>
+                <option>In Stock</option>
+                <option>Low Stock</option>
+                <option>Out of Stock</option>
+              </select>
+
+              <select class="filter-pill filter-select">
+                <option>Sort: Newest</option>
+                <option>Sort: Oldest</option>
+                <option>Price: Low → High</option>
+                <option>Price: High → Low</option>
+              </select>
+
+              <button type="submit" class="filter-apply-btn">Apply</button>
+            </div>
+
+          </form>
+        </section>
+
+        <!-- TABLE -->
+        <section class="admin-table-card">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th style="width:40px;"><input type="checkbox"></th>
+                <th>Product Name</th>
+                <th>Stock</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th style="width:110px; text-align:center;">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <!-- ROW CONTOH (DUMMY) -->
+              <tr>
+                <td><input type="checkbox"></td>
+                <td class="cell-product">
+                  <img src="/TUBES_2_Toko/assets/products/placeholder.png" class="cell-thumb">
+                  <span>Sample Product</span>
+                </td>
+                <td>
+                  <span class="stock-badge stock-ok">100 In Stock</span>
+                </td>
+                <td>Rp 0</td>
+                <td>
+                  <span class="status-pill status-published">Published</span>
+                </td>
+                <td class="cell-actions">
+                  <a href="#"><i class="bi bi-pencil"></i></a>
+                  <a href="#"><i class="bi bi-trash3"></i></a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- FOOTER TABLE -->
+          <div class="admin-table-footer">
+            <div class="table-info">
+              Showing 0 of 0 products
+            </div>
+
+            <div class="table-pagination">
+              <span class="page-btn disabled">Previous</span>
+              <span class="page-number active">1</span>
+              <span class="page-btn disabled">Next</span>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-    </main>
+      </main>
+    </div>
   </div>
-</div>
 
-<script>
-(async function () {
-  const API_URL = "/TUBES_2_Toko/backend/admin/dashboard.php";
+  <script>
+  (async function () {
+    const API_URL = "/TUBES_2_Toko/backend/admin/dashboard.php";
 
-  try {
-    const res = await fetch(API_URL, { credentials: "include" });
-    if (!res.ok) throw new Error("Unauthorized or server error");
+    try {
+      const res = await fetch(API_URL, { credentials: "include" });
+      if (!res.ok) throw new Error("Unauthorized or server error");
 
-    const data = await res.json();
-    if (!data.ok) throw new Error("Invalid response");
+      const data = await res.json();
+      if (!data.ok) throw new Error("Invalid response");
 
-    /* =====================
-       TOPBAR (ADMIN NAME)
-       ===================== */
-    document.querySelector(".admin-welcome").textContent =
-      "Hi, " + data.admin.username;
+      /* =====================
+        TOPBAR (ADMIN NAME)
+        ===================== */
+      document.querySelector(".admin-welcome").textContent =
+        "Hi, " + data.admin.username;
 
-    document.querySelector(".admin-avatar-small").textContent =
-      data.admin.username.substring(0, 2).toUpperCase();
+      document.querySelector(".admin-avatar-small").textContent =
+        data.admin.username.substring(0, 2).toUpperCase();
 
-    /* =====================
-       STATS
-       ===================== */
-    const statEls = document.querySelectorAll(".stat-card .stat-value");
-    statEls[0].textContent = data.stats.totalProducts;
-    statEls[1].textContent = data.stats.totalCustomers;
-    statEls[2].textContent = data.stats.totalLowStock;
+      /* =====================
+        STATS
+        ===================== */
+      const statEls = document.querySelectorAll(".stat-card .stat-value");
+      statEls[0].textContent = data.stats.totalProducts;
+      statEls[1].textContent = data.stats.totalCustomers;
+      statEls[2].textContent = data.stats.totalLowStock;
 
-    document.querySelector(".stat-card:nth-child(2) .stat-sub").textContent =
-      `${data.stats.totalActiveCustomers} active`;
+      document.querySelector(".stat-card:nth-child(2) .stat-sub").textContent =
+        `${data.stats.totalActiveCustomers} active`;
 
-    /* =====================
-       CATEGORY FILTER
-       ===================== */
-    const catSelect = document.querySelector(
-      ".filter-select:nth-of-type(1)"
-    );
+      /* =====================
+        CATEGORY FILTER
+        ===================== */
+      const catSelect = document.querySelector(
+        ".filter-select:nth-of-type(1)"
+      );
 
-    data.filters.categories.forEach(cat => {
-      const opt = document.createElement("option");
-      opt.value = cat;
-      opt.textContent = cat;
-      catSelect.appendChild(opt);
-    });
+      data.filters.categories.forEach(cat => {
+        const opt = document.createElement("option");
+        opt.value = cat;
+        opt.textContent = cat;
+        catSelect.appendChild(opt);
+      });
 
-    /* =====================
-       TABLE PRODUCTS
-       ===================== */
-    const tbody = document.querySelector(".admin-table tbody");
-    tbody.innerHTML = "";
+      /* =====================
+        TABLE PRODUCTS
+        ===================== */
+      const tbody = document.querySelector(".admin-table tbody");
+      tbody.innerHTML = "";
 
-    if (data.products.length === 0) {
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="6" style="text-align:center; padding:20px; color:#777;">
-            No products found.
-          </td>
-        </tr>
-      `;
-      return;
+      if (data.products.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align:center; padding:20px; color:#777;">
+              No products found.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      data.products.forEach(p => {
+        let stockBadge = "";
+        if (p.stock <= 0) {
+          stockBadge = `<span class="stock-badge stock-out">Out of Stock</span>`;
+        } else if (p.stock <= 50) {
+          stockBadge = `<span class="stock-badge stock-low">${p.stock} In Stock</span>`;
+        } else {
+          stockBadge = `<span class="stock-badge stock-ok">${p.stock} In Stock</span>`;
+        }
+
+        let statusPill = "";
+        if (p.status === "published") {
+          statusPill = `<span class="status-pill status-published">Published</span>`;
+        } else if (p.status === "low") {
+          statusPill = `<span class="status-pill status-low">Low Stock</span>`;
+        } else {
+          statusPill = `<span class="status-pill status-draft">Out of Stock</span>`;
+        }
+
+        tbody.innerHTML += `
+          <tr>
+            <td><input type="checkbox"></td>
+            <td class="cell-product">
+              <img src="${p.image}" class="cell-thumb">
+              <span>${p.name}</span>
+            </td>
+            <td>${stockBadge}</td>
+            <td>Rp ${p.price.toLocaleString("id-ID")}</td>
+            <td>${statusPill}</td>
+            <td class="cell-actions">
+              <a href="/TUBES_2_Toko/admin/editProduct.php?id=${p.id}">
+                <i class="bi bi-pencil"></i>
+              </a>
+              <a href="/TUBES_2_Toko/admin/deleteProduct.php?id=${p.id}"
+                onclick="return confirm('Hapus produk ini?')">
+                <i class="bi bi-trash3"></i>
+              </a>
+            </td>
+          </tr>
+        `;
+      });
+
+      /* =====================
+        TABLE FOOTER INFO
+        ===================== */
+      document.querySelector(".table-info").textContent =
+        `Showing ${data.products.length} of ${data.pagination.total} products`;
+
+    } catch (err) {
+      alert("Session expired or access denied. Please login again.");
+      window.location.href = "/TUBES_2_Toko/auth/login.php";
+    }
+  })();
+  </script>
+  <script>
+    async function loadPart(id, url) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const res = await fetch(url, { cache: "no-cache" });
+      el.innerHTML = await res.text();
     }
 
-    data.products.forEach(p => {
-      let stockBadge = "";
-      if (p.stock <= 0) {
-        stockBadge = `<span class="stock-badge stock-out">Out of Stock</span>`;
-      } else if (p.stock <= 50) {
-        stockBadge = `<span class="stock-badge stock-low">${p.stock} In Stock</span>`;
-      } else {
-        stockBadge = `<span class="stock-badge stock-ok">${p.stock} In Stock</span>`;
-      }
-
-      let statusPill = "";
-      if (p.status === "published") {
-        statusPill = `<span class="status-pill status-published">Published</span>`;
-      } else if (p.status === "low") {
-        statusPill = `<span class="status-pill status-low">Low Stock</span>`;
-      } else {
-        statusPill = `<span class="status-pill status-draft">Out of Stock</span>`;
-      }
-
-      tbody.innerHTML += `
-        <tr>
-          <td><input type="checkbox"></td>
-          <td class="cell-product">
-            <img src="${p.image}" class="cell-thumb">
-            <span>${p.name}</span>
-          </td>
-          <td>${stockBadge}</td>
-          <td>Rp ${p.price.toLocaleString("id-ID")}</td>
-          <td>${statusPill}</td>
-          <td class="cell-actions">
-            <a href="/TUBES_2_Toko/admin/editProduct.php?id=${p.id}">
-              <i class="bi bi-pencil"></i>
-            </a>
-            <a href="/TUBES_2_Toko/admin/deleteProduct.php?id=${p.id}"
-               onclick="return confirm('Hapus produk ini?')">
-              <i class="bi bi-trash3"></i>
-            </a>
-          </td>
-        </tr>
-      `;
-    });
-
-    /* =====================
-       TABLE FOOTER INFO
-       ===================== */
-    document.querySelector(".table-info").textContent =
-      `Showing ${data.products.length} of ${data.pagination.total} products`;
-
-  } catch (err) {
-    alert("Session expired or access denied. Please login again.");
-    window.location.href = "/TUBES_2_Toko/auth/login.php";
-  }
-})();
-</script>
-
+    // load sidebar (INI YANG KURANG)
+    loadPart("sideBar", "/TUBES_2_Toko/frontend/includes/sideBar.html");
+  </script>
 </body>
 </html>

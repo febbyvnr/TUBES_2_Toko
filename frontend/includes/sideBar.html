@@ -1,30 +1,25 @@
 <link rel="stylesheet" href="/TUBES_2_Toko/styles/sideBar.css">
 
 <div class="admin-sidebar">
-
-  <!-- Logo -->
   <div class="sidebar-header">
     <img src="/TUBES_2_Toko/assets/Logo Feyora.png" class="sidebar-logo" alt="Feyora Logo">
   </div>
 
-  <!-- Menu -->
   <ul class="sidebar-menu">
-
     <li>
-      <!-- tambahkan class="active" manual sesuai halaman -->
-      <a href="dashboard.html" class="active">
+      <a href="/TUBES_2_Toko/frontend/admin/dashboard.html" class="active">
         <i class="bi bi-grid-1x2"></i> Dashboard
       </a>
     </li>
 
     <li>
-      <a href="orders.html">
+      <a href="/TUBES_2_Toko/frontend/admin/orders.html">
         <i class="bi bi-bag-check"></i> Orders
       </a>
     </li>
 
     <li>
-      <a href="customers.html">
+      <a href="/TUBES_2_Toko/frontend/admin/customers.html">
         <i class="bi bi-people"></i> Customers
       </a>
     </li>
@@ -34,6 +29,16 @@
         <i class="bi bi-box-arrow-right"></i> Logout
       </a>
     </li>
-
   </ul>
 </div>
+<script>
+  (function(){
+    const path = location.pathname;
+    document.querySelectorAll(".sidebar-menu a").forEach(a => {
+      a.classList.remove("active");
+      if (a.getAttribute("href") && path.endsWith(a.getAttribute("href").split("/").pop())) {
+        a.classList.add("active");
+      }
+    });
+  })();
+</script>
