@@ -26,8 +26,8 @@
       </div>
 
       <div class="admin-topbar-right">
-        <span class="admin-welcome">Hi, Admin</span>
-        <div class="admin-avatar-small">AD</div>
+        <span class="admin-welcome">Hi, </span>
+        <div class="admin-avatar-small"></div>
       </div>
     </header>
 
@@ -288,6 +288,49 @@ tbody.addEventListener("click", async (e) => {
     p.delete("msg");
     history.replaceState({}, "", location.pathname + (p.toString() ? "?" + p.toString() : ""));
   })();
+</script>
+<script>
+(async function () {
+  try {
+    const res = await fetch("/TUBES_2_Toko/backend/auth/me.php", {
+      credentials: "include"
+    });
+
+    const data = await res.json();
+
+    if (!data.ok || !data.logged_in) {
+      return;
+    }
+
+    const username = data.user.username || "User";
+
+    // ===== SET TEXT =====
+    const welcomeEl = document.querySelector(".admin-welcome");
+    if (welcomeEl) {
+      welcomeEl.textContent = "Hi, " + username;
+    }
+
+    // ===== SET AVATAR =====
+    const avatarEl = document.querySelector(".admin-avatar-small");
+    if (!avatarEl) return;
+
+    // kalau ada foto (opsional, future proof)
+    if (data.user.profile_photo_url) {
+      avatarEl.innerHTML = `
+        <img src="${data.user.profile_photo_url}"
+             alt="avatar"
+             style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+      `;
+    } else {
+      // ambil 2 huruf pertama username
+      const initials = username.trim().substring(0, 2).toUpperCase();
+      avatarEl.textContent = initials;
+    }
+
+  } catch (err) {
+    console.error("Failed to load user info", err);
+  }
+})();
 </script>
 </body>
 </html>

@@ -10,5 +10,5 @@ if (ini_get('session.use_cookies')) {
     );
 }
 session_destroy();
-header('Location: /TUBES_2_Toko/index.php');
+header('Location: /TUBES_2_Toko/index.html');
 exit;

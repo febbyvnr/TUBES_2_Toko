@@ -25,8 +25,8 @@
         </div>
 
         <div class="admin-topbar-right">
-          <span class="admin-welcome">Hi, Admin</span>
-          <div class="admin-avatar-small">AD</div>
+          <span class="admin-welcome">Hi, </span>
+          <div class="admin-avatar-small"></div>
         </div>
       </header>
 
@@ -273,7 +273,7 @@
 
         document.querySelector(".admin-welcome").textContent = "Hi, " + data.admin.username;
         document.querySelector(".admin-avatar-small").textContent =
-          String(data.admin.username || "AD").substring(0,2).toUpperCase();
+          String(data.admin.username).substring(0,2).toUpperCase();
 
         setStats(data.stats || {});
         fillCategories(data.meta?.categories || []);
@@ -301,7 +301,7 @@
       loadDashboard(1);
     });
 
-    // Optional: enter di search langsung apply
+    // enter di search langsung apply
     searchInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         e.preventDefault();

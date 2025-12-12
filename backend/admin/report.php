@@ -1,215 +1,250 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Orders — Féyora</title>
+<?php
+// admin/report.php
+session_start();
+require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../vendor/fpdf/fpdf.php';
 
-  <!-- Styles -->
-  <link rel="stylesheet" href="/TUBES_2_Toko/styles/adminDashboard.css">
-  <link rel="stylesheet" href="/TUBES_2_Toko/styles/orders.css">
-
-  <!-- Icons -->
-  <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-</head>
-
-<body class="admin-body">
-
-<div class="admin-layout">
-
-  <!-- SIDEBAR -->
-  <aside class="admin-sidebar">
-    <div class="sidebar-logo">FEYORA</div>
-    <nav class="sidebar-nav">
-      <a href="dashboard.html">Dashboard</a>
-      <a href="orders.html" class="active">Orders</a>
-      <a href="customers.html">Customers</a>
-      <a href="products.html">Products</a>
-    </nav>
-  </aside>
-
-  <div class="admin-main">
-
-    <!-- TOPBAR -->
-    <header class="admin-topbar">
-      <div class="admin-breadcrumb">
-        <span>Home</span>
-        <span class="sep">/</span>
-        <span>Orders</span>
-      </div>
-
-      <div class="admin-topbar-right">
-        <span class="admin-welcome">Hi, Admin</span>
-        <div class="admin-avatar-small">AD</div>
-      </div>
-    </header>
-
-    <main class="admin-content">
-
-      <!-- HEADER -->
-      <div class="admin-content-header">
-        <h1 class="admin-page-title">Orders</h1>
-      </div>
-
-      <!-- FILTER -->
-      <section class="admin-filterbar">
-        <form id="filterForm" class="filter-form">
-          <div class="filter-search">
-            <i class="bi bi-search"></i>
-            <input type="text" name="search" placeholder="Search order..." />
-          </div>
-
-          <div class="filter-group">
-            <select name="status" class="filter-pill filter-select">
-              <option value="all">All Status</option>
-              <option value="Order Created">Order Created</option>
-              <option value="Waiting for Payment">Waiting for Payment</option>
-              <option value="Payment Success">Payment Success</option>
-              <option value="Cancelled">Cancelled</option>
-            </select>
-
-            <button class="filter-apply-btn">Apply</button>
-          </div>
-        </form>
-      </section>
-
-      <!-- TABLE -->
-      <section class="admin-table-card">
-        <table class="admin-table orders-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Customer</th>
-              <th>Items</th>
-              <th>Total</th>
-              <th>Status</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-
-          <tbody id="orders-body">
-            <tr>
-              <td colspan="6" style="text-align:center;color:#777;">
-                Loading orders...
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <!-- FOOTER -->
-        <div class="admin-table-footer">
-          <div id="table-info" class="table-info"></div>
-          <div id="pagination" class="table-pagination"></div>
-        </div>
-      </section>
-
-    </main>
-  </div>
-</div>
-
-<script>
-const API_URL = "/TUBES_2_Toko/backend/admin/orders.php";
-
-let currentPage = 1;
-
-async function loadOrders(page = 1) {
-  currentPage = page;
-
-  const form = document.getElementById("filterForm");
-  const params = new URLSearchParams(new FormData(form));
-  params.set("page", page);
-
-  const res = await fetch(`${API_URL}?${params.toString()}`, {
-    credentials: "include"
-  });
-
-  const json = await res.json();
-
-  if (!json.ok) {
-    document.getElementById("orders-body").innerHTML = `
-      <tr><td colspan="6" style="text-align:center;color:red;">
-        ${json.error || "Failed to load orders"}
-      </td></tr>`;
-    return;
-  }
-
-  renderTable(json.data.orders);
-  renderPagination(json.data.pagination);
+// ===== CEK LOGIN & ROLE ADMIN =====
+if (!isset($_SESSION['user_id'])) {
+    header('Location: /TUBES_2_Toko/auth/login.php');
+    exit;
 }
 
-function renderTable(orders) {
-  const tbody = document.getElementById("orders-body");
+$user_id = (int)$_SESSION['user_id'];
+$stmt = $mysqli->prepare("SELECT username, role FROM user WHERE id = ? LIMIT 1");
+$stmt->bind_param('i', $user_id);
+$stmt->execute();
+$resUser = $stmt->get_result()->fetch_assoc();
+$stmt->close();
 
-  if (!orders.length) {
-    tbody.innerHTML = `
-      <tr><td colspan="6" style="text-align:center;color:#777;">
-        No orders found.
-      </td></tr>`;
-    return;
-  }
+if (!$resUser || $resUser['role'] !== 'admin') {
+    header('Location: /TUBES_2_Toko/index.php');
+    exit;
+}
 
-  tbody.innerHTML = orders.map(o => `
-    <tr>
-      <td>${o.id}</td>
-      <td>${o.customer}</td>
-      <td class="orders-items">
-        ${o.items.length
-          ? o.items.map(i => `<div>${i}</div>`).join("")
-          : "<span style='color:#999'>No items</span>"
+// ===== AMBIL DATA TRANSAKSI + DETAIL =====
+// Ambil hanya transaksi yang sudah dibayar / selesai
+$sql = "
+    SELECT 
+        t.id              AS transaction_id,
+        t.total_price     AS transaction_total,
+        t.status          AS transaction_status,
+        t.date_created    AS transaction_date,
+        u.username        AS username,
+        
+        dt.product_id,
+        dt.quantity,
+        dt.price          AS line_price,
+        p.name            AS product_name
+    FROM transactions t
+    JOIN user u              ON t.user_id = u.id
+    JOIN detail_transaction dt ON dt.transaction_id = t.id
+    JOIN products p          ON p.id = dt.product_id
+    WHERE t.status <> 'Belum Dibayar'
+    ORDER BY t.id ASC, dt.id ASC
+";
+
+$result = $mysqli->query($sql);
+
+// Kelompokkan per transaksi
+$transactions = [];
+$totalRevenue = 0;
+$statusCount  = [];
+
+if ($result) {
+    while ($row = $result->fetch_assoc()) {
+        $tid = $row['transaction_id'];
+
+        if (!isset($transactions[$tid])) {
+            $transactions[$tid] = [
+                'id'        => $tid,
+                'username'  => $row['username'],
+                'total'     => (int)$row['transaction_total'],
+                'status'    => $row['transaction_status'],
+                'date'      => $row['transaction_date'],
+                'items'     => []
+            ];
+
+            // summary
+            $totalRevenue += (int)$row['transaction_total'];
+            $statusKey = $row['transaction_status'];
+            if (!isset($statusCount[$statusKey])) {
+                $statusCount[$statusKey] = 0;
+            }
+            $statusCount[$statusKey]++;
         }
-      </td>
-      <td>Rp ${o.total.toLocaleString("id-ID")}</td>
-      <td>${renderStatus(o.status)}</td>
-      <td>${o.date}</td>
-    </tr>
-  `).join("");
+
+        $transactions[$tid]['items'][] = [
+            'product_name' => $row['product_name'],
+            'quantity'     => (int)$row['quantity'],
+            'line_total'   => (int)$row['line_price'] * (int)$row['quantity'],
+        ];
+    }
+    $result->free();
 }
 
-function renderStatus(status) {
-  switch (status) {
-    case "Order Created":
-      return `<span class="status-pill status-draft">Order Created</span>`;
-    case "Waiting for Payment":
-      return `<span class="status-pill status-low">Waiting for Payment</span>`;
-    case "Payment Success":
-      return `<span class="status-pill status-published">Payment Success</span>`;
-    case "Cancelled":
-      return `<span class="status-pill status-danger">Cancelled</span>`;
-    default:
-      return `<span class="status-pill status-draft">${status}</span>`;
-  }
+$totalOrders = count($transactions);
+
+// ===== KONFIG FPDF =====
+class PDF extends FPDF {}
+
+$pdf = new PDF('L', 'mm', 'A4'); // Landscape
+$pdf->SetTitle('Feyora_Sales_Report');
+$pdf->AddPage();
+
+// ===== LOGO & HEADER ATAS =====
+$logoPath = __DIR__ . '/../assets/Logo Feyora.png'; // sesuaikan path logo
+
+if (file_exists($logoPath)) {
+    // letakkan logo di tengah
+    $pdf->Image($logoPath, 120, 8, 50); // (x, y, width)
+    $pdf->Ln(30);
+} else {
+    $pdf->Ln(10);
 }
 
-function renderPagination(p) {
-  document.getElementById("table-info").innerText =
-    `Showing page ${p.page} of ${p.totalPages} (${p.totalRows} orders)`;
+// Judul
+$pdf->SetFont('Arial', 'B', 24);
+$pdf->Cell(0, 12, 'Sales Report', 0, 1, 'L');
+$pdf->Ln(2);
 
-  const pag = document.getElementById("pagination");
-  pag.innerHTML = "";
+// Info kecil: tanggal & admin
+$pdf->SetFont('Arial', '', 10);
+$pdf->Cell(0, 5, 'Generated at: ' . date('d M Y H:i'), 0, 1, 'L');
+$pdf->Cell(0, 5, 'Generated by: ' . $resUser['username'], 0, 1, 'L');
+$pdf->Ln(4);
 
-  const btn = (label, page, disabled = false) =>
-    `<button class="page-btn ${disabled ? "disabled" : ""}"
-             ${disabled ? "disabled" : ""}
-             onclick="loadOrders(${page})">${label}</button>`;
+// ===== HEADER TABEL =====
+// Warna header (pink lembut)
+// Lebar kolom (total +- 275)
+$wId       = 15;
+$wUser     = 35;
+$wProduct  = 90;
+$wQty      = 20;
+$wTotal    = 35;
+$wStatus   = 35;
+$wDate     = 45;
 
-  pag.innerHTML += btn("Previous", p.page - 1, p.page <= 1);
+// ===== ISI TABEL =====
+// ===== ISI TABEL (MERGE VERTIKAL PER TRANSAKSI) =====
+$rowH        = 8;          // tinggi 1 baris
+$maxTableY   = 185;        // batas sebelum page break
 
-  for (let i = 1; i <= p.totalPages; i++) {
-    pag.innerHTML += `
-      <button class="page-number ${i === p.page ? "active" : ""}"
-              onclick="loadOrders(${i})">${i}</button>`;
-  }
+// fungsi kecil untuk gambar header tabel (dipakai ulang setelah AddPage)
+$printHeader = function() use ($pdf, $wId, $wUser, $wProduct, $wQty, $wTotal, $wStatus, $wDate) {
+    $pdf->SetFillColor(255, 220, 220);
+    $pdf->SetDrawColor(220, 150, 150);
+    $pdf->SetLineWidth(0.3);
+    $pdf->SetFont('Arial', 'B', 11);
 
-  pag.innerHTML += btn("Next", p.page + 1, p.page >= p.totalPages);
+    $pdf->Cell($wId,      10, 'ID',        1, 0, 'C', true);
+    $pdf->Cell($wUser,    10, 'Username',  1, 0, 'C', true);
+    $pdf->Cell($wProduct, 10, 'Products',  1, 0, 'C', true);
+    $pdf->Cell($wQty,     10, 'Quantity',  1, 0, 'C', true);
+    $pdf->Cell($wTotal,   10, 'Total',     1, 0, 'C', true);
+    $pdf->Cell($wStatus,  10, 'Status',    1, 0, 'C', true);
+    $pdf->Cell($wDate,    10, 'Date',      1, 1, 'C', true);
+
+    $pdf->SetFont('Arial', '', 10);
+};
+
+$printHeader();
+
+if (empty($transactions)) {
+    $pdf->Cell(0, 10, 'No paid orders found.', 1, 1, 'C');
+} else {
+    foreach ($transactions as $t) {
+        $items     = $t['items'];
+        $rowCount  = max(1, count($items));
+        $blockH    = $rowH * $rowCount; // tinggi blok transaksi
+
+        // cek apakah muat di halaman, kalau tidak -> page baru + header
+        if ($pdf->GetY() + $blockH > $maxTableY) {
+            $pdf->AddPage();
+            $printHeader();
+        }
+
+        // koordinat awal blok
+        $xStart = $pdf->GetX();
+        $yStart = $pdf->GetY();
+
+        // ===== kolom ID & Username (merged) =====
+        $pdf->Cell($wId,   $blockH, $t['id'],       1, 0, 'C');
+        $pdf->Cell($wUser, $blockH, $t['username'], 1, 0, 'L');
+
+        // posisi mulai kolom Products
+        $xAfterUser = $pdf->GetX();
+
+        // ===== kolom Products + Quantity (per item baris) =====
+        $pdf->SetXY($xAfterUser, $yStart);
+
+        if (!empty($items)) {
+            $i = 0;
+            foreach ($items as $item) {
+                $pdf->Cell($wProduct, $rowH, $item['product_name'], 1, 0, 'L');
+                $pdf->Cell($wQty,     $rowH, $item['quantity'],     1, 0, 'C');
+
+                $i++;
+                if ($i < $rowCount) {
+                    // pindah ke baris berikutnya, tetap mulai di kolom Products
+                    $pdf->Ln($rowH);
+                    $pdf->SetX($xAfterUser);
+                }
+            }
+        } else {
+            // kalau tidak ada item (harusnya jarang terjadi)
+            $pdf->Cell($wProduct, $blockH, '-', 1, 0, 'L');
+            $pdf->Cell($wQty,     $blockH, '-', 1, 0, 'C');
+        }
+
+        // ===== kolom Total, Status, Date (merged) =====
+        $xAfterQty = $xAfterUser + $wProduct + $wQty;
+        $pdf->SetXY($xAfterQty, $yStart);
+
+        $totalFmt = 'Rp ' . number_format($t['total'], 0, ',', '.');
+        $dateFmt  = date('d M Y H:i', strtotime($t['date']));
+
+        $pdf->Cell($wTotal,  $blockH, $totalFmt, 1, 0, 'R');
+        $pdf->Cell($wStatus, $blockH, $t['status'], 1, 0, 'C');
+        $pdf->Cell($wDate,   $blockH, $dateFmt, 1, 0, 'C');
+
+        // pindahkan pointer ke bawah blok transaksi
+        $pdf->SetXY($xStart, $yStart + $blockH);
+    }
 }
 
-document.getElementById("filterForm").addEventListener("submit", e => {
-  e.preventDefault();
-  loadOrders(1);
-});
+// ===== SUMMARY DI BAGIAN BAWAH =====
+$pdf->Ln(8);
+$pdf->SetFont('Arial', 'B', 12);
+$pdf->Cell(0, 7, 'Summary', 0, 1, 'L');
 
-loadOrders();
-</script>
+$pdf->SetFont('Arial', '', 10);
 
-</body>
-</html>
+$pdf->Cell(60, 6, 'Total Orders:', 0, 0, 'L');
+$pdf->Cell(40, 6, $totalOrders, 0, 1, 'L');
+
+$pdf->Cell(60, 6, 'Total Revenue:', 0, 0, 'L');
+$pdf->Cell(40, 6, 'Rp ' . number_format($totalRevenue, 0, ',', '.'), 0, 1, 'L');
+
+$pdf->Ln(3);
+$pdf->Cell(60, 6, 'Orders by Status:', 0, 1, 'L');
+
+if (!empty($statusCount)) {
+    foreach ($statusCount as $st => $cnt) {
+        $pdf->Cell(60, 5, '- ' . $st, 0, 0, 'L');
+        $pdf->Cell(40, 5, $cnt, 0, 1, 'L');
+    }
+} else {
+    $pdf->Cell(60, 5, '- (none)', 0, 1, 'L');
+}
+
+// ===== OUTPUT PDF (AUTO DOWNLOAD) =====
+$filename = 'Feyora_SalesReport_' . date('Ymd-His') . '.pdf';
+
+header('Content-Type: application/pdf');
+header('Content-Disposition: attachment; filename="' . $filename . '"');
+header('Cache-Control: private, max-age=0, must-revalidate');
+header('Pragma: public');
+
+$pdf->Output('D', $filename);
+exit;

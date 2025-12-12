@@ -5,8 +5,8 @@
   <title>Orders — Féyora</title>
 
   <!-- Styles -->
-  <link rel="stylesheet" href="/TUBES_2_Toko/styles/adminDashboard.css">
-  <link rel="stylesheet" href="/TUBES_2_Toko/styles/orders.css">
+  <link rel="stylesheet" href="/TUBES_2_Toko/frontend/styles/adminDashboard.css">
+  <link rel="stylesheet" href="/TUBES_2_Toko/frontend/styles/orders.css">
 
   <!-- Icons -->
   <link rel="stylesheet"
@@ -14,20 +14,8 @@
 </head>
 
 <body class="admin-body">
-
+<div id="sideBar"></div>
 <div class="admin-layout">
-
-  <!-- SIDEBAR -->
-  <aside class="admin-sidebar">
-    <div class="sidebar-logo">FEYORA</div>
-    <nav class="sidebar-nav">
-      <a href="dashboard.html">Dashboard</a>
-      <a href="orders.html" class="active">Orders</a>
-      <a href="customers.html">Customers</a>
-      <a href="products.html">Products</a>
-    </nav>
-  </aside>
-
   <div class="admin-main">
 
     <!-- TOPBAR -->
@@ -39,16 +27,20 @@
       </div>
 
       <div class="admin-topbar-right">
-        <span class="admin-welcome">Hi, Admin</span>
-        <div class="admin-avatar-small">AD</div>
+        <span class="admin-welcome">Hi, </span>
+        <div class="admin-avatar-small"></div>
       </div>
     </header>
 
     <main class="admin-content">
 
-      <!-- HEADER -->
+      <!-- HEADER + PDF -->
       <div class="admin-content-header">
         <h1 class="admin-page-title">Orders</h1>
+        <button class="btn-primary-admin"
+                onclick="window.location.href='/TUBES_2_Toko/backend/admin/report.php'">
+          <i class="bi bi-file-earmark-pdf"></i> Export PDF
+        </button>
       </div>
 
       <!-- FILTER -->
@@ -210,6 +202,60 @@ document.getElementById("filterForm").addEventListener("submit", e => {
 
 loadOrders();
 </script>
+<script>
+  async function loadPart(id, url) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const res = await fetch(url, { cache: "no-cache" });
+    el.innerHTML = await res.text();
+  }
+  loadPart("sideBar", "/TUBES_2_Toko/frontend/includes/sideBar.html");
+</script>
+<script>
+  document.getElementById("btnExportPdf").addEventListener("click", () => {
+  const form = document.getElementById("filterForm");
+  const params = new URLSearchParams(new FormData(form)); // bawa search & status
+  window.location.href = "/TUBES_2_Toko/backend/admin/report.php?" + params.toString();
+});
+</script>
+<script>
+(async function () {
+  try {
+    const res = await fetch("/TUBES_2_Toko/backend/auth/me.php", {
+      credentials: "include"
+    });
 
+    const data = await res.json();
+
+    if (!data.ok || !data.logged_in) {
+      return;
+    }
+
+    const username = data.user.username || "User";
+
+    const welcomeEl = document.querySelector(".admin-welcome");
+    if (welcomeEl) {
+      welcomeEl.textContent = "Hi, " + username;
+    }
+
+    const avatarEl = document.querySelector(".admin-avatar-small");
+    if (!avatarEl) return;
+
+    if (data.user.profile_photo_url) {
+      avatarEl.innerHTML = `
+        <img src="${data.user.profile_photo_url}"
+             alt="avatar"
+             style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+      `;
+    } else {
+      const initials = username.trim().substring(0, 2).toUpperCase();
+      avatarEl.textContent = initials;
+    }
+
+  } catch (err) {
+    console.error("Failed to load user info", err);
+  }
+})();
+</script>
 </body>
 </html>

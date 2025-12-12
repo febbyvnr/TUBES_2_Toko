@@ -2,7 +2,8 @@
 
 <div class="admin-sidebar">
   <div class="sidebar-header">
-    <img src="/TUBES_2_Toko/frontend/assets/Logo Feyora.png" class="sidebar-logo" alt="Feyora Logo">
+    <img src="/TUBES_2_Toko/frontend/assets/Logo%20Feyora.png"
+         class="sidebar-logo" alt="Feyora Logo">
   </div>
 
   <ul class="sidebar-menu">
@@ -31,10 +32,10 @@
     </li>
   </ul>
 </div>
+
 <script>
 (function () {
   const basename = (p) => (p || "").split("/").filter(Boolean).pop() || "";
-
   const currentPath = location.pathname;
   const currentBase = basename(currentPath);
 
@@ -54,7 +55,7 @@
 
     if (currentPath === linkPath || (currentBase && linkBase && currentBase === linkBase)) {
       a.classList.add("active");
-      break; 
+      break;
     }
   }
 })();
