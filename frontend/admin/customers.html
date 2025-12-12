@@ -3,8 +3,6 @@
 <head>
   <meta charset="utf-8">
   <title>Customers — Féyora</title>
-
-  <!-- Global admin styles -->
   <link rel="stylesheet" href="../styles/adminDashboard.css">
   <link rel="stylesheet" href="../styles/customer.css">
   <link rel="stylesheet" href="../styles/sideBar.css">
@@ -65,9 +63,9 @@
 
           <div class="filter-group">
             <select class="customer-filter-select">
-              <option>All Status</option>
-              <option>Active</option>
-              <option>Inactive</option>
+              <option value="all">All Status</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
             </select>
 
             <button class="customer-apply-btn">Apply</button>
@@ -118,9 +116,10 @@ const applyBtn = document.querySelector('.customer-apply-btn');
 let currentPage = 1;
 
 async function loadCustomers(page = 1) {
+  currentPage = page;
   const params = new URLSearchParams({
     search: searchInput.value.trim(),
-    status: statusSelect.value.toLowerCase(),
+    status: statusSelect.value,
     page
   });
 
@@ -180,10 +179,13 @@ function renderTable(customers) {
       </td>
 
       <td class="customer-actions">
-        <a href="/TUBES_2_Toko/backend/admin/deleteCustomer.php?id=${c.id}"
-           onclick="return confirm('Delete this customer?')">
+        <button type="button"
+                class="customer-del-btn"
+                data-id="${c.id}"
+                title="Delete"
+                style="background:none;border:none;cursor:pointer;">
           <i class="bi bi-trash3"></i>
-        </a>
+        </button>
       </td>
     </tr>
   `).join('');
@@ -237,15 +239,67 @@ function escapeHtml(str) {
 loadCustomers();
 </script>
 <script>
+/* =========================
+   DELETE CUSTOMER (AJAX)
+   ========================= */
+tbody.addEventListener("click", async (e) => {
+  const btn = e.target.closest(".customer-del-btn");
+  if (!btn) return;
+
+  const id = btn.dataset.id;
+  if (!confirm("Delete this customer?")) return;
+
+  try {
+    const fd = new FormData();
+    fd.append("id", id);
+
+    const res = await fetch("/TUBES_2_Toko/backend/admin/deleteCustomer.php", {
+      method: "POST",
+      body: fd,
+      credentials: "include"
+    });
+
+    const data = await res.json();
+
+    if (!data.ok) {
+      alert(data.error || "Failed to delete customer");
+      return;
+    }
+
+    // reload halaman saat ini
+    loadCustomers(currentPage);
+
+  } catch (err) {
+    console.error(err);
+    alert("Server error");
+  }
+});
+</script>
+<script>
   async function loadPart(id, url) {
     const el = document.getElementById(id);
     if (!el) return;
     const res = await fetch(url, { cache: "no-cache" });
     el.innerHTML = await res.text();
   }
-
-  // load sidebar (INI YANG KURANG)
   loadPart("sideBar", "/TUBES_2_Toko/frontend/includes/sideBar.html");
+</script>
+<script>
+  (function(){
+    const p = new URLSearchParams(location.search);
+    const msg = p.get("msg");
+    if (!msg) return;
+
+    // alert(msg);
+    
+    const info = document.getElementById("table-info");
+    if (info) {
+      if (msg === "DELETED") info.textContent = "Customer deleted successfully.";
+      else info.textContent = "Info: " + msg;
+    }
+    p.delete("msg");
+    history.replaceState({}, "", location.pathname + (p.toString() ? "?" + p.toString() : ""));
+  })();
 </script>
 </body>
 </html>
