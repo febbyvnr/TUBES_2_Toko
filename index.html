@@ -50,27 +50,36 @@
 </main>
 
 <div id="footer"></div>
-
 <script>
-  async function loadPart(id, url) {
-    const el = document.getElementById(id);
-    const res = await fetch(url, { cache: "no-cache" });
-    el.innerHTML = await res.text();
-  }
+async function loadPart(id, url) {
+  const el = document.getElementById(id);
+  if (!el) return;
 
-  loadPart("header", "frontend/includes/header.html");
-  loadPart("footer", "frontend/includes/footer.html");
+  const res = await fetch(url, { cache: "no-cache" });
+  const html = await res.text();
+  el.innerHTML = html;
+
+  // paksa execute script dari include
+  el.querySelectorAll("script").forEach(oldScript => {
+    const s = document.createElement("script");
+    if (oldScript.src) s.src = oldScript.src;
+    s.textContent = oldScript.textContent;
+    document.body.appendChild(s);
+    oldScript.remove();
+  });
+
+  // setelah header masuk + scriptnya sudah dieksekusi
+  if (id === "header" && window.initHeaderAuth) {
+    await window.initHeaderAuth();
+  }
+}
+
+(async function () {
+  await loadPart("header", "/TUBES_2_Toko/frontend/includes/header.html");
+  await loadPart("footer", "/TUBES_2_Toko/frontend/includes/footer.html");
+})();
 </script>
 <script>
-  async function loadPart(id, url) {
-    const el = document.getElementById(id);
-    const res = await fetch(url, { cache: "no-cache" });
-    el.innerHTML = await res.text();
-  }
-
-  loadPart("header", "frontend/includes/header.html");
-  loadPart("footer", "frontend/includes/footer.html");
-
   const API_HOME = "/TUBES_2_Toko/backend/index.php";
 
   function esc(s){return String(s).replace(/[&<>"']/g,c=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[c]));}

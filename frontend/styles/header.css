@@ -28,7 +28,8 @@
   font-weight: bold;
 }
 
-.profile-dropdown {
+.profile-dropdown,
+#profile-dropdown {
   position: absolute;
   right: 0;
   top: 45px;
@@ -36,9 +37,10 @@
   border: 1px solid #ddd;
   border-radius: 6px;
   display: none;
-  min-width: 140px;
+  min-width: 220px;
   padding: 8px 0;
-  z-index: 999;
+  z-index: 9990;
+  overflow: hidden;
 }
 
 .profile-dropdown.show {
@@ -46,12 +48,17 @@
 }
 
 .profile-dropdown a {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 22px;
+  line-height: 1.2;
+  white-space: nowrap;
   padding: 8px 12px;
   color: #333;
   text-decoration: none;
 }
 
 .profile-dropdown a:hover {
-  background: #f2f2f2;
+  background: #f4f4f4;
 }

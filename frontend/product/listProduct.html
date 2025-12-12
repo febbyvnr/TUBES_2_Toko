@@ -69,182 +69,185 @@
   <div id="footer"></div>
 
   <script>
-    // ===== CONFIG =====
-    const API_LIST = "/TUBES_2_Toko/backend/product/listProduct.php"; // JSON endpoint kamu
+  async function loadPart(id, url) {
+    const el = document.getElementById(id);
+    if (!el) return;
 
-    // ===== LOAD PARTIAL =====
-    async function loadPart(id, url) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      try {
-        const res = await fetch(url, { cache: "no-cache" });
-        if (!res.ok) throw new Error("Failed load " + url);
-        el.innerHTML = await res.text();
-      } catch (e) {
-        // biar keliatan errornya (gak silent)
-        console.warn(e);
-      }
-    }
-    loadPart("header", "/TUBES_2_Toko/frontend/includes/header.html");
-    loadPart("footer", "/TUBES_2_Toko/frontend/includes/footer.html");
+    const res = await fetch(url, { cache: "no-cache" });
+    const html = await res.text();
+    el.innerHTML = html;
 
-    // ===== HELPERS =====
-    function qs() {
-      return new URLSearchParams(window.location.search);
-    }
-
-    function setQuery(paramsObj) {
-      const p = qs();
-      Object.entries(paramsObj).forEach(([k, v]) => {
-        if (v === null || v === undefined || v === "") p.delete(k);
-        else p.set(k, String(v));
-      });
-      // reset page if filter changed
-      if ("category" in paramsObj || "price_min" in paramsObj || "price_max" in paramsObj || "sort" in paramsObj) {
-        p.delete("page");
-      }
-      window.location.search = p.toString();
-    }
-
-    function escapeHtml(s) {
-      return String(s).replace(/[&<>"']/g, c => ({
-        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-      }[c]));
-    }
-
-    // ===== ELEMENTS =====
-    const grid = document.getElementById("productGrid");
-    const paginationEl = document.getElementById("pagination");
-    const form = document.getElementById("filtersForm");
-
-    const categorySelect = document.getElementById("categorySelect");
-    const priceMin = document.getElementById("priceMin");
-    const priceMax = document.getElementById("priceMax");
-    const sortSelect = document.getElementById("sortSelect");
-
-    // ===== INIT FILTERS FROM URL =====
-    function fillFormFromUrl(meta) {
-      const p = qs();
-      const cat = p.get("category") || "";
-      const min = p.get("price_min") || "";
-      const max = p.get("price_max") || "";
-      const sort = p.get("sort") || "";
-
-      categorySelect.innerHTML =
-        `<option value="">All</option>` +
-        (meta.categories || []).map(c => {
-          const sel = (c === cat) ? "selected" : "";
-          return `<option value="${escapeHtml(c)}" ${sel}>${escapeHtml(c)}</option>`;
-        }).join("");
-
-      priceMin.value = min;
-      priceMax.value = max;
-      sortSelect.value = sort;
-    }
-
-    // ===== RENDER PRODUCTS =====
-    function renderProducts(items) {
-      if (!items || items.length === 0) {
-        grid.innerHTML = `<p class="muted" style="padding:10px 0;">No products found.</p>`;
-        return;
-      }
-
-      grid.innerHTML = items.map(p => {
-        const img = p.image_url || "/TUBES_2_Toko/assets/products/placeholder.png";
-        const title = escapeHtml(p.title || "Untitled Product");
-        const price = escapeHtml(p.price_text || "");
-
-        // IMPORTANT: link ke PHP detail (backend), bukan html
-        return `
-          <div class="product-card">
-            <a href="/TUBES_2_Toko/backend/product/detailProduct.php?id=${encodeURIComponent(p.id)}">
-              <div class="product-media" style="background-image:url('${img}');"></div>
-            </a>
-            <div class="product-info">
-              <div class="product-title">${title}</div>
-              ${price ? `<div class="product-price">${price}</div>` : ``}
-            </div>
-          </div>
-        `;
-      }).join("");
-    }
-
-    // ===== RENDER PAGINATION =====
-    function renderPagination(page, totalPages) {
-      if (!totalPages || totalPages <= 1) {
-        paginationEl.innerHTML = "";
-        return;
-      }
-
-      const p = qs();
-
-      function pageLink(label, toPage, disabled = false, active = false) {
-        if (disabled) return `<span class="page-btn disabled">${label}</span>`;
-        if (active)   return `<span class="page-btn active">${label}</span>`;
-        p.set("page", String(toPage));
-        return `<a class="page-btn" href="?${p.toString()}">${label}</a>`;
-      }
-
-      const prevDisabled = page <= 1;
-      const nextDisabled = page >= totalPages;
-
-      let html = "";
-      html += pageLink("&lt;", page - 1, prevDisabled);
-
-      const start = Math.max(1, page - 3);
-      const end = Math.min(totalPages, page + 3);
-
-      if (start > 1) {
-        html += pageLink("1", 1, false, page === 1);
-        if (start > 2) html += `<span class="page-btn disabled">...</span>`;
-      }
-
-      for (let i = start; i <= end; i++) {
-        html += pageLink(String(i), i, false, i === page);
-      }
-
-      if (end < totalPages) {
-        if (end < totalPages - 1) html += `<span class="page-btn disabled">...</span>`;
-        html += pageLink(String(totalPages), totalPages, false, page === totalPages);
-      }
-
-      html += pageLink("&gt;", page + 1, nextDisabled);
-      paginationEl.innerHTML = html;
-    }
-
-    // ===== LOAD DATA =====
-    async function loadProducts() {
-      const p = qs();
-      const url = `${API_LIST}?${p.toString()}`;
-
-      try {
-        const res = await fetch(url, { credentials: "include" });
-        const data = await res.json();
-
-        if (!data.ok) throw new Error(data.error || "API not ok");
-
-        fillFormFromUrl(data.meta || {});
-        renderProducts(data.data?.items || []);
-        renderPagination(data.data?.page || 1, data.data?.total_pages || 1);
-      } catch (e) {
-        console.error(e);
-        grid.innerHTML = `<p class="muted">Failed to load products.</p>`;
-        paginationEl.innerHTML = "";
-      }
-    }
-
-    // ===== SUBMIT FILTERS =====
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      setQuery({
-        category: categorySelect.value,
-        price_min: priceMin.value,
-        price_max: priceMax.value,
-        sort: sortSelect.value
-      });
+    // paksa execute script dari include
+    el.querySelectorAll("script").forEach(oldScript => {
+      const s = document.createElement("script");
+      if (oldScript.src) s.src = oldScript.src;
+      s.textContent = oldScript.textContent;
+      document.body.appendChild(s);
+      oldScript.remove();
     });
 
-    loadProducts();
+    // setelah header masuk + scriptnya sudah dieksekusi
+    if (id === "header" && window.initHeaderAuth) {
+      await window.initHeaderAuth();
+    }
+  }
+
+  (async function () {
+    await loadPart("header", "/TUBES_2_Toko/frontend/includes/header.html");
+    await loadPart("footer", "/TUBES_2_Toko/frontend/includes/footer.html");
+  })();
   </script>
+
+  <script>
+const API_LIST = "/TUBES_2_Toko/backend/product/listProduct.php";
+
+function qs() {
+  return new URLSearchParams(window.location.search);
+}
+
+function setQuery(paramsObj) {
+  const p = qs();
+  Object.entries(paramsObj).forEach(([k, v]) => {
+    if (v === null || v === undefined || v === "") p.delete(k);
+    else p.set(k, String(v));
+  });
+  if ("category" in paramsObj || "price_min" in paramsObj || "price_max" in paramsObj || "sort" in paramsObj) {
+    p.delete("page");
+  }
+  window.location.search = p.toString();
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[c]));
+}
+
+const grid = document.getElementById("productGrid");
+const paginationEl = document.getElementById("pagination");
+const form = document.getElementById("filtersForm");
+
+const categorySelect = document.getElementById("categorySelect");
+const priceMin = document.getElementById("priceMin");
+const priceMax = document.getElementById("priceMax");
+const sortSelect = document.getElementById("sortSelect");
+
+function fillFormFromUrl(meta) {
+  const p = qs();
+  const cat = p.get("category") || "";
+  const min = p.get("price_min") || "";
+  const max = p.get("price_max") || "";
+  const sort = p.get("sort") || "";
+
+  categorySelect.innerHTML =
+    `<option value="">All</option>` +
+    (meta.categories || []).map(c => {
+      const sel = (c === cat) ? "selected" : "";
+      return `<option value="${escapeHtml(c)}" ${sel}>${escapeHtml(c)}</option>`;
+    }).join("");
+
+  priceMin.value = min;
+  priceMax.value = max;
+  sortSelect.value = sort;
+}
+
+function renderProducts(items) {
+  if (!items || items.length === 0) {
+    grid.innerHTML = `<p class="muted" style="padding:10px 0;">No products found.</p>`;
+    return;
+  }
+
+  grid.innerHTML = items.map(p => {
+    const img = p.image_url || "/TUBES_2_Toko/assets/products/placeholder.png";
+    const title = escapeHtml(p.title || "Untitled Product");
+    const price = escapeHtml(p.price_text || "");
+
+    return `
+      <div class="product-card">
+        <a href="/TUBES_2_Toko/backend/product/detailProduct.php?id=${encodeURIComponent(p.id)}">
+          <div class="product-media" style="background-image:url('${img}');"></div>
+        </a>
+        <div class="product-info">
+          <div class="product-title">${title}</div>
+          ${price ? `<div class="product-price">${price}</div>` : ``}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderPagination(page, totalPages) {
+  if (!totalPages || totalPages <= 1) {
+    paginationEl.innerHTML = "";
+    return;
+  }
+
+  const p = qs();
+
+  function pageLink(label, toPage, disabled = false, active = false) {
+    if (disabled) return `<span class="page-btn disabled">${label}</span>`;
+    if (active)   return `<span class="page-btn active">${label}</span>`;
+    p.set("page", String(toPage));
+    return `<a class="page-btn" href="?${p.toString()}">${label}</a>`;
+  }
+
+  let html = "";
+  html += pageLink("&lt;", page - 1, page <= 1);
+
+  const start = Math.max(1, page - 3);
+  const end = Math.min(totalPages, page + 3);
+
+  if (start > 1) {
+    html += pageLink("1", 1, false, page === 1);
+    if (start > 2) html += `<span class="page-btn disabled">...</span>`;
+  }
+
+  for (let i = start; i <= end; i++) {
+    html += pageLink(String(i), i, false, i === page);
+  }
+
+  if (end < totalPages) {
+    if (end < totalPages - 1) html += `<span class="page-btn disabled">...</span>`;
+    html += pageLink(String(totalPages), totalPages, false, page === totalPages);
+  }
+
+  html += pageLink("&gt;", page + 1, page >= totalPages);
+  paginationEl.innerHTML = html;
+}
+
+async function loadProducts() {
+  const p = qs();
+  const url = `${API_LIST}?${p.toString()}`;
+
+  try {
+    const res = await fetch(url, { credentials: "include" });
+    const data = await res.json();
+
+    if (!data.ok) throw new Error(data.error || "API not ok");
+
+    fillFormFromUrl(data.meta || {});
+    renderProducts(data.data?.items || []);
+    renderPagination(data.data?.page || 1, data.data?.total_pages || 1);
+  } catch (e) {
+    console.error(e);
+    grid.innerHTML = `<p class="muted">Failed to load products.</p>`;
+    paginationEl.innerHTML = "";
+  }
+}
+
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  setQuery({
+    category: categorySelect.value,
+    price_min: priceMin.value,
+    price_max: priceMax.value,
+    sort: sortSelect.value
+  });
+});
+
+(async function init(){
+  await loadProducts();
+})();
+</script>
 </body>
 </html>

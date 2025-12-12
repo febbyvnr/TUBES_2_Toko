@@ -250,5 +250,18 @@ form.addEventListener("submit", async e => {
   window.history.replaceState({}, "", newUrl);
 })();
 </script>
+<script>
+async function loadPart(id, url) {
+  const el = document.getElementById(id);
+  const res = await fetch(url, { cache: "no-cache" });
+  el.innerHTML = await res.text();
+
+  if (id === "header" && window.initHeaderAuth) {
+    await window.initHeaderAuth();
+  }
+}
+
+loadPart("header", "/TUBES_2_Toko/frontend/includes/header.html");
+</script>
 </body>
 </html>

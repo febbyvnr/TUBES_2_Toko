@@ -1,3 +1,18 @@
+.site-header {
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+  width: 100%;
+}
+
+.header-inner {
+  max-width: 1200px; 
+  margin: 0 auto; 
+  padding: 16px 20px;  
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .profile-menu {
   position: relative;
   display: inline-block;
