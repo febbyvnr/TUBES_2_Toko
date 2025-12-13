@@ -1,261 +1,241 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Orders — Féyora</title>
+    <meta charset="utf-8">
+    <title>Orders — Féyora</title>
 
-  <!-- Styles -->
-  <link rel="stylesheet" href="/TUBES_2_Toko/frontend/styles/adminDashboard.css">
-  <link rel="stylesheet" href="/TUBES_2_Toko/frontend/styles/orders.css">
+    <!-- Styles -->
+    <link rel="stylesheet" href="/TUBES_2_Toko/frontend/styles/adminDashboard.css">
+    <link rel="stylesheet" href="/TUBES_2_Toko/frontend/styles/orders.css">
 
-  <!-- Icons -->
-  <link rel="stylesheet"
+    <!-- Icons -->
+    <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 
 <body class="admin-body">
 <div id="sideBar"></div>
 <div class="admin-layout">
-  <div class="admin-main">
+    <div class="admin-main">
 
-    <!-- TOPBAR -->
-    <header class="admin-topbar">
-      <div class="admin-breadcrumb">
-        <span>Home</span>
-        <span class="sep">/</span>
-        <span>Orders</span>
-      </div>
+        <!-- TOPBAR -->
+        <header class="admin-topbar">
+            <div class="admin-breadcrumb">
+                <span>Home</span>
+                <span class="sep">/</span>
+                <span>Orders</span>
+            </div>
 
-      <div class="admin-topbar-right">
-        <span class="admin-welcome">Hi, </span>
-        <div class="admin-avatar-small"></div>
-      </div>
-    </header>
+            <div class="admin-topbar-right">
+                <span class="admin-welcome">Hi, </span>
+                <div class="admin-avatar-small"></div>
+            </div>
+        </header>
 
-    <main class="admin-content">
+        <main class="admin-content">
+            <!-- HEADER + PDF -->
+            <div class="admin-content-header">
+                <h1 class="admin-page-title">Orders</h1>
+                <button class="btn-primary-admin"
+                    onclick="window.location.href='/TUBES_2_Toko/backend/admin/report.php'">
+                    <i class="bi bi-file-earmark-pdf"></i> Export PDF
+                </button>
+            </div>
 
-      <!-- HEADER + PDF -->
-      <div class="admin-content-header">
-        <h1 class="admin-page-title">Orders</h1>
-        <button class="btn-primary-admin"
-                onclick="window.location.href='/TUBES_2_Toko/backend/admin/report.php'">
-          <i class="bi bi-file-earmark-pdf"></i> Export PDF
-        </button>
-      </div>
+            <!-- FILTER -->
+            <section class="admin-filterbar">
+                <form id="filterForm" class="filter-form">
+                    <div class="filter-search">
+                        <i class="bi bi-search"></i>
+                        <input type="text" name="search" placeholder="Search order..." />
+                    </div>
 
-      <!-- FILTER -->
-      <section class="admin-filterbar">
-        <form id="filterForm" class="filter-form">
-          <div class="filter-search">
-            <i class="bi bi-search"></i>
-            <input type="text" name="search" placeholder="Search order..." />
-          </div>
+                    <div class="filter-group">
+                        <select name="status" class="filter-pill filter-select">
+                            <option value="all">All Status</option>
+                            <option value="Order Created">Order Created</option>
+                            <option value="Waiting for Payment">Waiting for Payment</option>
+                            <option value="Payment Success">Payment Success</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
 
-          <div class="filter-group">
-            <select name="status" class="filter-pill filter-select">
-              <option value="all">All Status</option>
-              <option value="Order Created">Order Created</option>
-              <option value="Waiting for Payment">Waiting for Payment</option>
-              <option value="Payment Success">Payment Success</option>
-              <option value="Cancelled">Cancelled</option>
-            </select>
+                        <button class="filter-apply-btn">Apply</button>
+                    </div>
+                </form>
+            </section>
 
-            <button class="filter-apply-btn">Apply</button>
-          </div>
-        </form>
-      </section>
+            <!-- TABLE -->
+            <section class="admin-table-card">
+                <table class="admin-table orders-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Customer</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr> 
+                    </thead>
 
-      <!-- TABLE -->
-      <section class="admin-table-card">
-        <table class="admin-table orders-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Customer</th>
-              <th>Items</th>
-              <th>Total</th>
-              <th>Status</th>
-              <th>Date</th>
-            </tr>
-          </thead>
+                    <tbody id="orders-body">
+                        <tr>
+                            <td colspan="6" style="text-align:center;color:#777;">
+                                Loading orders...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
 
-          <tbody id="orders-body">
-            <tr>
-              <td colspan="6" style="text-align:center;color:#777;">
-                Loading orders...
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <!-- FOOTER -->
-        <div class="admin-table-footer">
-          <div id="table-info" class="table-info"></div>
-          <div id="pagination" class="table-pagination"></div>
-        </div>
-      </section>
-
-    </main>
-  </div>
+                <!-- FOOTER -->
+                <div class="admin-table-footer">
+                    <div id="table-info" class="table-info"></div>
+                    <div id="pagination" class="table-pagination"></div>
+                </div>
+            </section>
+        </main>
+    </div>
 </div>
 
 <script>
-const API_URL = "/TUBES_2_Toko/backend/admin/orders.php";
-
-let currentPage = 1;
-
-async function loadOrders(page = 1) {
-  currentPage = page;
-
-  const form = document.getElementById("filterForm");
-  const params = new URLSearchParams(new FormData(form));
-  params.set("page", page);
-
-  const res = await fetch(`${API_URL}?${params.toString()}`, {
-    credentials: "include"
-  });
-
-  const json = await res.json();
-
-  if (!json.ok) {
-    document.getElementById("orders-body").innerHTML = `
-      <tr><td colspan="6" style="text-align:center;color:red;">
-        ${json.error || "Failed to load orders"}
-      </td></tr>`;
-    return;
-  }
-
-  renderTable(json.data.orders);
-  renderPagination(json.data.pagination);
-}
-
-function renderTable(orders) {
-  const tbody = document.getElementById("orders-body");
-
-  if (!orders.length) {
-    tbody.innerHTML = `
-      <tr><td colspan="6" style="text-align:center;color:#777;">
-        No orders found.
-      </td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = orders.map(o => `
-    <tr>
-      <td>${o.id}</td>
-      <td>${o.customer}</td>
-      <td class="orders-items">
-        ${o.items.length
-          ? o.items.map(i => `<div>${i}</div>`).join("")
-          : "<span style='color:#999'>No items</span>"
+    const API_URL = "/TUBES_2_Toko/backend/admin/orders.php";
+    let currentPage = 1;
+    async function loadOrders(page = 1) {
+        currentPage = page;
+        const form = document.getElementById("filterForm");
+        const params = new URLSearchParams(new FormData(form));
+        params.set("page", page);
+        const res = await fetch(`${API_URL}?${params.toString()}`, {
+            credentials: "include"
+        });
+        const json = await res.json();
+        if (!json.ok) {
+            document.getElementById("orders-body").innerHTML = `
+                <tr><td colspan="6" style="text-align:center;color:red;">
+                    ${json.error || "Failed to load orders"}
+                </td></tr>`;
+            return;
         }
-      </td>
-      <td>Rp ${o.total.toLocaleString("id-ID")}</td>
-      <td>${renderStatus(o.status)}</td>
-      <td>${o.date}</td>
-    </tr>
-  `).join("");
-}
+        renderTable(json.data.orders);
+        renderPagination(json.data.pagination);
+    }
 
-function renderStatus(status) {
-  switch (status) {
-    case "Order Created":
-      return `<span class="status-pill status-draft">Order Created</span>`;
-    case "Waiting for Payment":
-      return `<span class="status-pill status-low">Waiting for Payment</span>`;
-    case "Payment Success":
-      return `<span class="status-pill status-published">Payment Success</span>`;
-    case "Cancelled":
-      return `<span class="status-pill status-danger">Cancelled</span>`;
-    default:
-      return `<span class="status-pill status-draft">${status}</span>`;
-  }
-}
+    function renderTable(orders) {
+        const tbody = document.getElementById("orders-body");
 
-function renderPagination(p) {
-  document.getElementById("table-info").innerText =
-    `Showing page ${p.page} of ${p.totalPages} (${p.totalRows} orders)`;
+        if (!orders.length) {
+            tbody.innerHTML = `
+                <tr><td colspan="6" style="text-align:center;color:#777;">
+                    No orders found.
+                </td></tr>`;
+            return;
+        }
 
-  const pag = document.getElementById("pagination");
-  pag.innerHTML = "";
+        tbody.innerHTML = orders.map(o => `
+            <tr>
+                <td>${o.id}</td>
+                <td>${o.customer}</td>
+                <td class="orders-items">
+                    ${o.items.length
+                        ? o.items.map(i => `<div>${i}</div>`).join("")
+                        : "<span style='color:#999'>No items</span>"
+                    }
+                </td>
+                <td>Rp ${o.total.toLocaleString("id-ID")}</td>
+                <td>${renderStatus(o.status)}</td>
+                <td>${o.date}</td>
+            </tr>
+        `).join("");
+    }
 
-  const btn = (label, page, disabled = false) =>
-    `<button class="page-btn ${disabled ? "disabled" : ""}"
-             ${disabled ? "disabled" : ""}
-             onclick="loadOrders(${page})">${label}</button>`;
+    function renderStatus(status) {
+        switch (status) {
+            case "Order Created":
+                return `<span class="status-pill status-draft">Order Created</span>`;
+            case "Waiting for Payment":
+                return `<span class="status-pill status-low">Waiting for Payment</span>`;
+            case "Payment Success":
+                return `<span class="status-pill status-published">Payment Success</span>`;
+            case "Cancelled":
+                return `<span class="status-pill status-danger">Cancelled</span>`;
+            default:
+                return `<span class="status-pill status-draft">${status}</span>`;
+        }
+    }
 
-  pag.innerHTML += btn("Previous", p.page - 1, p.page <= 1);
+    function renderPagination(p) {
+        document.getElementById("table-info").innerText =
+            `Showing page ${p.page} of ${p.totalPages} (${p.totalRows} orders)`;
+        const pag = document.getElementById("pagination");
+        pag.innerHTML = "";
+        const btn = (label, page, disabled = false) =>
+            `<button class="page-btn ${disabled ? "disabled" : ""}"
+                ${disabled ? "disabled" : ""}
+                onclick="loadOrders(${page})">${label}</button>`;
 
-  for (let i = 1; i <= p.totalPages; i++) {
-    pag.innerHTML += `
-      <button class="page-number ${i === p.page ? "active" : ""}"
-              onclick="loadOrders(${i})">${i}</button>`;
-  }
+        pag.innerHTML += btn("Previous", p.page - 1, p.page <= 1);
+        for (let i = 1; i <= p.totalPages; i++) {
+            pag.innerHTML += `
+                <button class="page-number ${i === p.page ? "active" : ""}"
+                    onclick="loadOrders(${i})">${i}</button>`;
+        }
+        pag.innerHTML += btn("Next", p.page + 1, p.page >= p.totalPages);
+    }
 
-  pag.innerHTML += btn("Next", p.page + 1, p.page >= p.totalPages);
-}
-
-document.getElementById("filterForm").addEventListener("submit", e => {
-  e.preventDefault();
-  loadOrders(1);
-});
-
-loadOrders();
-</script>
-<script>
-  async function loadPart(id, url) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const res = await fetch(url, { cache: "no-cache" });
-    el.innerHTML = await res.text();
-  }
-  loadPart("sideBar", "/TUBES_2_Toko/frontend/includes/sideBar.html");
-</script>
-<script>
-  document.getElementById("btnExportPdf").addEventListener("click", () => {
-  const form = document.getElementById("filterForm");
-  const params = new URLSearchParams(new FormData(form)); // bawa search & status
-  window.location.href = "/TUBES_2_Toko/backend/admin/report.php?" + params.toString();
-});
-</script>
-<script>
-(async function () {
-  try {
-    const res = await fetch("/TUBES_2_Toko/backend/auth/me.php", {
-      credentials: "include"
+    document.getElementById("filterForm").addEventListener("submit", e => {
+        e.preventDefault();
+        loadOrders(1);
     });
 
-    const data = await res.json();
-
-    if (!data.ok || !data.logged_in) {
-      return;
+    loadOrders();
+</script>
+<script>
+    async function loadPart(id, url) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const res = await fetch(url, { cache: "no-cache" });
+        el.innerHTML = await res.text();
     }
-
-    const username = data.user.username || "User";
-
-    const welcomeEl = document.querySelector(".admin-welcome");
-    if (welcomeEl) {
-      welcomeEl.textContent = "Hi, " + username;
-    }
-
-    const avatarEl = document.querySelector(".admin-avatar-small");
-    if (!avatarEl) return;
-
-    if (data.user.profile_photo_url) {
-      avatarEl.innerHTML = `
-        <img src="${data.user.profile_photo_url}"
-             alt="avatar"
-             style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
-      `;
-    } else {
-      const initials = username.trim().substring(0, 2).toUpperCase();
-      avatarEl.textContent = initials;
-    }
-
-  } catch (err) {
-    console.error("Failed to load user info", err);
-  }
-})();
+    loadPart("sideBar", "/TUBES_2_Toko/frontend/includes/sideBar.html");
+</script>
+<script>
+    document.getElementById("btnExportPdf").addEventListener("click", () => {
+        const form = document.getElementById("filterForm");
+        const params = new URLSearchParams(new FormData(form)); // bawa search & status
+        window.location.href = "/TUBES_2_Toko/backend/admin/report.php?" + params.toString();
+    });
+</script>
+<script>
+    (async function () {
+        try {
+            const res = await fetch("/TUBES_2_Toko/backend/auth/me.php", {
+                credentials: "include"
+            });
+            const data = await res.json();
+            if (!data.ok || !data.logged_in) {
+                return;
+            }
+            const username = data.user.username || "User";
+            const welcomeEl = document.querySelector(".admin-welcome");
+            if (welcomeEl) {
+                welcomeEl.textContent = "Hi, " + username;
+            }
+            const avatarEl = document.querySelector(".admin-avatar-small");
+            if (!avatarEl) return;
+            if (data.user.profile_photo_url) {
+                avatarEl.innerHTML = `
+                    <img src="${data.user.profile_photo_url}"
+                        alt="avatar"
+                        style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+                `;
+            } else {
+                const initials = username.trim().substring(0, 2).toUpperCase();
+                avatarEl.textContent = initials;
+            }
+        } catch (err) {
+            console.error("Failed to load user info", err);
+        }
+    })();
 </script>
 </body>
 </html>
