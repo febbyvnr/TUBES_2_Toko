@@ -71,6 +71,7 @@
               <option>Hoodies</option>
               <option>Tshirts</option>
               <option>Cardigans</option>
+              <option>Sweatshirts</option>
             </select>
 
             <button type="submit" class="btn-primary-admin full">
@@ -116,7 +117,7 @@ async function loadProduct() {
   descEl.value = p.description || "";
   priceEl.value = p.price ?? "";
   stockEl.value = p.stock ?? "";
-  categoryEl.value = p.category || "";
+  categoryEl.value = p.category;
 }
 
 formEl.onsubmit = async (e) => {
