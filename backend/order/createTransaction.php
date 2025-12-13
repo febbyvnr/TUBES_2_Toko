@@ -58,7 +58,7 @@ if (empty($items)) {
 $mysqli->begin_transaction();
 
 try {
-  $insT = $mysqli->prepare("INSERT INTO transaction (user_id, total_price) VALUES (?, ?)");
+  $insT = $mysqli->prepare("INSERT INTO transactions (user_id, total_price) VALUES (?, ?)");
   $insT->bind_param("ii", $user_id, $total);
   $insT->execute();
 
@@ -87,5 +87,5 @@ try {
   echo json_encode(["ok" => true, "data" => ["transaction_id" => $transaction_id, "total" => $total]]);
 } catch (Throwable $e) {
   $mysqli->rollback();
-  echo json_encode(["ok" => false, "message" => "Failed create transaction", "error" => $e->getMessage()]);
+  echo json_encode(["ok" => false, "message" => "Failed create transactions", "error" => $e->getMessage()]);
 }

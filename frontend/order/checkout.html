@@ -88,41 +88,47 @@
 </main>
 <div id="footer"></div>
 <script>
-    async function loadCheckout() {
-        const res = await fetch("/TUBES_2_Toko/backend/order/getItems.php", {
-            credentials: "include"
-        });
-        const json = await res.json();
-        const itemsEl = document.getElementById("orderItems");
-        if (!json.ok || !json.data.items.length) {
-            itemsEl.innerHTML = "<p>No items selected.</p>";
-            document.getElementById("subtotal").innerText = "Rp 0";
-            document.getElementById("grandTotal").innerText = "Rp 0";
-            return;
-        }
-        let total = 0;
-        itemsEl.innerHTML = json.data.items.map(i => {
-            total += i.price * i.quantity;
-            return `
-                <div class="order-item">
-                    <img src="/TUBES_2_Toko/assets/products/${i.image}" alt="${i.name}">
-                    <div>
-                        <b>${i.name}</b><br>
-                        <div class="item-info">Size: ${i.size}</div>
-                        <div class="item-info">Qty: ${i.quantity}</div>
-                    </div>
-                    <div class="price">Rp ${i.price.toLocaleString()}</div>
-                </div>
-            `;
-        }).join("");
-        document.getElementById("subtotal").innerText =
-            "Rp " + total.toLocaleString();
+  async function loadCheckout() {
+    const res = await fetch("/TUBES_2_Toko/backend/order/getItems.php", {
+      credentials: "include"
+    });
+    const json = await res.json();
+    const itemsEl = document.getElementById("orderItems");
 
-        document.getElementById("grandTotal").innerText =
-            "Rp " + (total + 7000).toLocaleString();
+    if (!json.ok || !json.data.items.length) {
+      itemsEl.innerHTML = "<p>No items selected.</p>";
+      document.getElementById("subtotal").innerText = "Rp 0";
+      document.getElementById("grandTotal").innerText = "Rp 0";
+      return;
     }
+
+    let total = 0;
+    itemsEl.innerHTML = json.data.items.map(i => {
+      total += i.price * i.quantity;
+      return `
+        <div class="order-item">
+          <img src="/TUBES_2_Toko/assets/products/${i.image}" alt="${i.name}">
+          <div>
+            <b>${i.name}</b><br>
+            <div class="item-info">Size: ${i.size}</div>
+            <div class="item-info">Qty: ${i.quantity}</div>
+          </div>
+          <div class="price">Rp ${i.price.toLocaleString()}</div>
+        </div>
+      `;
+    }).join("");
+
+    document.getElementById("subtotal").innerText =
+      "Rp " + total.toLocaleString();
+
+    document.getElementById("grandTotal").innerText =
+      "Rp " + (total + 7000).toLocaleString();
+  }
+
+  (async () => {
+    await loadCheckout();
     await createTransactionOnce();
-    loadCheckout();
+  })();
 </script>
 <script>
   async function createTransactionOnce() {
@@ -192,87 +198,53 @@
   });
 </script>
 <script>
-    //bwh ini dari code lama, tp gbs
-    document.getElementById("useLocation").addEventListener("change", () => {
-        let addressInput = document.getElementById("address");
+  const useLocationEl = document.getElementById("useLocation");
+  const addressInput  = document.getElementById("address");
 
-        if (!navigator.geolocation) {
-            alert("Your browser doesn't support geolocation.");
-            return;
+  useLocationEl.addEventListener("change", () => {
+    if (!useLocationEl.checked) return;
+
+    if (!navigator.geolocation) {
+      alert("Browser kamu tidak mendukung lokasi. Isi alamat manual ya.");
+      useLocationEl.checked = false;
+      return;
+    }
+
+    const oldPlaceholder = addressInput.placeholder || "";
+    addressInput.placeholder = "Detecting Location...";
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+
+          const res = await fetch(`/TUBES_2_Toko/backend/order/reverseGeocode.php?lat=${lat}&lon=${lon}`, {
+            credentials: "include"
+          });
+          const json = await res.json();
+
+          if (!json.ok) throw new Error(json.message || "reverseGeocode failed");
+
+          addressInput.value = json.data.display_name;
+        } catch (err) {
+          console.error(err);
+          alert("Gagal mengambil alamat. Coba lagi atau isi manual.");
+          useLocationEl.checked = false;
+          addressInput.focus();
+        } finally {
+          addressInput.placeholder = oldPlaceholder;
         }
-
-        navigator.geolocation.getCurrentPosition(success, () => {
-            alert("Unable to retrieve location.");
-        });
-
-        function success(pos) {
-            const lat = pos.coords.latitude;
-            const lon = pos.coords.longitude;
-
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.display_name) {
-                        addressInput.value = data.display_name;
-                    }
-                });
-        }
-    });
-    //ini baru dr gpt
-    // const useLocationEl = document.getElementById("useLocation");
-    // const addressInput  = document.getElementById("address");
-    // useLocationEl.addEventListener("change", async () => {
-    //     if (!useLocationEl.checked) return;
-    //     if (!navigator.geolocation) {
-    //         alert("Your browser doesn't support location. Please enter the address manually.");
-    //         useLocationEl.checked = false;
-    //         return;
-    //     }
-    //     const oldPlaceholder = addressInput.placeholder;
-    //     addressInput.placeholder = "Detecting Location...";
-    //     addressInput.value = "";
-    //     const fetchWithTimeout = (url, ms = 12000) => {
-    //         const controller = new AbortController();
-    //         const t = setTimeout(() => controller.abort(), ms);
-    //         return fetch(url, {
-    //         signal: controller.signal,
-    //         headers: {
-    //             "Accept": "application/json"
-    //         }
-    //         }).finally(() => clearTimeout(t));
-    //     };
-    //     navigator.geolocation.getCurrentPosition(async (pos) => {
-    //         try {
-    //         const lat = pos.coords.latitude;
-    //         const lon = pos.coords.longitude;
-    //         const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`;
-    //         const res = await fetchWithTimeout(url, 12000);
-    //         if (!res.ok) throw new Error("Reverse geocode failed");
-    //         const data = await res.json();
-    //         if (data && data.display_name) {
-    //             addressInput.value = data.display_name;
-    //         } else {
-    //             throw new Error("No address returned");
-    //         }
-    //         } catch (err) {
-    //         console.error(err);
-    //         alert("Failed to detect location. Please try again or enter address manually.");
-    //         addressInput.focus();
-    //         useLocationEl.checked = false;
-    //         } finally {
-    //         addressInput.placeholder = oldPlaceholder || "";
-    //         }
-    //     }, (error) => {
-    //         console.error(error);
-    //         alert("Location permission denied / failed to read location. Enter the address manually.");
-    //         addressInput.placeholder = oldPlaceholder || "";
-    //         useLocationEl.checked = false;
-    //     }, {
-    //         enableHighAccuracy: true,
-    //         timeout: 15000,
-    //         maximumAge: 0
-    //     });
-    // });
+      },
+      (err) => {
+        console.error(err);
+        alert("Tidak bisa mengambil lokasi (izin ditolak / gagal). Isi manual ya.");
+        useLocationEl.checked = false;
+        addressInput.placeholder = oldPlaceholder;
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+  });
 </script>
 </body>
 </html>
