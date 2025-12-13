@@ -1,196 +1,167 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>FEYORA — Checkout</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FEYORA — Checkout</title>
 
-  <link rel="stylesheet" href="../styles/checkout.css">
-  <link rel="stylesheet" href="../styles/header.css">
-  <link rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="../styles/HomePage.css">
+    <link rel="stylesheet" href="../styles/checkout.css">
+    <link rel="stylesheet" href="../styles/header.css">
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
-
 <body>
-
 <div id="header"></div>
-
-<main class="checkout-wrapper">
-
-  <!-- LEFT -->
-  <section class="checkout-left">
-    <h2>Shipping Address</h2>
-    <p class="subtitle">Enter your shipping details</p>
-
-
-    <form id="shippingForm">
-      <label>Email</label>
-      <input type="email" name="email" required>
-
-      <div class="form-row">
-            <div class="half">
-                <label>First Name</label>
-                <input type="text">
+<main class="wrapper">
+    <!-- LEFT -->
+    <section class="checkout-left">
+        <h2>Shipping Address</h2>
+        <p class="subtitle">Enter your shipping details</p>
+        <form id="shippingForm">
+            <label>Email</label>
+            <input type="email" name="email" required>
+            <div class="form-row">
+                <div class="half">
+                    <label>First Name</label>
+                    <input type="text" name="first_name">
+                </div>
+                <div class="half">
+                    <label>Last Name</label>
+                    <input type="text" name="last_name">
+                </div>
             </div>
-            <div class="half">
-                <label>Last Name</label>
-                <input type="text">
+            <div class="address-row">
+                <label class="address-label">Address</label>
+                <label class="use-location">
+                    <input type="checkbox" id="useLocation">
+                    Use My Current Location
+                </label>
             </div>
+            <input type="text" name="address" id="address" required>
+            <div class="form-row">
+                <div class="third">
+                    <label>City</label>
+                    <input type="text" name="city">
+                </div>
+                <div class="third">
+                    <label>State</label>
+                    <input type="text" name="state">
+                </div>
+                <div class="third">
+                    <label>ZIP Code</label>
+                    <input type="text" name="zip">
+                </div>
+            </div>
+            <div class="billing-row">
+                <input type="checkbox" id="sameBilling">
+                <label for="sameBilling">Billing address is the same as shipping</label>
+            </div>
+            <div class="btn-row">
+                <a href="../cart/listCart.php" class="btn-return">Return to Cart</a>
+                <button type="submit" class="btn-submit">Continue to Payment</button>
+            </div>
+        </form>
+    </section>
+    <!-- RIGHT -->
+    <aside class="checkout-right">
+        <h3>Order Summary</h3>
+        <div id="orderItems"></div>
+        <div class="summary-line">
+            <span>Subtotal</span>
+            <span id="subtotal">Rp 0</span>
         </div>
-
-        <div class="address-row">
-            <label class="address-label">Address</label>
-            <label class="use-location">
-                <input type="checkbox" id="useLocation">
-                Use My Location
-            </label>
+        <div class="summary-line">
+            <span>Shipping</span>
+            <span>Rp 5.000</span>
         </div>
-
-        <input type="text" name="address" id="address" required>
-
-
-        <div class="form-row">
-            <div class="third">
-                <label>City</label>
-                <input type="text">
-            </div>
-            <div class="third">
-                <label>State</label>
-                <input type="text">
-            </div>
-            <div class="third">
-                <label>ZIP Code</label>
-                <input type="text">
-            </div>
-            
+        <div class="summary-line">
+            <span>Admin</span>
+            <span>Rp 2.000</span>
         </div>
-
-        <div class="billing-row">
-            <input type="checkbox" id="sameBilling">
-            <label for="sameBilling">Billing address is the same as shipping</label>
+        <div class="summary-total">
+            Total: <span id="grandTotal">Rp 0</span>
         </div>
-        
-        <div class="btn-row">
-    <a href="../cart/listCart.php" class="btn-return">Return to Cart</a>
-    <button type="submit" class="btn-submit">Continue to Payment</button>
-</div>
-
-    </form>
-  </section>
-
-  <!-- RIGHT -->
-  <aside class="checkout-right">
-    <h3>Order Summary</h3>
-
-    <!-- ITEMS -->
-    <div id="orderItems"></div>
-
-    <div class="summary">
-      <div class="line">
-        <span>Subtotal</span>
-        <span id="subtotal">Rp 0</span>
-      </div>
-      <div class="line">
-        <span>Shipping</span>
-        <span>Rp 5.000</span>
-      </div>
-      <div class="line">
-        <span>Admin</span>
-        <span>Rp 2.000</span>
-      </div>
-      <div class="total">
-        Total: <span id="grandTotal">Rp 0</span>
-      </div>
-    </div>
-  </aside>
-
+    </aside>
 </main>
-
 <div id="footer"></div>
-
-<!-- ================= HEADER & FOOTER ================= -->
 <script>
-async function loadPart(id, url) {
-  const el = document.getElementById(id);
-  const res = await fetch(url, { cache: "no-cache" });
-  el.innerHTML = await res.text();
-}
+    async function loadCheckout() {
+        const res = await fetch("/TUBES_2_Toko/backend/order/getItems.php", {
+            credentials: "include"
+        });
+        const json = await res.json();
+        const itemsEl = document.getElementById("orderItems");
+        if (!json.ok || !json.data.items.length) {
+            itemsEl.innerHTML = "<p>No items selected.</p>";
+            document.getElementById("subtotal").innerText = "Rp 0";
+            document.getElementById("grandTotal").innerText = "Rp 0";
+            return;
+        }
+        let total = 0;
+        itemsEl.innerHTML = json.data.items.map(i => {
+            total += i.price * i.quantity;
+            return `
+                <div class="order-item">
+                    <img src="/TUBES_2_Toko/assets/products/${i.image}" alt="${i.name}">
+                    <div>
+                        <b>${i.name}</b><br>
+                        <div class="item-info">Size: ${i.size}</div>
+                        <div class="item-info">Qty: ${i.quantity}</div>
+                    </div>
+                    <div class="price">Rp ${i.price.toLocaleString()}</div>
+                </div>
+            `;
+        }).join("");
+        document.getElementById("subtotal").innerText =
+            "Rp " + total.toLocaleString();
 
-(async function () {
-  await loadPart("header", "/TUBES_2_Toko/frontend/includes/header.html");
-  await loadPart("footer", "/TUBES_2_Toko/frontend/includes/footer.html");
-})();
+        document.getElementById("grandTotal").innerText =
+            "Rp " + (total + 7000).toLocaleString();
+    }
+    loadCheckout();
 </script>
-
-<!-- ================= LOAD CHECKOUT ITEMS ================= -->
 <script>
-async function loadCheckout() {
-  const res = await fetch("/TUBES_2_Toko/backend/order/getItems.php", {
-    credentials: "include"
-  });
-
-  const json = await res.json();
-  const itemsEl = document.getElementById("orderItems");
-
-  if (!json.ok || !json.data.items.length) {
-    itemsEl.innerHTML = "<p>No items selected.</p>";
-    document.getElementById("subtotal").innerText = "Rp 0";
-    document.getElementById("grandTotal").innerText = "Rp 0";
-    return;
-  }
-
-  let total = 0;
-
-  itemsEl.innerHTML = json.data.items.map(i => {
-    total += i.price * i.quantity;
-    return `
-      <div class="order-item">
-        <img src="/TUBES_2_Toko/assets/products/${i.image}">
-        <div>
-          <b>${i.name}</b><br>
-          Size: ${i.size}<br>
-          Qty: ${i.quantity}
-        </div>
-        <div>Rp ${i.price.toLocaleString()}</div>
-      </div>
-    `;
-  }).join("");
-
-  document.getElementById("subtotal").innerText =
-    "Rp " + total.toLocaleString();
-
-  document.getElementById("grandTotal").innerText =
-    "Rp " + (total + 7000).toLocaleString();
-}
-
-loadCheckout();
+    const API_POST = "/TUBES_2_Toko/backend/order/submitShipping.php";
+    document.getElementById("shippingForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const res = await fetch(API_POST, {
+            method: "POST",
+            body: formData,
+            credentials: "include"
+        });
+        const json = await res.json();
+        if (json.ok) {
+            window.location.href = "/TUBES_2_Toko/frontend/payment/payment.html";
+        } else {
+            alert("Failed to continue.");
+        }
+    });
 </script>
-
-
-<!-- ================= SUBMIT SHIPPING ================= -->
 <script>
-const API_POST = "/TUBES_2_Toko/backend/order/submitShipping.php";
+    async function loadPart(id, url) {
+        const el = document.getElementById(id);
+        if (!el) return;
 
-document.getElementById("shippingForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const formData = new FormData(e.target);
-
-  const res = await fetch(API_POST, {
-    method: "POST",
-    body: formData,
-    credentials: "include"
-  });
-
-  const json = await res.json();
-
-  if (json.ok) {
-    window.location.href = "/TUBES_2_Toko/frontend/payment/payment.html";
-  } else {
-    alert("Failed to continue.");
-  }
-});
+        const res = await fetch(url, { cache: "no-cache" });
+        const html = await res.text();
+        el.innerHTML = html;
+        el.querySelectorAll("script").forEach(oldScript => {
+            const s = document.createElement("script");
+            if (oldScript.src) s.src = oldScript.src;
+            s.textContent = oldScript.textContent;
+            document.body.appendChild(s);
+            oldScript.remove();
+        });
+        if (id === "header" && window.initHeaderAuth) {
+            await window.initHeaderAuth();
+        }
+    }
+    (async function () {
+        await loadPart("header", "/TUBES_2_Toko/frontend/includes/header.html");
+        await loadPart("footer", "/TUBES_2_Toko/frontend/includes/footer.html");
+    })();
 </script>
-
 </body>
 </html>
