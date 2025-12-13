@@ -58,7 +58,7 @@
                 <label for="sameBilling">Billing address is the same as shipping</label>
             </div>
             <div class="btn-row">
-                <a href="../cart/listCart.php" class="btn-return">Return to Cart</a>
+                <a href="../cart/listCart.html" class="btn-return">Return to Cart</a>
                 <button type="button" class="btn-submit" id="toPayment">
                     Continue to Payment
                 </button>
@@ -121,25 +121,46 @@
         document.getElementById("grandTotal").innerText =
             "Rp " + (total + 7000).toLocaleString();
     }
+    await createTransactionOnce();
     loadCheckout();
 </script>
 <script>
-    const API_POST = "/TUBES_2_Toko/backend/order/submitShipping.php";
-    document.getElementById("shippingForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const res = await fetch(API_POST, {
-            method: "POST",
-            body: formData,
-            credentials: "include"
-        });
-        const json = await res.json();
-        if (json.ok) {
-            window.location.href = "/TUBES_2_Toko/frontend/payment/payment.html";
-        } else {
-            alert("Failed to continue.");
-        }
+  async function createTransactionOnce() {
+    const res = await fetch("/TUBES_2_Toko/backend/order/createTransaction.php", {
+      credentials: "include"
     });
+    const json = await res.json();
+    if (!json.ok) {
+      console.error(json);
+      alert("Gagal membuat transaksi awal. Coba refresh atau ulangi checkout.");
+    }
+  }
+</script>
+<script>
+  const API_POST = "/TUBES_2_Toko/backend/order/submitShipping.php";
+  document.getElementById("shippingForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const res = await fetch(API_POST, {
+      method: "POST",
+      body: formData,
+      credentials: "include"
+    });
+    const json = await res.json();
+    if (!json.ok) {
+      alert(json.message || "Failed to continue.");
+      return;
+    }
+    const markRes = await fetch("/TUBES_2_Toko/backend/order/markWaiting.php", {
+      credentials: "include"
+    });
+    const markJson = await markRes.json();
+    if (!markJson.ok) {
+      alert(markJson.message || "Gagal mengubah status transaksi.");
+      return;
+    }
+    window.location.href = "/TUBES_2_Toko/frontend/payment/payment.html";
+  });
 </script>
 <script>
     async function loadPart(id, url) {
@@ -166,9 +187,9 @@
     })();
 </script>
 <script>
-    document.getElementById("toPayment").addEventListener("click", () => {
-        window.location.href = "./payment.html";
-    });
+  document.getElementById("toPayment").addEventListener("click", () => {
+    document.getElementById("shippingForm").requestSubmit();
+  });
 </script>
 <script>
     //bwh ini dari code lama, tp gbs
