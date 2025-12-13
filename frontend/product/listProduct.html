@@ -154,7 +154,7 @@
 
             grid.innerHTML = items.map(p => {
                 const img = p.image_url || "/TUBES_2_Toko/assets/products/placeholder.png";
-                const title = escapeHtml(p.title || "Untitled Product");
+                const title = escapeHtml(p.name);
                 const price = escapeHtml(p.price_text || "");
 
                 return `
