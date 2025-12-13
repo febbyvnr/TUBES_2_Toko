@@ -50,20 +50,17 @@
             <input type="text" name="name" id="name" class="admin-input" required>
 
             <label>Description</label>
-            <textarea name="description" id="description"
-                      class="admin-textarea" required></textarea>
+            <textarea name="description" id="description" class="admin-textarea" required></textarea>
           </div>
 
           <div class="admin-form-card">
             <h3 class="form-section-title">Pricing & Stock</h3>
 
             <label>Price</label>
-            <input type="number" name="price" id="price"
-                   class="admin-input" required>
+            <input type="number" name="price" id="price" class="admin-input" required>
 
             <label>Stock</label>
-            <input type="number" name="stock" id="stock"
-                   class="admin-input" required>
+            <input type="number" name="stock" id="stock" class="admin-input" required>
 
             <label>Category</label>
             <select name="category" id="category" class="admin-input" required>
@@ -91,23 +88,41 @@
 const API = "/TUBES_2_Toko/backend/admin/editProducts.php";
 const id = new URLSearchParams(location.search).get("id");
 
+// ambil elemen (hindari nama variabel "name")
+const productIdEl = document.getElementById("productId");
+const nameEl = document.getElementById("name");
+const descEl = document.getElementById("description");
+const priceEl = document.getElementById("price");
+const stockEl = document.getElementById("stock");
+const categoryEl = document.getElementById("category");
+const formEl = document.getElementById("editForm");
+
 async function loadProduct() {
-  const res = await fetch(`${API}?id=${id}`, { credentials:"include" });
+  if (!id) {
+    alert("ID produk tidak ada di URL");
+    return;
+  }
+
+  const res = await fetch(`${API}?id=${encodeURIComponent(id)}`, {
+    credentials: "include"
+  });
+
   const json = await res.json();
-  if (!json.ok) return alert(json.message);
+  if (!json.ok) return alert(json.message || "Gagal load produk");
 
   const p = json.data;
-  productId.value = p.id;
-  name.value = p.name;
-  description.value = p.description;
-  price.value = p.price;
-  stock.value = p.stock;
-  category.value = p.category;
+  productIdEl.value = p.id;
+  nameEl.value = p.name || "";
+  descEl.value = p.description || "";
+  priceEl.value = p.price ?? "";
+  stockEl.value = p.stock ?? "";
+  categoryEl.value = p.category || "";
 }
 
-editForm.onsubmit = async e => {
+formEl.onsubmit = async (e) => {
   e.preventDefault();
-  const formData = new FormData(editForm);
+
+  const formData = new FormData(formEl);
 
   const res = await fetch(API, {
     method: "POST",
@@ -116,7 +131,12 @@ editForm.onsubmit = async e => {
   });
 
   const json = await res.json();
-  if (!json.ok) return alert(json.message);
+  if (!json.ok) {
+    const msg = (json.errors && json.errors.length)
+      ? json.errors.join("\n")
+      : (json.message || "Gagal update produk");
+    return alert(msg);
+  }
 
   alert("Product updated!");
   location.href = "/TUBES_2_Toko/frontend/admin/dashboard.html";

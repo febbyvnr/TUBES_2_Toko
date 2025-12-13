@@ -65,10 +65,9 @@ if (isset($_FILES['image']) && is_array($_FILES['image'])) {
       } elseif (($f['size'] ?? 0) > 10 * 1024 * 1024) {
         $errors[] = 'Image max size is 10MB.';
       } else {
-        // simpan ke: /TUBES_2_Toko/assets/products/
-        $uploadDir = realpath(__DIR__ . '/../../assets/products');
+        $uploadDir = realpath(__DIR__ . '/../../frontend/assets/products');
         if ($uploadDir === false) {
-          $uploadDir = __DIR__ . '/../../assets/products';
+          $uploadDir = __DIR__ . '/../../frontend/assets/products';
           if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true)) {
             $errors[] = 'Failed to create upload directory.';
           }
@@ -102,7 +101,7 @@ $stmt = $mysqli->prepare("
 ");
 
 if (!$stmt) {
-  if ($imageFileName) @unlink(__DIR__ . '/../../assets/products/' . $imageFileName);
+  if ($imageFileName) @unlink(__DIR__ . '/../../frontend/assets/products/' . $imageFileName);
   http_response_code(500);
   echo json_encode(['ok' => false, 'errors' => ['Database prepare failed.']]);
   exit;
@@ -116,7 +115,7 @@ if (!$stmt) {
 $stmt->bind_param('ssdiss', $name, $desc, $price, $stock, $category, $imageFileName);
 
 if (!$stmt->execute()) {
-  if ($imageFileName) @unlink(__DIR__ . '/../../assets/products/' . $imageFileName);
+  if ($imageFileName) @unlink(__DIR__ . '/../../frontend/assets/products/' . $imageFileName);
   http_response_code(500);
   echo json_encode(['ok' => false, 'errors' => ['Database execute failed.'], 'db_error' => $stmt->error]);
   $stmt->close();

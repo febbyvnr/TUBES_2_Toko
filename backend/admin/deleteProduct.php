@@ -3,8 +3,8 @@ session_start();
 require_once __DIR__ . '/../config/db.php';
 
 if (!isset($_SESSION['user_id'])) {
-    header("Location: /TUBES_2_Toko/frontend/auth/login.html");
-    exit;
+  header("Location: /TUBES_2_Toko/frontend/auth/login.html");
+  exit;
 }
 
 $user_id = (int)$_SESSION['user_id'];
@@ -16,18 +16,18 @@ $user = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
 if (!$user || $user['role'] !== 'admin') {
-    http_response_code(403);
-    echo "Forbidden";
-    exit;
+  http_response_code(403);
+  echo "Forbidden";
+  exit;
 }
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-
 if ($id <= 0) {
-    header("Location: /TUBES_2_Toko/frontend/admin/dashboard.html");
-    exit;
+  header("Location: /TUBES_2_Toko/frontend/admin/dashboard.html");
+  exit;
 }
 
+/* ambil nama file image */
 $stmt = $mysqli->prepare("SELECT image FROM products WHERE id = ? LIMIT 1");
 $stmt->bind_param("i", $id);
 $stmt->execute();
@@ -35,18 +35,25 @@ $product = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
 if (!$product) {
-    header("Location: /TUBES_2_Toko/frontend/admin/dashboard.html");
-    exit;
+  header("Location: /TUBES_2_Toko/frontend/admin/dashboard.html");
+  exit;
 }
 
+/* hapus file image kalau ada */
 if (!empty($product['image'])) {
-    $imagePath = __DIR__ . '/../assets/products/' . $product['image'];
-    if (file_exists($imagePath)) {
-        unlink($imagePath);
-    }
+  // path fisik di server (bukan URL)
+  $imagePath = realpath(__DIR__ . "/../../frontend/assets/products/" . $product['image']);
+
+  // pastikan file benar-benar masih di folder assets/products (biar aman dari path traversal)
+  $baseDir = realpath(__DIR__ . "/../../frontend/assets/products");
+
+  if ($imagePath && $baseDir && str_starts_with($imagePath, $baseDir) && file_exists($imagePath)) {
+    @unlink($imagePath);
+  }
 }
 
-$stmt = $mysqli->prepare("DELETE FROM products WHERE id = ?");
+/* hapus record produk */
+$stmt = $mysqli->prepare("DELETE FROM products WHERE id = ? LIMIT 1");
 $stmt->bind_param("i", $id);
 $stmt->execute();
 $stmt->close();

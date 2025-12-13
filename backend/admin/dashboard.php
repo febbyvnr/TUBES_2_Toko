@@ -126,7 +126,7 @@ $res = $stmt->get_result();
 $products = [];
 while ($r = $res->fetch_assoc()) {
   $img = !empty($r['image'])
-    ? "/TUBES_2_Toko/assets/products/" . rawurlencode($r['image'])
+    ? "/TUBES_2_Toko/frontend/assets/products/" . rawurlencode($r['image'])
     : "/TUBES_2_Toko/frontend/assets/products/placeholder.png";
 
   $products[] = [
