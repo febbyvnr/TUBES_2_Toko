@@ -66,106 +66,142 @@
 
   <!-- BUTTON -->
   <button class="btn-check" onclick="checkStatus()">
-    Check Status
+    Confirm Payment
   </button>
 
 </div>
-
 <script>
-const params = new URLSearchParams(location.search);
-const type = (params.get("type") || "ovo").toLowerCase();
-const trxId = params.get("transaction_id");
+  const params = new URLSearchParams(location.search);
+  const type = (params.get("type") || "ovo").toLowerCase();
+  const trxId = params.get("transaction_id");
 
-/* WALLET CONFIG (JANGAN UBAH UI) */
-const WALLET_MAP = {
-  ovo: {
-    label: "OVO",
-    logo: "ovo.png"
-  },
-  gopay: {
-    label: "GOPAY",
-    logo: "gopay.png"
-  },
-  dana: {
-    label: "DANA",
-    logo: "dana.png"
+  if (!trxId) alert("transaction_id tidak ada di URL.");
+
+  const WALLET_MAP = {
+    ovo: { label: "OVO", logo: "ovo.png" },
+    gopay: { label: "GOPAY", logo: "gopay.png" },
+    dana: { label: "DANA", logo: "dana.png" }
+  };
+
+  const wallet = WALLET_MAP[type] || WALLET_MAP.ovo;
+
+  document.getElementById("wallet-name").innerText = wallet.label;
+  document.getElementById("wallet-label").innerText = wallet.label;
+  document.getElementById("wallet-instruction").innerText = wallet.label;
+  document.getElementById("wallet-instruction2").innerText = wallet.label;
+
+  document.getElementById("wallet-logo").src =
+    `/TUBES_2_Toko/frontend/assets/${wallet.logo}`;
+
+  // ===== AMBIL TOTAL DARI BACKEND (SOURCE OF TRUTH) =====
+  async function loadEwalletData() {
+    try {
+      const res = await fetch(
+        `/TUBES_2_Toko/backend/order/ewallet.php?transaction_id=${encodeURIComponent(trxId)}&type=${encodeURIComponent(type)}`,
+        { credentials: "include" }
+      );
+
+      const ct = res.headers.get("content-type") || "";
+      const raw = await res.text();
+
+      if (!ct.includes("application/json")) {
+        console.error("NOT JSON:", raw);
+        alert("Server tidak mengembalikan JSON.");
+        return;
+      }
+
+      const d = JSON.parse(raw);
+
+      if (d.ok === false) {
+        alert(d.message || "Gagal load ewallet data.");
+        return;
+      }
+
+      // total dari DB
+      document.getElementById("total").innerText =
+        "Rp " + Number(d.total || 0).toLocaleString("id-ID");
+
+      // nomor pembayaran (kalau backend kasih)
+      if (d.wallet_number) {
+        document.getElementById("wallet-number").innerText = d.wallet_number;
+        document.getElementById("wallet-number2").innerText = d.wallet_number;
+      }
+
+      // deadline (kalau backend kasih)
+      document.getElementById("deadline").innerText =
+        d.deadline ? ("Jatuh tempo " + d.deadline) : "-";
+
+      if (d.deadline_ts) startCountdown(Number(d.deadline_ts));
+    } catch (err) {
+      console.error(err);
+      alert("Terjadi error saat load data e-wallet. Cek console.");
+    }
   }
-};
 
-/* FALLBACK */
-const wallet = WALLET_MAP[type] || WALLET_MAP.ovo;
+  function startCountdown(deadlineTs) {
+    const el = document.getElementById("countdown");
+    const timer = setInterval(() => {
+      const diff = deadlineTs - Date.now();
+      if (diff <= 0) {
+        el.innerText = "Waktu Habis";
+        clearInterval(timer);
+        return;
+      }
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      el.innerText = `${h} jam ${m} menit ${s} detik`;
+    }, 1000);
+  }
 
-/* SET TEXT */
-document.getElementById("wallet-name").innerText = wallet.label;
-document.getElementById("wallet-label").innerText = wallet.label;
-document.getElementById("wallet-instruction").innerText = wallet.label;
-document.getElementById("wallet-instruction2").innerText = wallet.label;
+  function copyNumber() {
+    navigator.clipboard.writeText(
+      document.getElementById("wallet-number").innerText
+    );
+    alert("Nomor pembayaran disalin");
+  }
+  window.copyNumber = copyNumber;
 
-/* SET LOGO (ABSOLUTE PATH, AMAN) */
-document.getElementById("wallet-logo").src =
-  `/TUBES_2_Toko/frontend/assets/${wallet.logo}`;
+  async function confirmPayment() {
+    try {
+      const btn = document.querySelector(".btn-check");
+      btn.disabled = true;
 
-/* DUMMY DATA (SEMENTARA) */
-document.getElementById("total").innerText = "Rp 3.306.000";
-document.getElementById("deadline").innerText = "Jatuh tempo 14 Dec 2025, 01:16";
+      const res = await fetch(
+        `/TUBES_2_Toko/backend/order/updateStatus.php?id=${encodeURIComponent(trxId)}&mode=json`,
+        { credentials: "include" }
+      );
 
-startCountdown(24 * 60 * 60);
+      const ct = res.headers.get("content-type") || "";
+      const raw = await res.text();
 
-function startCountdown(seconds){
-  let s = seconds;
-  setInterval(()=>{
-    if (s <= 0) return;
-    const h = Math.floor(s / 3600);
-    const m = Math.floor((s % 3600) / 60);
-    const d = s % 60;
-    document.getElementById("countdown").innerText =
-      `${h} jam ${m} menit ${d} detik`;
-    s--;
-  },1000);
-}
+      if (!ct.includes("application/json")) {
+        console.error("NOT JSON:", raw);
+        alert("updateStatus tidak mengembalikan JSON. Cek updateStatus.php.");
+        btn.disabled = false;
+        return;
+      }
 
-function copyNumber(){
-  navigator.clipboard.writeText(
-    document.getElementById("wallet-number").innerText
-  );
-  alert("Nomor pembayaran disalin");
-}
+      const json = JSON.parse(raw);
 
-function checkStatus(){
-  location.href =
-    `/TUBES_2_Toko/backend/order/updateStatus.php?id=${trxId}`;
-}
 
-/* DUMMY DATA (nanti ganti dari API) */
-document.getElementById("total").innerText = "Rp 3.306.000";
-document.getElementById("deadline").innerText = "Jatuh tempo 14 Dec 2025, 01:16";
+      if (!json.ok) {
+        alert(json.message || "Gagal konfirmasi pembayaran.");
+        btn.disabled = false;
+        return;
+      }
 
-startCountdown(24 * 60 * 60);
+      window.location.href =
+        `/TUBES_2_Toko/frontend/order/payment-success.html?transaction_id=${encodeURIComponent(trxId)}`;
+    } catch (err) {
+      console.error(err);
+      alert("Terjadi error saat confirm payment. Cek console.");
+      document.querySelector(".btn-check").disabled = false;
+    }
+  }
+  window.checkStatus = confirmPayment;
 
-function startCountdown(seconds){
-  let s = seconds;
-  setInterval(()=>{
-    const h = Math.floor(s / 3600);
-    const m = Math.floor((s % 3600) / 60);
-    const d = s % 60;
-    document.getElementById("countdown").innerText =
-      `${h} jam ${m} menit ${d} detik`;
-    s--;
-  },1000);
-}
-
-function copyNumber(){
-  navigator.clipboard.writeText(
-    document.getElementById("wallet-number").innerText
-  );
-  alert("Nomor pembayaran disalin");
-}
-
-function checkStatus(){
-  location.href =
-    `/TUBES_2_Toko/backend/order/updateStatus.php?id=${trxId}`;
-}
+  loadEwalletData();
 </script>
-
 </body>
 </html>

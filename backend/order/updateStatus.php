@@ -2,46 +2,60 @@
 session_start();
 require_once __DIR__ . '/../config/db.php';
 
+header('Content-Type: application/json; charset=utf-8');
+
 if (!isset($_SESSION['user_id'])) {
-    die("Not logged in");
+    http_response_code(401);
+    echo json_encode(["ok" => false, "message" => "Not logged in"]);
+    exit;
 }
 
 $user_id = (int)$_SESSION['user_id'];
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$mode = $_GET['mode'] ?? "";
 
 if ($id <= 0) {
-    die("Invalid transaction ID");
+    http_response_code(400);
+    echo json_encode(["ok" => false, "message" => "Invalid transaction ID"]);
+    exit;
 }
 
-$chk = $mysqli->prepare("SELECT id, status FROM transactions WHERE id = ? AND user_id = ?");
-$chk->bind_param("ii", $id, $user_id);
-$chk->execute();
-$trx = $chk->get_result()->fetch_assoc();
-
-if (!$trx) {
-    die("Transaction not found");
-}
-
-$u = $mysqli->prepare("UPDATE transactions SET status = 'Payment Success' WHERE id = ? AND user_id = ?");
-$u->bind_param("ii", $id, $user_id);
-$u->execute();
-
-$del = $mysqli->prepare("
-    DELETE c
-    FROM cart c
-    JOIN detail_transaction d
-      ON d.product_id = c.product_id
-     AND d.size = c.size
-    WHERE c.user_id = ?
-      AND d.transaction_id = ?
+// update status hanya kalau transaksi milik user
+$stmt = $mysqli->prepare("
+    UPDATE transactions
+    SET status = 'Payment Success'
+    WHERE id = ? AND user_id = ?
 ");
-$del->bind_param("ii", $user_id, $id);
-$del->execute();
+$stmt->bind_param("ii", $id, $user_id);
+$stmt->execute();
 
-unset($_SESSION['checkout_ids']);
-if (isset($_SESSION['transaction_id']) && (int)$_SESSION['transaction_id'] === $id) {
-    unset($_SESSION['transaction_id']);
+if ($stmt->errno) {
+    http_response_code(500);
+    echo json_encode(["ok" => false, "message" => "DB error", "error" => $stmt->error]);
+    exit;
 }
 
+// HAPUS CART item yang sedang checkout (kalau ada)
+$selected = $_SESSION['checkout_ids'] ?? [];
+$cartIds = array_map('intval', array_keys($selected));
+
+if (!empty($cartIds)) {
+    $in = implode(',', $cartIds);
+    $del = $mysqli->prepare("DELETE FROM cart WHERE user_id = ? AND id IN ($in)");
+    $del->bind_param("i", $user_id);
+    $del->execute();
+}
+
+// bersihin session checkout (biar ga kepakai lagi)
+unset($_SESSION['checkout_ids']);
+// optional: kalau mau transaksi di session juga dibersihin
+// unset($_SESSION['transaction_id']);
+
+if ($mode === "json") {
+    echo json_encode(["ok" => true, "transaction_id" => $id]);
+    exit;
+}
+
+// kalau bukan json, redirect ke halaman sukses
 header("Location: /TUBES_2_Toko/frontend/order/payment-success.html?transaction_id=" . $id);
 exit;
