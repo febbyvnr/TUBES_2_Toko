@@ -1,81 +1,64 @@
 <?php
-header("Access-Control-Allow-Origin: https://frontend.toko.com");
-header("Access-Control-Allow-Credentials: true");
-header("Access-Control-Allow-Headers: Content-Type, Accept");
-header("Access-Control-Allow-Methods: POST, OPTIONS");
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') exit;
-
-session_set_cookie_params([
-    "samesite" => "None",
-    "secure" => true,
-    "httponly" => true
-]);
 session_start();
-
 require_once __DIR__ . '/../config/db.php';
 
-$user_id = $_SESSION['user_id'] ?? null;
-$selected = $_SESSION['checkout_ids'] ?? null;
+header('Content-Type: application/json; charset=utf-8');
 
-if (!$user_id || !$selected) {
-    http_response_code(401);
-    echo json_encode(["error" => "Unauthorized"]);
-    exit;
+if (!isset($_SESSION['user_id'])) {
+  http_response_code(401);
+  echo json_encode(["ok" => false, "message" => "Not logged in"]);
+  exit;
 }
 
-$payment_method = $_POST['method'] ?? null;
-$wallet_type = $_POST['ewallet_type'] ?? null;
-$total_price = $_POST['total_price'] ?? 0;
+$user_id = (int)$_SESSION['user_id'];
 
-// INSERT TRANSACTION
-$stmt = $mysqli->prepare("
-    INSERT INTO transactions (user_id, total_price, status, date_created)
-    VALUES (?, ?, 'Waiting for Payment', NOW())
-");
-$stmt->bind_param("id", $user_id, $total_price);
-$stmt->execute();
-$transaction_id = $mysqli->insert_id;
-$stmt->close();
-
-// INSERT DETAIL
-$ids = implode(",", array_map('intval', array_keys($selected)));
-$result = $mysqli->query("
-    SELECT c.quantity, c.size, c.product_id, p.price
-    FROM cart c
-    JOIN products p ON c.product_id = p.id
-    WHERE c.user_id = $user_id AND c.id IN ($ids)
-");
-
-while ($row = $result->fetch_assoc()) {
-    $stmt2 = $mysqli->prepare("
-        INSERT INTO detail_transaction
-        (transaction_id, product_id, size, price, quantity)
-        VALUES (?, ?, ?, ?, ?)
-    ");
-    $stmt2->bind_param(
-        "iisdi",
-        $transaction_id,
-        $row['product_id'],
-        $row['size'],
-        $row['price'],
-        $row['quantity']
-    );
-    $stmt2->execute();
-    $stmt2->close();
+if (!isset($_SESSION['transaction_id']) || (int)$_SESSION['transaction_id'] <= 0) {
+  http_response_code(400);
+  echo json_encode(["ok" => false, "message" => "No transaction in session"]);
+  exit;
 }
 
-$mysqli->query("DELETE FROM cart WHERE user_id = $user_id AND id IN ($ids)");
-unset($_SESSION['checkout_ids'], $_SESSION['shipping']);
+$transaction_id = (int)$_SESSION['transaction_id'];
+$method = $_POST['method'] ?? null;
+$ewallet_type = $_POST['ewallet_type'] ?? null;
 
-if ($payment_method === "cod") {
-    $mysqli->query("UPDATE transactions SET status='Payment Success' WHERE id=$transaction_id");
+if (!$method) {
+  http_response_code(400);
+  echo json_encode(["ok" => false, "message" => "method is required"]);
+  exit;
 }
 
-header("Content-Type: application/json");
+// pastikan transaksi milik user + ambil total dari DB (ini yg jadi source of truth)
+$chk = $mysqli->prepare("SELECT id, total_price, status FROM transactions WHERE id = ? AND user_id = ?");
+$chk->bind_param("ii", $transaction_id, $user_id);
+$chk->execute();
+$trx = $chk->get_result()->fetch_assoc();
+
+if (!$trx) {
+  http_response_code(404);
+  echo json_encode(["ok" => false, "message" => "Transaction not found"]);
+  exit;
+}
+
+// update status (PASTIKAN value ini ada di ENUM kamu)
+$newStatus = ($method === "cod") ? "Payment Success" : "Waiting for Payment";
+
+$u = $mysqli->prepare("UPDATE transactions SET status = ? WHERE id = ? AND user_id = ?");
+$u->bind_param("sii", $newStatus, $transaction_id, $user_id);
+$u->execute();
+
+if ($u->errno) {
+  http_response_code(500);
+  echo json_encode(["ok" => false, "message" => "DB error", "error" => $u->error]);
+  exit;
+}
+
+// jangan unset session dulu (biar halaman bank/ewallet masih bisa fetch by id)
 echo json_encode([
-    "status" => "success",
-    "transaction_id" => $transaction_id,
-    "payment_method" => $payment_method,
-    "ewallet_type" => $wallet_type
+  "ok" => true,
+  "transaction_id" => $transaction_id,
+  "payment_method" => $method,
+  "ewallet_type" => $ewallet_type,
+  "total" => (int)$trx["total_price"]
 ]);
 exit;

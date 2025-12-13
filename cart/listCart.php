@@ -216,7 +216,7 @@ $cart = $resultCart->fetch_all(MYSQLI_ASSOC);
                 Total : Rp <?= number_format($total, 0, ',', '.') ?>
             </div>
 
-        <form action="order/checkout.php" method="POST">
+        <form action="../TUBES_2_Toko/frontend/order/checkout.html" method="POST">
             <button class="checkout-btn" 
                 <?= empty($_SESSION['checkout_ids']) ? "onclick=\"alert('Pilih item dulu sebelum checkout!'); return false;\"" : '' ?>>
                 Checkout
