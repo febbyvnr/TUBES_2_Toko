@@ -239,7 +239,7 @@ body.order-page .price {
 }
 
 .btn-check {
-  margin-top: 25px;
+  margin-top: -50px !important;
   float: right;
   background: #ff2d7a;
   color: #fff;
