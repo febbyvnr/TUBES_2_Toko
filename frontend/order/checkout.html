@@ -59,7 +59,9 @@
             </div>
             <div class="btn-row">
                 <a href="../cart/listCart.php" class="btn-return">Return to Cart</a>
-                <button type="submit" class="btn-submit">Continue to Payment</button>
+                <button type="button" class="btn-submit" id="toPayment">
+                    Continue to Payment
+                </button>
             </div>
         </form>
     </section>
@@ -162,6 +164,94 @@
         await loadPart("header", "/TUBES_2_Toko/frontend/includes/header.html");
         await loadPart("footer", "/TUBES_2_Toko/frontend/includes/footer.html");
     })();
+</script>
+<script>
+    document.getElementById("toPayment").addEventListener("click", () => {
+        window.location.href = "./payment.html";
+    });
+</script>
+<script>
+    //bwh ini dari code lama, tp gbs
+    document.getElementById("useLocation").addEventListener("change", () => {
+        let addressInput = document.getElementById("address");
+
+        if (!navigator.geolocation) {
+            alert("Your browser doesn't support geolocation.");
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(success, () => {
+            alert("Unable to retrieve location.");
+        });
+
+        function success(pos) {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.display_name) {
+                        addressInput.value = data.display_name;
+                    }
+                });
+        }
+    });
+    //ini baru dr gpt
+    // const useLocationEl = document.getElementById("useLocation");
+    // const addressInput  = document.getElementById("address");
+    // useLocationEl.addEventListener("change", async () => {
+    //     if (!useLocationEl.checked) return;
+    //     if (!navigator.geolocation) {
+    //         alert("Your browser doesn't support location. Please enter the address manually.");
+    //         useLocationEl.checked = false;
+    //         return;
+    //     }
+    //     const oldPlaceholder = addressInput.placeholder;
+    //     addressInput.placeholder = "Detecting Location...";
+    //     addressInput.value = "";
+    //     const fetchWithTimeout = (url, ms = 12000) => {
+    //         const controller = new AbortController();
+    //         const t = setTimeout(() => controller.abort(), ms);
+    //         return fetch(url, {
+    //         signal: controller.signal,
+    //         headers: {
+    //             "Accept": "application/json"
+    //         }
+    //         }).finally(() => clearTimeout(t));
+    //     };
+    //     navigator.geolocation.getCurrentPosition(async (pos) => {
+    //         try {
+    //         const lat = pos.coords.latitude;
+    //         const lon = pos.coords.longitude;
+    //         const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`;
+    //         const res = await fetchWithTimeout(url, 12000);
+    //         if (!res.ok) throw new Error("Reverse geocode failed");
+    //         const data = await res.json();
+    //         if (data && data.display_name) {
+    //             addressInput.value = data.display_name;
+    //         } else {
+    //             throw new Error("No address returned");
+    //         }
+    //         } catch (err) {
+    //         console.error(err);
+    //         alert("Failed to detect location. Please try again or enter address manually.");
+    //         addressInput.focus();
+    //         useLocationEl.checked = false;
+    //         } finally {
+    //         addressInput.placeholder = oldPlaceholder || "";
+    //         }
+    //     }, (error) => {
+    //         console.error(error);
+    //         alert("Location permission denied / failed to read location. Enter the address manually.");
+    //         addressInput.placeholder = oldPlaceholder || "";
+    //         useLocationEl.checked = false;
+    //     }, {
+    //         enableHighAccuracy: true,
+    //         timeout: 15000,
+    //         maximumAge: 0
+    //     });
+    // });
 </script>
 </body>
 </html>
