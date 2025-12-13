@@ -186,10 +186,10 @@
                         <td>Rp ${Number(p.price || 0).toLocaleString("id-ID")}</td>
                         <td>${statusPill}</td>
                         <td class="cell-actions">
-                            <a href="/TUBES_2_Toko/frontend/admin/editProducts.html?id=${encodeURIComponent(p.id)}">
+                            <a href="/TUBES_2_Toko/backend/admin/editProducts.php?id=${encodeURIComponent(p.id)}">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            <a href="/TUBES_2_Toko/frontend/admin/deleteProducts.php?id=${encodeURIComponent(p.id)}"
+                            <a href="/TUBES_2_Toko/backend/admin/deleteProducts.php?id=${encodeURIComponent(p.id)}"
                                 onclick="return confirm('Hapus produk ini?')">
                                 <i class="bi bi-trash3"></i>
                             </a>
