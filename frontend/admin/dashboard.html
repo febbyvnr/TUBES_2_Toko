@@ -29,7 +29,9 @@
             <main class="admin-content">
                 <div class="admin-content-header">
                     <h1 class="admin-page-title">Dashboard</h1>
-                    <button class="btn-primary-admin">
+
+                    <button class="btn-primary-admin"
+                            onclick="location.href='/TUBES_2_Toko/frontend/admin/addProducts.html'">
                         <i class="bi bi-plus-lg"></i> Add New Product
                     </button>
                 </div>
@@ -157,7 +159,7 @@
             }
 
             productsBody.innerHTML = items.map(p => {
-                const stock = Number(p.stock) || 0; // ✅ ini bikin status stock bener
+                const stock = Number(p.stock) || 0;
                 let stockBadge = "";
                 let statusPill = "";
 
@@ -185,10 +187,10 @@
                         <td>Rp ${Number(p.price || 0).toLocaleString("id-ID")}</td>
                         <td>${statusPill}</td>
                         <td class="cell-actions">
-                            <a href="/TUBES_2_Toko/admin/editProduct.php?id=${encodeURIComponent(p.id)}">
+                            <a href="/TUBES_2_Toko/frontend/admin/editProducts.html?id=${encodeURIComponent(p.id)}">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            <a href="/TUBES_2_Toko/admin/deleteProduct.php?id=${encodeURIComponent(p.id)}"
+                            <a href="/TUBES_2_Toko/backend/admin/deleteProduct.php?id=${encodeURIComponent(p.id)}"
                                 onclick="return confirm('Hapus produk ini?')">
                                 <i class="bi bi-trash3"></i>
                             </a>
