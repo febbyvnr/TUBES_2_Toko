@@ -88,6 +88,23 @@
 </main>
 <div id="footer"></div>
 <script>
+  async function createTransactionOnce() {
+    const res = await fetch("/TUBES_2_Toko/backend/order/createTransaction.php", {
+      credentials: "include"
+    });
+    const json = await res.json();
+
+    if (!json.ok) {
+      console.error("createTransactionOnce failed:", json);
+      alert(json.message || "Gagal membuat transaksi awal.");
+      return;
+    }
+
+    console.log("Transaction created:", json);
+  }
+</script>
+
+<script>
   async function loadCheckout() {
     const res = await fetch("/TUBES_2_Toko/backend/order/getItems.php", {
       credentials: "include"
@@ -118,29 +135,14 @@
       `;
     }).join("");
 
-    document.getElementById("subtotal").innerText =
-      "Rp " + total.toLocaleString();
-
-    document.getElementById("grandTotal").innerText =
-      "Rp " + (total + 7000).toLocaleString();
+    document.getElementById("subtotal").innerText = "Rp " + total.toLocaleString();
+    document.getElementById("grandTotal").innerText = "Rp " + (total + 7000).toLocaleString();
   }
 
   (async () => {
     await loadCheckout();
     await createTransactionOnce();
   })();
-</script>
-<script>
-  async function createTransactionOnce() {
-    const res = await fetch("/TUBES_2_Toko/backend/order/createTransaction.php", {
-      credentials: "include"
-    });
-    const json = await res.json();
-    if (!json.ok) {
-      console.error(json);
-      alert("Gagal membuat transaksi awal. Coba refresh atau ulangi checkout.");
-    }
-  }
 </script>
 <script>
   const API_POST = "/TUBES_2_Toko/backend/order/submitShipping.php";
@@ -221,8 +223,6 @@
       alert(json.message || "Gagal mengubah status transaksi.");
       return;
     }
-
-    alert("Status diubah ke 'Waiting for Payment'. Silakan lanjutkan pembayaran.");
   });
 </script>
 <script>
