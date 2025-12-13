@@ -93,7 +93,7 @@ $cart = $resultCart->fetch_all(MYSQLI_ASSOC);
     <div class="cart-items-column">
 
         <div class="cart-header">
-            <a href="product/listProduct.php" class="back-link">← Back to Products</a>
+            <a href="../../frontend/product/listProduct.html" class="back-link">← Back to Products</a>
             <h2 class="cart-title">Your Shopping Cart</h2>
         </div>
 
