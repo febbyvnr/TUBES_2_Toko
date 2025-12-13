@@ -73,15 +73,21 @@ $cart = $resultCart->fetch_all(MYSQLI_ASSOC);
 ?>
 <!doctype html>
 <html lang="en">
-<?php
-  $pageTitle   = 'Your Cart — FEYORA';
-  $extraStyles = '<link rel="stylesheet" href="styles/cart.css?v=' . time() . '">';
-  include __DIR__ . '/../includes/head.php';
-?>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <title>FEYORA</title>
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/TUBES_2_Toko/frontend/styles/HomePage.css">
+    <link rel="stylesheet" href="/TUBES_2_Toko/frontend/styles/header.css">
+    <link rel="stylesheet" href="/TUBES_2_Toko/frontend/styles/cart.css">
+</head>
 <body>
-
-<?php include __DIR__ . '/../includes/header.php'; ?>
-
+<div id="header"></div>
 <main class="cart-page">
 <div class="container cart-wrapper">
     <div class="cart-items-column">
@@ -116,7 +122,7 @@ $cart = $resultCart->fetch_all(MYSQLI_ASSOC);
                 </div>
 
                 <img
-                    src="assets/products/<?= htmlspecialchars($item['image']) ?>"
+                    src="/TUBES_2_Toko/frontend/assets/products/<?= htmlspecialchars($item['image']) ?>"
                     alt="<?= htmlspecialchars($item['name']) ?>"
                     class="cart-img"
                 >
@@ -131,7 +137,7 @@ $cart = $resultCart->fetch_all(MYSQLI_ASSOC);
                     </div>
 
                     <div class="cart-info-bottom">
-                        <form action="cart/update.php" method="POST" class="qty-form">
+                        <form action="/TUBES_2_Toko/backend/cart/update.php" method="POST" class="qty-form">
                             <input type="hidden" name="cart_id"   value="<?= (int)$item['cart_id'] ?>">
                             <input type="hidden" name="quantity" value="<?= (int)$item['quantity'] ?>">
 
@@ -150,7 +156,7 @@ $cart = $resultCart->fetch_all(MYSQLI_ASSOC);
                     <div class="cart-summary-label">Total</div>
                     <div class="cart-summary-value">
                         Rp <?= number_format($item['price'] * $item['quantity'], 0, ',', '.') ?>
-                        <a href="cart/delete.php?id=<?= (int)$item['cart_id'] ?>" 
+                        <a href="/TUBES_2_Toko/backend/cart/delete.php?id=<?= (int)$item['cart_id'] ?>" 
                             class="delete-icon-btn summary-delete"
                             title="Hapus dari keranjang">
                             <i class="bi bi-trash3"></i>
@@ -193,7 +199,7 @@ $cart = $resultCart->fetch_all(MYSQLI_ASSOC);
                 Total : Rp <?= number_format($total, 0, ',', '.') ?>
             </div>
 
-        <form action="../TUBES_2_Toko/frontend/order/checkout.html" method="POST">
+        <form action="/TUBES_2_Toko/frontend/order/checkout.html" method="POST">
             <button class="checkout-btn" 
                 <?= empty($_SESSION['checkout_ids']) ? "onclick=\"alert('Pilih item dulu sebelum checkout!'); return false;\"" : '' ?>>
                 Checkout
@@ -210,6 +216,39 @@ $cart = $resultCart->fetch_all(MYSQLI_ASSOC);
 
 </div> 
 </main>
-<?php include __DIR__ . '/../includes/footer.php'; ?>
+<div id="footer"></div>
+<script>
+    async function loadPart(id, url) {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        const res = await fetch(url, {
+            cache: "no-cache",
+            credentials: "include"
+        });
+
+        const html = await res.text();
+        el.innerHTML = html;
+
+        // paksa execute script dari include
+        el.querySelectorAll("script").forEach(oldScript => {
+            const s = document.createElement("script");
+            if (oldScript.src) s.src = oldScript.src;
+            s.textContent = oldScript.textContent;
+            document.body.appendChild(s);
+            oldScript.remove();
+        });
+
+        // setelah header masuk + scriptnya sudah dieksekusi
+        if (id === "header" && window.initHeaderAuth) {
+            await window.initHeaderAuth();
+        }
+    }
+
+    (async function () {
+        await loadPart("header", "/TUBES_2_Toko/frontend/includes/header.html");
+        await loadPart("footer", "/TUBES_2_Toko/frontend/includes/footer.html");
+    })();
+</script>
 </body>
 </html>
