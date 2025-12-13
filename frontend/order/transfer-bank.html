@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Pembayaran Transfer Bank</title>
+  <title>Bank Transfer Payment</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- CSS -->
@@ -14,17 +14,17 @@
 <div class="ewallet-container">
 
   <h2 class="ewallet-title">
-    Pembayaran Transfer Bank (<span>BCA</span>)
+    Bank Transfer (<span>BCA</span>)
   </h2>
 
   <!-- INFO -->
   <div class="ewallet-row">
-    <div class="label">Total Pembayaran</div>
+    <div class="label">Total Payment</div>
     <div class="price" id="total">Rp 0</div>
   </div>
 
   <div class="ewallet-row">
-    <div class="label">Bayar Dalam</div>
+    <div class="label">Pay in</div>
     <div>
       <div class="countdown" id="countdown">--</div>
       <div class="deadline" id="deadline">-</div>
@@ -39,25 +39,25 @@
     <b>BCA Virtual Account</b>
   </div>
 
-  <div class="label">Nomor Virtual Account</div>
+  <div class="label">Virtual Account</div>
   <div class="wallet-number">
     <span id="va">-</span>
-    <span class="copy-btn" onclick="copyVA()">SALIN</span>
+    <span class="copy-btn" onclick="copyVA()">COPY</span>
   </div>
 
   <hr>
 
   <!-- INSTRUCTION -->
   <h4 class="instruction-title">
-    Cara Membayar via BCA
+    How to Pay Via BCA
   </h4>
 
   <ol class="instruction-list">
-    <li>Pilih <b>m-Transfer &gt; BCA Virtual Account</b></li>
-    <li>Masukkan nomor VA <b id="va2"></b></li>
-    <li>Periksa nama merchant & total tagihan</li>
-    <li>Masukkan PIN m-BCA</li>
-    <li>Transaksi selesai</li>
+    <li>Choose <b>m-Transfer &gt; BCA Virtual Account</b></li>
+    <li>Insert VA number <b id="va2"></b></li>
+    <li>Check the merchant or recipient & total payment</li>
+    <li>Insert PIN m-BCA</li>
+    <li>Transaction is Complete</li>
   </ol>
 
   <!-- BUTTON -->
