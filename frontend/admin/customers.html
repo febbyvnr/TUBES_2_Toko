@@ -1,336 +1,304 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Customers - Féyora</title>
-  <link rel="stylesheet" href="../styles/adminDashboard.css">
-  <link rel="stylesheet" href="../styles/customer.css">
-  <link rel="stylesheet" href="../styles/sideBar.css">
+    <meta charset="utf-8">
+    <title>Customers - Féyora</title>
+    <link rel="stylesheet" href="../styles/adminDashboard.css">
+    <link rel="stylesheet" href="../styles/customer.css">
+    <link rel="stylesheet" href="../styles/sideBar.css">
 
-  <!-- Bootstrap Icons -->
-  <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 
 <body class="admin-body">
 <div id="sideBar"></div>
 <div class="admin-layout">
-  <div class="admin-main">
+    <div class="admin-main">
 
-    <!-- TOPBAR -->
-    <header class="admin-topbar">
-      <div class="admin-breadcrumb">
-        <span>Home</span>
-        <span class="sep">/</span>
-        <span>Customers</span>
-      </div>
+        <!-- TOPBAR -->
+        <header class="admin-topbar">
+            <div class="admin-breadcrumb">
+                <span>Home</span>
+                <span class="sep">/</span>
+                <span>Customers</span>
+            </div>
 
-      <div class="admin-topbar-right">
-        <span class="admin-welcome">Hi, </span>
-        <div class="admin-avatar-small"></div>
-      </div>
-    </header>
+            <div class="admin-topbar-right">
+                <span class="admin-welcome">Hi, </span>
+                <div class="admin-avatar-small"></div>
+            </div>
+        </header>
 
-    <main class="admin-content">
+        <main class="admin-content">
 
-      <!-- HEADER -->
-      <div class="admin-content-header">
-        <h1 class="admin-page-title">Customers</h1>
-      </div>
+            <!-- HEADER -->
+            <div class="admin-content-header">
+                <h1 class="admin-page-title">Customers</h1>
+            </div>
 
-      <!-- FILTER BAR -->
-      <section class="admin-filterbar">
-        <form class="filter-form" onsubmit="return false;">
-          <div class="customer-searchbar">
-            <i class="bi bi-search"></i>
-            <input
-              type="text"
-              placeholder="Search username or email..."
-            >
-          </div>
+            <!-- FILTER BAR -->
+            <section class="admin-filterbar">
+                <form class="filter-form" onsubmit="return false;">
+                    <div class="customer-searchbar">
+                        <i class="bi bi-search"></i>
+                        <input
+                          type="text"
+                          placeholder="Search username or email..."
+                        >
+                    </div>
 
-          <div class="filter-group">
-            <select class="customer-filter-select">
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
+                    <div class="filter-group">
+                        <select class="customer-filter-select">
+                            <option value="all">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
 
-            <button class="customer-apply-btn">Apply</button>
-          </div>
-        </form>
-      </section>
+                      <button class="customer-apply-btn">Apply</button>
+                    </div>
+                </form>
+            </section>
 
-      <!-- TABLE -->
-      <section class="customer-table-card">
-        <table class="customer-table">
-          <thead>
-            <tr>
-              <th>Username Email</th>
-              <th>Phone</th>
-              <th>Password</th>
-              <th>Status</th>
-              <th style="width:110px">Actions</th>
-            </tr>
-          </thead>
+            <!-- TABLE -->
+            <section class="customer-table-card">
+                <table class="customer-table">
+                    <thead>
+                        <tr>
+                            <th>Username Email</th>
+                            <th>Phone</th>
+                            <th>Password</th>
+                            <th>Status</th>
+                            <th style="width:110px">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customers-body">
+                    </tbody>
+                </table>
 
-          <tbody id="customers-body">
-            
-          </tbody>
-        </table>
-
-        <!-- FOOTER -->
-        <div class="admin-table-footer">
-          <div class="table-info" id="table-info"></div>
-          <div class="customer-pagination" id="pagination"></div>
-        </div>
-      </section>
-
-    </main>
-  </div>
+                <!-- FOOTER -->
+                <div class="admin-table-footer">
+                    <div class="table-info" id="table-info"></div>
+                    <div class="customer-pagination" id="pagination"></div>
+                </div>
+            </section>
+        </main>
+    </div>
 </div>
 <script>
-const API_URL = '/TUBES_2_Toko/backend/admin/customers.php';
+    const API_URL = '/TUBES_2_Toko/backend/admin/customers.php';
 
-const tbody      = document.getElementById('customers-body');
-const tableInfo = document.getElementById('table-info');
-const pagination = document.getElementById('pagination');
+    const tbody      = document.getElementById('customers-body');
+    const tableInfo = document.getElementById('table-info');
+    const pagination = document.getElementById('pagination');
 
-// filter elements
-const searchInput = document.querySelector('.customer-searchbar input');
-const statusSelect = document.querySelector('.customer-filter-select');
-const applyBtn = document.querySelector('.customer-apply-btn');
+    // filter elements
+    const searchInput = document.querySelector('.customer-searchbar input');
+    const statusSelect = document.querySelector('.customer-filter-select');
+    const applyBtn = document.querySelector('.customer-apply-btn');
 
-let currentPage = 1;
+    let currentPage = 1;
 
-async function loadCustomers(page = 1) {
-  currentPage = page;
-  const params = new URLSearchParams({
-    search: searchInput.value.trim(),
-    status: statusSelect.value,
-    page
-  });
+    async function loadCustomers(page = 1) {
+        currentPage = page;
+        const params = new URLSearchParams({
+            search: searchInput.value.trim(),
+            status: statusSelect.value,
+          page
+        });
 
-  const res = await fetch(`${API_URL}?${params.toString()}`, {
-    credentials: 'include'
-  });
+        const res = await fetch(`${API_URL}?${params.toString()}`, {
+            credentials: 'include'
+        });
 
-  const data = await res.json();
+        const data = await res.json();
 
-  if (!data.ok) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="5" style="text-align:center;color:red;">
-          ${data.error || 'Failed to load data'}
-        </td>
-      </tr>`;
-    return;
-  }
-
-  renderTable(data.customers);
-  renderFooter(data.pagination);
-}
-
-function renderTable(customers) {
-  if (customers.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="5" style="text-align:center;color:#777;">
-          No customers found.
-        </td>
-      </tr>`;
-    return;
-  }
-
-  tbody.innerHTML = customers.map(c => `
-    <tr>
-      <td>
-        <div class="customer-user">
-          <span class="u-name">${escapeHtml(c.username)}</span>
-          <span class="u-email">${escapeHtml(c.email)}</span>
-        </div>
-      </td>
-
-      <td class="customer-phone">
-        ${escapeHtml(c.phone)}
-      </td>
-
-      <td class="customer-pass">
-        ********
-      </td>
-
-      <td>
-        ${c.status === 'active'
-          ? '<span class="status-active">Active</span>'
-          : '<span class="status-inactive">Inactive</span>'
+        if (!data.ok) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align:center;color:red;">
+                        ${data.error || 'Failed to load data'}
+                    </td>
+                </tr>`;
+            return;
         }
-      </td>
 
-      <td class="customer-actions">
-        <button type="button"
-                class="customer-del-btn"
-                data-id="${c.id}"
-                title="Delete"
-                style="background:none;border:none;cursor:pointer;">
-          <i class="bi bi-trash3"></i>
-        </button>
-      </td>
-    </tr>
-  `).join('');
-}
-
-function renderFooter(p) {
-  tableInfo.textContent =
-    `Showing ${p.perPage > p.total ? p.total : p.perPage} of ${p.total} customers`;
-
-  pagination.innerHTML = '';
-
-  // Prev
-  if (p.page > 1) {
-    pagination.innerHTML += `<button class="page-btn">Previous</button>`;
-    pagination.lastChild.onclick = () => loadCustomers(p.page - 1);
-  } else {
-    pagination.innerHTML += `<span class="page-btn disabled">Previous</span>`;
-  }
-
-  // Pages
-  for (let i = 1; i <= p.totalPages; i++) {
-    if (i === p.page) {
-      pagination.innerHTML += `<span class="page-number active">${i}</span>`;
-    } else {
-      pagination.innerHTML += `<button class="page-number">${i}</button>`;
-      pagination.lastChild.onclick = () => loadCustomers(i);
+        renderTable(data.customers);
+        renderFooter(data.pagination);
     }
-  }
 
-  // Next
-  if (p.page < p.totalPages) {
-    pagination.innerHTML += `<button class="page-btn">Next</button>`;
-    pagination.lastChild.onclick = () => loadCustomers(p.page + 1);
-  } else {
-    pagination.innerHTML += `<span class="page-btn disabled">Next</span>`;
-  }
-}
+    function renderTable(customers) {
+        if (customers.length === 0) {
+          tbody.innerHTML = `
+              <tr>
+                  <td colspan="5" style="text-align:center;color:#777;">
+                      No customers found.
+                  </td>
+              </tr>`;
+          return;
+        }
+        tbody.innerHTML = customers.map(c => `
+            <tr>
+                <td>
+                    <div class="customer-user">
+                        <span class="u-name">${escapeHtml(c.username)}</span>
+                        <span class="u-email">${escapeHtml(c.email)}</span>
+                    </div>
+                </td>
 
-applyBtn.addEventListener('click', () => {
-  currentPage = 1;
-  loadCustomers(currentPage);
-});
+                <td class="customer-phone">
+                    ${escapeHtml(c.phone)}
+                </td>
 
-function escapeHtml(str) {
-  return String(str).replace(/[&<>"']/g, s => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
-  }[s]));
-}
+                <td class="customer-pass">
+                    ********
+                </td>
 
-// INIT
-loadCustomers();
-</script>
-<script>
-/* =========================
-   DELETE CUSTOMER (AJAX)
-   ========================= */
-tbody.addEventListener("click", async (e) => {
-  const btn = e.target.closest(".customer-del-btn");
-  if (!btn) return;
+                <td>
+                    ${c.status === 'active'
+                        ? '<span class="status-active">Active</span>'
+                        : '<span class="status-inactive">Inactive</span>'
+                    }
+                </td>
 
-  const id = btn.dataset.id;
-  if (!confirm("Delete this customer?")) return;
+                <td class="customer-actions">
+                    <button type="button"
+                          class="customer-del-btn"
+                          data-id="${c.id}"
+                          title="Delete"
+                          style="background:none;border:none;cursor:pointer;">
+                      <i class="bi bi-trash3"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
 
-  try {
-    const fd = new FormData();
-    fd.append("id", id);
+    function renderFooter(p) {
+        tableInfo.textContent =
+            `Showing ${p.perPage > p.total ? p.total : p.perPage} of ${p.total} customers`;
 
-    const res = await fetch("/TUBES_2_Toko/backend/admin/deleteCustomer.php", {
-      method: "POST",
-      body: fd,
-      credentials: "include"
+        pagination.innerHTML = '';
+
+        // Prev
+        if (p.page > 1) {
+            pagination.innerHTML += `<button class="page-btn">Previous</button>`;
+            pagination.lastChild.onclick = () => loadCustomers(p.page - 1);
+        } else {
+            pagination.innerHTML += `<span class="page-btn disabled">Previous</span>`;
+        }
+
+        // Pages
+        for (let i = 1; i <= p.totalPages; i++) {
+            if (i === p.page) {
+                pagination.innerHTML += `<span class="page-number active">${i}</span>`;
+            } else {
+                pagination.innerHTML += `<button class="page-number">${i}</button>`;
+                pagination.lastChild.onclick = () => loadCustomers(i);
+            }
+        }
+        if (p.page < p.totalPages) {
+            pagination.innerHTML += `<button class="page-btn">Next</button>`;
+            pagination.lastChild.onclick = () => loadCustomers(p.page + 1);
+        } else {
+            pagination.innerHTML += `<span class="page-btn disabled">Next</span>`;
+        }
+    }
+    applyBtn.addEventListener('click', () => {
+        currentPage = 1;
+        loadCustomers(currentPage);
     });
-
-    const data = await res.json();
-
-    if (!data.ok) {
-      alert(data.error || "Failed to delete customer");
-      return;
+    function escapeHtml(str) {
+        return String(str).replace(/[&<>"']/g, s => ({
+            '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+        }[s]));
     }
-
-    // reload halaman saat ini
-    loadCustomers(currentPage);
-
-  } catch (err) {
-    console.error(err);
-    alert("Server error");
-  }
-});
+    loadCustomers();
 </script>
 <script>
-  async function loadPart(id, url) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const res = await fetch(url, { cache: "no-cache" });
-    el.innerHTML = await res.text();
-  }
-  loadPart("sideBar", "/TUBES_2_Toko/frontend/includes/sideBar.html");
-</script>
-<script>
-  (function(){
-    const p = new URLSearchParams(location.search);
-    const msg = p.get("msg");
-    if (!msg) return;
+    tbody.addEventListener("click", async (e) => {
+        const btn = e.target.closest(".customer-del-btn");
+        if (!btn) return;
 
-    // alert(msg);
-    
-    const info = document.getElementById("table-info");
-    if (info) {
-      if (msg === "DELETED") info.textContent = "Customer deleted successfully.";
-      else info.textContent = "Info: " + msg;
-    }
-    p.delete("msg");
-    history.replaceState({}, "", location.pathname + (p.toString() ? "?" + p.toString() : ""));
-  })();
-</script>
-<script>
-(async function () {
-  try {
-    const res = await fetch("/TUBES_2_Toko/backend/auth/me.php", {
-      credentials: "include"
+        const id = btn.dataset.id;
+        if (!confirm("Delete this customer?")) return;
+
+        try {
+            const fd = new FormData();
+            fd.append("id", id);
+            const res = await fetch("/TUBES_2_Toko/backend/admin/deleteCustomer.php", {
+                method: "POST",
+                body: fd,
+                credentials: "include"
+              });
+            const data = await res.json();
+            if (!data.ok) {
+                alert(data.error || "Failed to delete customer");
+                return;
+            }
+            loadCustomers(currentPage);
+        } catch (err) {
+            console.error(err);
+            alert("Server error");
+        }
     });
-
-    const data = await res.json();
-
-    if (!data.ok || !data.logged_in) {
-      return;
+</script>
+<script>
+    async function loadPart(id, url) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const res = await fetch(url, { cache: "no-cache" });
+        el.innerHTML = await res.text();
     }
+    loadPart("sideBar", "/TUBES_2_Toko/frontend/includes/sideBar.html");
+</script>
+<script>
+    (function(){
+        const p = new URLSearchParams(location.search);
+        const msg = p.get("msg");
+        if (!msg) return;
+        const info = document.getElementById("table-info");
+        if (info) {
+            if (msg === "DELETED") info.textContent = "Customer deleted successfully.";
+            else info.textContent = "Info: " + msg;
+        }
+        p.delete("msg");
+        history.replaceState({}, "", location.pathname + (p.toString() ? "?" + p.toString() : ""));
+    })();
+</script>
+<script>
+    (async function () {
+        try {
+            const res = await fetch("/TUBES_2_Toko/backend/auth/me.php", {
+                credentials: "include"
+            });
+            const data = await res.json();
+            if (!data.ok || !data.logged_in) {
+                return;
+            }
+            const username = data.user.username || "User";
+            const welcomeEl = document.querySelector(".admin-welcome");
+            if (welcomeEl) {
+                welcomeEl.textContent = "Hi, " + username;
+            }
+            const avatarEl = document.querySelector(".admin-avatar-small");
+            if (!avatarEl) return;
 
-    const username = data.user.username || "User";
-
-    // ===== SET TEXT =====
-    const welcomeEl = document.querySelector(".admin-welcome");
-    if (welcomeEl) {
-      welcomeEl.textContent = "Hi, " + username;
-    }
-
-    // ===== SET AVATAR =====
-    const avatarEl = document.querySelector(".admin-avatar-small");
-    if (!avatarEl) return;
-
-    // kalau ada foto (opsional, future proof)
-    if (data.user.profile_photo_url) {
-      avatarEl.innerHTML = `
-        <img src="${data.user.profile_photo_url}"
-             alt="avatar"
-             style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
-      `;
-    } else {
-      // ambil 2 huruf pertama username
-      const initials = username.trim().substring(0, 2).toUpperCase();
-      avatarEl.textContent = initials;
-    }
-
-  } catch (err) {
-    console.error("Failed to load user info", err);
-  }
-})();
+            if (data.user.profile_photo_url) {
+                avatarEl.innerHTML = `
+                    <img src="${data.user.profile_photo_url}"
+                        alt="avatar"
+                        style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+                `;
+            } else {
+                const initials = username.trim().substring(0, 2).toUpperCase();
+                avatarEl.textContent = initials;
+            }
+        } catch (err) {
+            console.error("Failed to load user info", err);
+        }
+    })();
 </script>
 </body>
 </html>
