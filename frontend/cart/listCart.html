@@ -1,48 +1,90 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Your Cart — FEYORA</title>
-  <link rel="stylesheet" href="../../styles/cart.css">
+
+  <!-- CSS SAMA DENGAN SEBELUMNYA -->
+  <link rel="stylesheet" href="../styles/cart.css">
+  <link rel="stylesheet" href="../styles/header.css">
+  <link rel="stylesheet" href="../styles/HomePage.css">
+
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
+
 <body>
 
-<header id="site-header"></header>
+  <!-- HEADER -->
+  <div id="header"></div>
 
-<main class="cart-page">
-  <div class="container cart-wrapper">
+  <!-- CART CONTENT -->
+  <main class="cart-page">
+    <div class="container cart-wrapper">
 
-    <!-- LEFT -->
-    <div class="cart-items-column">
+      <div class="cart-items-column">
+        <div class="cart-header">
+          <a href="../product/listProduct.html" class="back-link">← Back to Products</a>
+          <h2 class="cart-title">Your Shopping Cart</h2>
+        </div>
 
-      <div class="cart-header">
-        <a href="../product/listProduct.html" class="back-link">← Back to Products</a>
-        <h2 class="cart-title">Your Shopping Cart</h2>
+        <!-- CART ITEMS -->
+        <div id="cart-list"></div>
       </div>
 
-      <!-- CART ITEMS RENDER HERE -->
-      <div id="cart-list"></div>
+      <!-- CHECKOUT SIDEBAR -->
+      <div class="checkout-summary">
+        <div class="summary-title">Item Checkout</div>
+        <div class="summary-list" id="checkout-list"></div>
 
-    </div>
+        <div class="summary-total" id="checkout-total">
+          Total : Rp 0
+        </div>
 
-    <!-- RIGHT -->
-    <div class="checkout-summary">
-      <div class="summary-title">Item Checkout</div>
-      <div class="summary-list" id="checkout-list"></div>
-
-      <div class="summary-total" id="checkout-total">
-        Total : Rp 0
+        <button class="checkout-btn" onclick="checkout()">Checkout</button>
+        <button class="cancelCheckout-btn" onclick="cancelCheckout()">Cancel</button>
       </div>
 
-      <button class="checkout-btn" onclick="checkout()">Checkout</button>
-      <button class="cancelCheckout-btn" onclick="cancelCheckout()">Cancel</button>
     </div>
+  </main>
 
-  </div>
-</main>
+  <!-- FOOTER -->
+  <div id="footer"></div>
 
-<footer id="site-footer"></footer>
+  <!-- LOAD HEADER & FOOTER (SAMA PERSIS DENGAN listProduct) -->
+  <script>
+    async function loadPart(id, url) {
+      const el = document.getElementById(id);
+      if (!el) return;
 
-<script src="cart.js"></script>
+      const res = await fetch(url, { cache: "no-cache" });
+      const html = await res.text();
+      el.innerHTML = html;
+
+      // paksa eksekusi script di header/footer
+      el.querySelectorAll("script").forEach(oldScript => {
+        const s = document.createElement("script");
+        if (oldScript.src) s.src = oldScript.src;
+        s.textContent = oldScript.textContent;
+        document.body.appendChild(s);
+        oldScript.remove();
+      });
+
+      // init auth header
+      if (id === "header" && window.initHeaderAuth) {
+        await window.initHeaderAuth();
+      }
+    }
+
+    (async function () {
+      await loadPart("header", "/TUBES_2_Toko/frontend/includes/header.html");
+      await loadPart("footer", "/TUBES_2_Toko/frontend/includes/footer.html");
+    })();
+  </script>
+
+  <!-- CART LOGIC -->
+  <script src="cart.js"></script>
+
 </body>
 </html>
