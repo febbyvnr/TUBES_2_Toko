@@ -58,7 +58,7 @@
                 <label for="sameBilling">Billing address is the same as shipping</label>
             </div>
             <div class="btn-row">
-                <a href="../cart/listCart.html" class="btn-return">Return to Cart</a>
+                <a href="#" class="btn-return" id="btnCancel">Return to Cart</a>
                 <button type="button" class="btn-submit" id="toPayment">
                     Continue to Payment
                 </button>
@@ -165,7 +165,7 @@
       alert(markJson.message || "Gagal mengubah status transaksi.");
       return;
     }
-    window.location.href = "/TUBES_2_Toko/frontend/payment/payment.html";
+    window.location.href = "/TUBES_2_Toko/frontend/order/payment.html";
   });
 </script>
 <script>
@@ -191,6 +191,39 @@
         await loadPart("header", "/TUBES_2_Toko/frontend/includes/header.html");
         await loadPart("footer", "/TUBES_2_Toko/frontend/includes/footer.html");
     })();
+</script>
+<script>
+  document.getElementById("btnCancel").addEventListener("click", async (e) => {
+    e.preventDefault();
+
+    if (!confirm("Batalkan pesanan dan kembali ke cart?")) return;
+
+    const res = await fetch("/TUBES_2_Toko/backend/order/cancelTransaction.php", {
+      credentials: "include"
+    });
+    const json = await res.json();
+
+    if (!json.ok) {
+      alert(json.message || "Gagal membatalkan transaksi.");
+      return;
+    }
+
+    window.location.href = "../cart/listCart.html";
+  });
+
+  document.getElementById("toPayment").addEventListener("click", async () => {
+    const res = await fetch("/TUBES_2_Toko/backend/order/markWaiting.php", {
+      credentials: "include"
+    });
+    const json = await res.json();
+
+    if (!json.ok) {
+      alert(json.message || "Gagal mengubah status transaksi.");
+      return;
+    }
+
+    alert("Status diubah ke 'Waiting for Payment'. Silakan lanjutkan pembayaran.");
+  });
 </script>
 <script>
   document.getElementById("toPayment").addEventListener("click", () => {

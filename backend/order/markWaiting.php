@@ -19,15 +19,16 @@ if (!isset($_SESSION['transaction_id'])) {
 $tid = (int)$_SESSION['transaction_id'];
 
 $u = $mysqli->prepare("
-  UPDATE transaction
+  UPDATE transactions
   SET status = 'Waiting for Payment'
   WHERE id = ? AND user_id = ?
 ");
 $u->bind_param("ii", $tid, $user_id);
 $u->execute();
 
-if ($u->affected_rows >= 0) {
-  echo json_encode(["ok" => true, "data" => ["transaction_id" => $tid]]);
-} else {
-  echo json_encode(["ok" => false, "message" => "Failed update status"]);
+if ($u->errno) {
+  echo json_encode(["ok" => false, "message" => "DB error", "error" => $u->error]);
+  exit;
 }
+
+echo json_encode(["ok" => true, "data" => ["transaction_id" => $tid]]);
