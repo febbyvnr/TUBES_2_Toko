@@ -44,9 +44,7 @@
     </div>
 
     <!-- ADD TO CART -->
-    <form action="/TUBES_2_Toko/backend/cart/add.php"
-          method="POST"
-          id="cartForm">
+    <form id="cartForm">
 
       <input type="hidden" name="product_id" id="productIdInput">
       <input type="hidden" name="size" id="selectedSize">
@@ -99,7 +97,7 @@
 
 <script>
 /* ================= CONFIG ================= */
-const API_DETAIL = "/TUBES_2_Toko/backend/product/detail.php";
+const API_DETAIL = "/TUBES_2_Toko/backend/product/detailProduct.php";
 const SIZES = ["XS","S","M","L","XL","All Size"];
 
 /* ================= HELPERS ================= */
@@ -179,14 +177,15 @@ async function loadProduct() {
     return;
   }
 
-  const p = json.data;
+  const p = json.data.product || json.data;
 
   document.title = `${p.title} — FEYORA`;
-  productTitle.textContent = p.title;
-  productPrice.textContent = p.price_text;
-  productDesc.innerHTML    = p.description;
-  productImage.src         = p.image;
-  productIdInput.value     = p.id;
+  productTitle.textContent = p.title || "";
+  productPrice.textContent = p.price_text || "";
+  productDesc.textContent  = p.description || "";
+  productImage.src         = p.image || "/TUBES_2_Toko/frontend/assets/products/placeholder.png";
+  productIdInput.value     = p.id || "";
+
 
   // sizes
   sizeOptions.innerHTML = SIZES.map(s =>
@@ -209,15 +208,35 @@ async function loadProduct() {
 }
 
 /* ================= FORM SUBMIT ================= */
-cartForm.onsubmit = e => {
-  if (addCartBtn.dataset.requireLogin === "1") {
-    e.preventDefault();
-    loginPopup.style.display = "flex";
+cartForm.onsubmit = async (e) => {
+  e.preventDefault();
+
+  if (!selectedSize.value) {
+    alert("Please select a size.");
     return;
   }
-  if (!selectedSize.value) {
-    e.preventDefault();
-    alert("Please select a size.");
+
+  const formData = new URLSearchParams();
+  formData.append("product_id", productIdInput.value);
+  formData.append("size", selectedSize.value);
+  formData.append("qty", qtyInput.value);
+
+  const res = await fetch("/TUBES_2_Toko/backend/cart/add.php", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: formData.toString(),
+    credentials: "include"
+  });
+
+  const json = await res.json();
+
+  if (json.success) {
+    // pindah ke cart (atau reload cart)
+    window.location.href = "/TUBES_2_Toko/frontend/cart/listCart.html";
+  } else {
+    alert("Failed to add to cart");
   }
 };
 
