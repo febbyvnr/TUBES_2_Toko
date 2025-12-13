@@ -35,7 +35,7 @@
                 <label class="address-label">Address</label>
                 <label class="use-location">
                     <input type="checkbox" id="useLocation">
-                    Use My Current Location
+                    Use My Location
                 </label>
             </div>
             <input type="text" name="address" id="address" required>
@@ -58,8 +58,10 @@
                 <label for="sameBilling">Billing address is the same as shipping</label>
             </div>
             <div class="btn-row">
-                <a href="../cart/listCart.php" class="btn-return">Return to Cart</a>
-                <button type="submit" class="btn-submit">Continue to Payment</button>
+                <a href="#" class="btn-return" id="btnCancel">Return to Cart</a>
+                <button type="button" class="btn-submit" id="toPayment">
+                    Continue to Payment
+                </button>
             </div>
         </form>
     </section>
@@ -86,58 +88,85 @@
 </main>
 <div id="footer"></div>
 <script>
-    async function loadCheckout() {
-        const res = await fetch("/TUBES_2_Toko/backend/order/getItems.php", {
-            credentials: "include"
-        });
-        const json = await res.json();
-        const itemsEl = document.getElementById("orderItems");
-        if (!json.ok || !json.data.items.length) {
-            itemsEl.innerHTML = "<p>No items selected.</p>";
-            document.getElementById("subtotal").innerText = "Rp 0";
-            document.getElementById("grandTotal").innerText = "Rp 0";
-            return;
-        }
-        let total = 0;
-        itemsEl.innerHTML = json.data.items.map(i => {
-            total += i.price * i.quantity;
-            return `
-                <div class="order-item">
-                    <img src="/TUBES_2_Toko/assets/products/${i.image}" alt="${i.name}">
-                    <div>
-                        <b>${i.name}</b><br>
-                        <div class="item-info">Size: ${i.size}</div>
-                        <div class="item-info">Qty: ${i.quantity}</div>
-                    </div>
-                    <div class="price">Rp ${i.price.toLocaleString()}</div>
-                </div>
-            `;
-        }).join("");
-        document.getElementById("subtotal").innerText =
-            "Rp " + total.toLocaleString();
+  async function loadCheckout() {
+    const res = await fetch("/TUBES_2_Toko/backend/order/getItems.php", {
+      credentials: "include"
+    });
+    const json = await res.json();
+    const itemsEl = document.getElementById("orderItems");
 
-        document.getElementById("grandTotal").innerText =
-            "Rp " + (total + 7000).toLocaleString();
+    if (!json.ok || !json.data.items.length) {
+      itemsEl.innerHTML = "<p>No items selected.</p>";
+      document.getElementById("subtotal").innerText = "Rp 0";
+      document.getElementById("grandTotal").innerText = "Rp 0";
+      return;
     }
-    loadCheckout();
+
+    let total = 0;
+    itemsEl.innerHTML = json.data.items.map(i => {
+      total += i.price * i.quantity;
+      return `
+        <div class="order-item">
+          <img src="/TUBES_2_Toko/assets/products/${i.image}" alt="${i.name}">
+          <div>
+            <b>${i.name}</b><br>
+            <div class="item-info">Size: ${i.size}</div>
+            <div class="item-info">Qty: ${i.quantity}</div>
+          </div>
+          <div class="price">Rp ${i.price.toLocaleString()}</div>
+        </div>
+      `;
+    }).join("");
+
+    document.getElementById("subtotal").innerText =
+      "Rp " + total.toLocaleString();
+
+    document.getElementById("grandTotal").innerText =
+      "Rp " + (total + 7000).toLocaleString();
+  }
+
+  (async () => {
+    await loadCheckout();
+    await createTransactionOnce();
+  })();
 </script>
 <script>
-    const API_POST = "/TUBES_2_Toko/backend/order/submitShipping.php";
-    document.getElementById("shippingForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const res = await fetch(API_POST, {
-            method: "POST",
-            body: formData,
-            credentials: "include"
-        });
-        const json = await res.json();
-        if (json.ok) {
-            window.location.href = "/TUBES_2_Toko/frontend/payment/payment.html";
-        } else {
-            alert("Failed to continue.");
-        }
+  async function createTransactionOnce() {
+    const res = await fetch("/TUBES_2_Toko/backend/order/createTransaction.php", {
+      credentials: "include"
     });
+    const json = await res.json();
+    if (!json.ok) {
+      console.error(json);
+      alert("Gagal membuat transaksi awal. Coba refresh atau ulangi checkout.");
+    }
+  }
+</script>
+<script>
+  const API_POST = "/TUBES_2_Toko/backend/order/submitShipping.php";
+  document.getElementById("shippingForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const res = await fetch(API_POST, {
+      method: "POST",
+      body: formData,
+      credentials: "include"
+    });
+    const json = await res.json();
+    if (!json.ok) {
+      alert(json.message || "Failed to continue.");
+      return;
+    }
+    const markRes = await fetch("/TUBES_2_Toko/backend/order/markWaiting.php", {
+      credentials: "include"
+    });
+    const markJson = await markRes.json();
+    if (!markJson.ok) {
+      alert(markJson.message || "Gagal mengubah status transaksi.");
+      return;
+    }
+    window.location.href = "/TUBES_2_Toko/frontend/order/payment.html";
+  });
 </script>
 <script>
     async function loadPart(id, url) {
@@ -162,6 +191,93 @@
         await loadPart("header", "/TUBES_2_Toko/frontend/includes/header.html");
         await loadPart("footer", "/TUBES_2_Toko/frontend/includes/footer.html");
     })();
+</script>
+<script>
+  document.getElementById("btnCancel").addEventListener("click", async (e) => {
+    e.preventDefault();
+
+    if (!confirm("Batalkan pesanan dan kembali ke cart?")) return;
+
+    const res = await fetch("/TUBES_2_Toko/backend/order/cancelTransaction.php", {
+      credentials: "include"
+    });
+    const json = await res.json();
+
+    if (!json.ok) {
+      alert(json.message || "Gagal membatalkan transaksi.");
+      return;
+    }
+
+    window.location.href = "../cart/listCart.html";
+  });
+
+  document.getElementById("toPayment").addEventListener("click", async () => {
+    const res = await fetch("/TUBES_2_Toko/backend/order/markWaiting.php", {
+      credentials: "include"
+    });
+    const json = await res.json();
+
+    if (!json.ok) {
+      alert(json.message || "Gagal mengubah status transaksi.");
+      return;
+    }
+
+    alert("Status diubah ke 'Waiting for Payment'. Silakan lanjutkan pembayaran.");
+  });
+</script>
+<script>
+  document.getElementById("toPayment").addEventListener("click", () => {
+    document.getElementById("shippingForm").requestSubmit();
+  });
+</script>
+<script>
+  const useLocationEl = document.getElementById("useLocation");
+  const addressInput  = document.getElementById("address");
+
+  useLocationEl.addEventListener("change", () => {
+    if (!useLocationEl.checked) return;
+
+    if (!navigator.geolocation) {
+      alert("Browser kamu tidak mendukung lokasi. Isi alamat manual ya.");
+      useLocationEl.checked = false;
+      return;
+    }
+
+    const oldPlaceholder = addressInput.placeholder || "";
+    addressInput.placeholder = "Detecting Location...";
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+
+          const res = await fetch(`/TUBES_2_Toko/backend/order/reverseGeocode.php?lat=${lat}&lon=${lon}`, {
+            credentials: "include"
+          });
+          const json = await res.json();
+
+          if (!json.ok) throw new Error(json.message || "reverseGeocode failed");
+
+          addressInput.value = json.data.display_name;
+        } catch (err) {
+          console.error(err);
+          alert("Gagal mengambil alamat. Coba lagi atau isi manual.");
+          useLocationEl.checked = false;
+          addressInput.focus();
+        } finally {
+          addressInput.placeholder = oldPlaceholder;
+        }
+      },
+      (err) => {
+        console.error(err);
+        alert("Tidak bisa mengambil lokasi (izin ditolak / gagal). Isi manual ya.");
+        useLocationEl.checked = false;
+        addressInput.placeholder = oldPlaceholder;
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+  });
 </script>
 </body>
 </html>

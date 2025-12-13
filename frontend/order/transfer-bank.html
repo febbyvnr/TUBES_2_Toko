@@ -1,123 +1,140 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bank Transfer Payment</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- CSS -->
-  <link rel="stylesheet" href="../styles/payment.css">
+  <link rel="stylesheet" href="../styles/payment.css" />
 </head>
 
 <body class="ewallet-page">
 
-<div class="ewallet-container">
+  <div class="ewallet-container">
+    <h2 class="ewallet-title">
+      Bank Transfer (<span>BCA</span>)
+    </h2>
 
-  <h2 class="ewallet-title">
-    Bank Transfer (<span>BCA</span>)
-  </h2>
-
-  <!-- INFO -->
-  <div class="ewallet-row">
-    <div class="label">Total Payment</div>
-    <div class="price" id="total">Rp 0</div>
-  </div>
-
-  <div class="ewallet-row">
-    <div class="label">Pay in</div>
-    <div>
-      <div class="countdown" id="countdown">--</div>
-      <div class="deadline" id="deadline">-</div>
+    <div class="ewallet-row">
+      <div class="label">Total Payment</div>
+      <div class="price" id="total">Rp 0</div>
     </div>
+
+    <div class="ewallet-row">
+      <div class="label">Pay in</div>
+      <div>
+        <div class="countdown" id="countdown">--</div>
+        <div class="deadline" id="deadline">-</div>
+      </div>
+    </div>
+
+    <hr>
+
+    <div class="wallet-box">
+      <img src="/TUBES_2_Toko/assets/bca.png" class="wallet-logo" alt="BCA">
+      <b>BCA Virtual Account</b>
+    </div>
+
+    <div class="label">Virtual Account</div>
+    <div class="wallet-number">
+      <span id="va">-</span>
+      <span class="copy-btn" id="btn-copy">COPY</span>
+    </div>
+
+    <hr>
+
+    <h4 class="instruction-title">How to Pay Via BCA</h4>
+    <ol class="instruction-list">
+      <li>Choose <b>m-Transfer &gt; BCA Virtual Account</b></li>
+      <li>Insert VA number <b id="va2"></b></li>
+      <li>Check the merchant or recipient &amp; total payment</li>
+      <li>Insert PIN m-BCA</li>
+      <li>Transaction is Complete</li>
+    </ol>
+
+    <button class="btn-check" id="btn-check">
+      Check Status
+    </button>
   </div>
 
-  <hr>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const trxId = params.get("transaction_id");
 
-  <!-- BANK -->
-  <div class="wallet-box">
-    <img src="/TUBES_2_Toko/assets/bca.png" class="wallet-logo">
-    <b>BCA Virtual Account</b>
-  </div>
-
-  <div class="label">Virtual Account</div>
-  <div class="wallet-number">
-    <span id="va">-</span>
-    <span class="copy-btn" onclick="copyVA()">COPY</span>
-  </div>
-
-  <hr>
-
-  <!-- INSTRUCTION -->
-  <h4 class="instruction-title">
-    How to Pay Via BCA
-  </h4>
-
-  <ol class="instruction-list">
-    <li>Choose <b>m-Transfer &gt; BCA Virtual Account</b></li>
-    <li>Insert VA number <b id="va2"></b></li>
-    <li>Check the merchant or recipient & total payment</li>
-    <li>Insert PIN m-BCA</li>
-    <li>Transaction is Complete</li>
-  </ol>
-
-  <!-- BUTTON -->
-  <button class="btn-check" onclick="checkStatus()">
-    Check Status
-  </button>
-
-</div>
-
-<script>
-const params = new URLSearchParams(location.search);
-const trxId = params.get("transaction_id");
-
-const API = "/TUBES_2_Toko/backend/order/transferBank.php";
-
-/* FETCH DATA (SAMA KAYA EWALLET) */
-fetch(`${API}?transaction_id=${trxId}`, { credentials: "include" })
-  .then(r => r.json())
-  .then(d => {
-    console.log("BANK DATA:", d);
-
-    document.getElementById("total").innerText =
-      "Rp " + Number(d.total).toLocaleString("id-ID");
-
-    document.getElementById("va").innerText = d.va_number;
-    document.getElementById("va2").innerText = d.va_number;
-
-    document.getElementById("deadline").innerText =
-      "Jatuh tempo " + d.deadline;
-
-    startCountdown(d.deadline_ts);
-  });
-
-function startCountdown(deadlineTs){
-  setInterval(() => {
-    const diff = deadlineTs - Date.now();
-    if (diff <= 0) {
-      document.getElementById("countdown").innerText = "Waktu Habis";
-      return;
+    if (!trxId) {
+      alert("transaction_id tidak ada di URL.");
     }
-    const h = Math.floor(diff / 3600000);
-    const m = Math.floor((diff % 3600000) / 60000);
-    const s = Math.floor((diff % 60000) / 1000);
-    document.getElementById("countdown").innerText =
-      `${h} jam ${m} menit ${s} detik`;
-  }, 1000);
-}
 
-function copyVA(){
-  navigator.clipboard.writeText(
-    document.getElementById("va").innerText
-  );
-  alert("Nomor VA disalin");
-}
+    const API = "/TUBES_2_Toko/backend/order/transferBank.php";
 
-function checkStatus(){
-  location.href =
-    `/TUBES_2_Toko/backend/order/updateStatus.php?id=${trxId}`;
-}
-</script>
+    async function loadBankData() {
+      try {
+        const res = await fetch(`${API}?transaction_id=${encodeURIComponent(trxId)}`, {
+          credentials: "include"
+        });
 
+        const ct = res.headers.get("content-type") || "";
+        const raw = await res.text();
+
+        if (!ct.includes("application/json")) {
+          console.error("NOT JSON:", raw);
+          alert("Server tidak mengembalikan JSON.");
+          return;
+        }
+
+        const d = JSON.parse(raw);
+
+        if (d.ok === false) {
+          alert(d.message || "Gagal load bank data.");
+          return;
+        }
+
+        document.getElementById("total").innerText =
+          "Rp " + Number(d.total || 0).toLocaleString("id-ID");
+
+        document.getElementById("va").innerText = d.va_number || "-";
+        document.getElementById("va2").innerText = d.va_number || "-";
+
+        document.getElementById("deadline").innerText =
+          d.deadline ? ("Jatuh tempo " + d.deadline) : "-";
+
+        if (d.deadline_ts) startCountdown(Number(d.deadline_ts));
+      } catch (err) {
+        console.error(err);
+        alert("Terjadi error saat load data bank. Cek console.");
+      }
+    }
+
+    function startCountdown(deadlineTs) {
+      const el = document.getElementById("countdown");
+      const timer = setInterval(() => {
+        const diff = deadlineTs - Date.now();
+        if (diff <= 0) {
+          el.innerText = "Waktu Habis";
+          clearInterval(timer);
+          return;
+        }
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        el.innerText = `${h} jam ${m} menit ${s} detik`;
+      }, 1000);
+    }
+
+    document.getElementById("btn-copy").addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(document.getElementById("va").innerText);
+        alert("Nomor VA disalin");
+      } catch {
+        alert("Gagal copy. Browser tidak mengizinkan clipboard.");
+      }
+    });
+
+    document.getElementById("btn-check").addEventListener("click", () => {
+      location.href = `/TUBES_2_Toko/backend/order/updateStatus.php?id=${encodeURIComponent(trxId)}`;
+    });
+
+    loadBankData();
+  </script>
 </body>
 </html>

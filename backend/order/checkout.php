@@ -19,7 +19,7 @@ $query = $mysqli->prepare("
     WHERE c.user_id = ?
 ");
 $query->bind_param("i", $user_id);
-query->execute();
+$query->execute();
 $result = $query->get_result();
 
 $cart_items = [];

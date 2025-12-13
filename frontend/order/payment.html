@@ -1,219 +1,273 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <title>Payment</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Payment</title>
 
-    <!-- FONT -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <!-- FONT -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
-    <!-- ICON -->
-    <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- ICON -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <link rel="stylesheet" href="../styles/HomePage.css">
-    <link rel="stylesheet" href="../styles/header.css">
-    <link rel="stylesheet" href="../styles/payment.css">
+  <link rel="stylesheet" href="../styles/HomePage.css">
+  <link rel="stylesheet" href="../styles/header.css">
+  <link rel="stylesheet" href="../styles/payment.css">
 </head>
 
 <body class="order-page">
-<div id="header"></div>
-<div class="container">
+  <div id="header"></div>
+
+  <div class="container">
     <!-- ALAMAT -->
     <div class="section-box">
-        <div class="section-title">Shipping Address</div>
-        <div class="address-wrapper">
-            <div class="address-left" id="address-left">Loading...</div>
-            <div class="address-right" id="address-right"></div>
-        </div>
+      <div class="section-title">Shipping Address</div>
+      <div class="address-wrapper">
+        <div class="address-left" id="address-left">Loading...</div>
+        <div class="address-right" id="address-right"></div>
+      </div>
     </div>
+
     <!-- PRODUK -->
     <div class="section-box">
-        <div class="section-title">Produk Dipesan</div>
-        <div class="product-header">
-            <div>Produk</div>
-            <div>Harga</div>
-            <div>Jumlah</div>
-            <div>Subtotal</div>
-        </div>
-        <div id="product-list"></div>
+      <div class="section-title">Product Ordered</div>
+      <div class="product-header">
+        <div>Products</div>
+        <div>Price</div>
+        <div>Quantity</div>
+        <div>Subtotal</div>
+      </div>
+      <div id="product-list"></div>
     </div>
 
     <!-- PAYMENT -->
     <div class="payment-container">
-        <!-- LEFT -->
-        <div class="section-box payment-left">
-            <div class="section-title">Payment Method</div>
-            <div class="method-list">
-                <button class="method-btn active" id="btn-cod" onclick="selectMethod('cod')">
-                    Cash on Delivery
-                </button>
-                <button class="method-btn" id="btn-bank" onclick="selectMethod('bank')">
-                    Bank Transfer
-                </button>
-                <button class="method-btn" id="btn-ewallet" onclick="selectMethod('ewallet')">
-                    E-Wallet
-                </button>
-            </div>
+      <!-- LEFT -->
+      <div class="section-box payment-left">
+        <div class="section-title">Payment Method</div>
 
-            <div class="payment-detail">
-                <div id="detail-cod">COD — Cash on Delivery</div>
-                <div id="detail-bank" style="display:none;">
-                  Bank Transfer — Virtual Account
-                </div>
-
-                <div id="detail-ewallet" style="display:none;">
-                  Choose E-Wallet:
-                  <div class="ewallet-options">
-                    <label><input type="radio" name="ewallet_type" value="Dana" checked> Dana</label>
-                    <label><input type="radio" name="ewallet_type" value="OVO"> OVO</label>
-                    <label><input type="radio" name="ewallet_type" value="Gopay"> Gopay</label>
-                  </div>
-                </div>
-            </div>
+        <div class="method-list">
+          <button class="method-btn active" id="btn-cod" type="button">Cash on Delivery</button>
+          <button class="method-btn" id="btn-bank" type="button">Bank Transfer</button>
+          <button class="method-btn" id="btn-ewallet" type="button">E-Wallet</button>
         </div>
 
-        <!-- RIGHT -->
-        <div class="section-box payment-right">
-            <div class="section-title">Order Summary</div>
-            <div class="summary-row">
-                <span>Subtotal Product</span>
-                <span id="sum-subtotal">-</span>
+        <div class="payment-detail">
+          <div id="detail-cod">COD — Cash on Delivery</div>
+
+          <div id="detail-bank" style="display:none;">
+            Bank Transfer — Virtual Account
+          </div>
+
+          <div id="detail-ewallet" style="display:none;">
+            Choose E-Wallet:
+            <div class="ewallet-options">
+              <label><input type="radio" name="ewallet_type" value="Dana" checked> Dana</label>
+              <label><input type="radio" name="ewallet_type" value="OVO"> OVO</label>
+              <label><input type="radio" name="ewallet_type" value="Gopay"> Gopay</label>
             </div>
-            <div class="summary-row">
-                <span>Subtotal Shipping</span>
-                <span id="sum-shipping">-</span>
-            </div>
-            <div class="summary-row">
-                <span>Admin Fee</span>
-                <span id="sum-admin">-</span>
-            </div>
-            <div class="total-line">
-                <span>Total Payment</span>
-                <span id="sum-total">-</span>
-            </div>
-            <button class="btn-submit" onclick="submitPayment()">
-                Place Order
-            </button>
+          </div>
         </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="section-box payment-right">
+        <div class="section-title">Order Summary</div>
+
+        <div class="summary-row">
+          <span>Subtotal Product</span>
+          <span id="sum-subtotal">-</span>
+        </div>
+        <div class="summary-row">
+          <span>Subtotal Shipping</span>
+          <span id="sum-shipping">-</span>
+        </div>
+        <div class="summary-row">
+          <span>Admin Fee</span>
+          <span id="sum-admin">-</span>
+        </div>
+
+        <div class="total-line">
+          <span>Total Payment</span>
+          <span id="sum-total">-</span>
+        </div>
+
+        <button class="btn-submit" id="btn-place" type="button">
+          Place Order
+        </button>
+      </div>
     </div>
-</div>
+  </div>
 
-<!-- FOOTER -->
-<div id="footer"></div>
+  <div id="footer"></div>
 
-<script>
-    fetch("../includes/header.html")
-        .then(r=>r.text()).then(t=>{
-            document.getElementById("header").innerHTML=t;
-            window.initHeaderAuth && initHeaderAuth();
-        });
-
-    fetch("../includes/footer.html")
-        .then(r=>r.text()).then(t=>{
-            document.getElementById("footer").innerHTML=t;
-        });
-
+  <script>
+    // ===== CONFIG =====
     const API = "/TUBES_2_Toko/backend";
     let selectedMethod = "cod";
 
-    /* LOAD DATA */
-    fetch(API + "/order/payment.php?mode=json",{credentials:"include"})
-    .then(r=>r.json())
-    .then(d=>{
-        document.getElementById("address-left").innerHTML =
-            `<b>${d.shipping.firstname} ${d.shipping.lastname}</b><br>${d.shipping.email}`;
+    // ===== HEADER/FOOTER (only once) =====
+    async function loadPart(id, url) {
+      const el = document.getElementById(id);
+      if (!el) return;
 
-      document.getElementById("address-right").innerText = d.shipping.address;
+      const res = await fetch(url, { cache: "no-cache" });
+      const html = await res.text();
+      el.innerHTML = html;
 
-      let html="";
-      d.items.forEach(i=>{
-          html+=`
+      el.querySelectorAll("script").forEach(oldScript => {
+        const s = document.createElement("script");
+        if (oldScript.src) s.src = oldScript.src;
+        s.textContent = oldScript.textContent;
+        document.body.appendChild(s);
+        oldScript.remove();
+      });
+
+      if (id === "header" && window.initHeaderAuth) {
+        await window.initHeaderAuth();
+      }
+    }
+
+    // ===== METHOD UI =====
+    function setMethod(m) {
+      selectedMethod = m;
+      ["cod", "bank", "ewallet"].forEach(x => {
+        document.getElementById("btn-" + x).classList.remove("active");
+        document.getElementById("detail-" + x).style.display = "none";
+      });
+      document.getElementById("btn-" + m).classList.add("active");
+      document.getElementById("detail-" + m).style.display = "block";
+    }
+
+    document.getElementById("btn-cod").addEventListener("click", () => setMethod("cod"));
+    document.getElementById("btn-bank").addEventListener("click", () => setMethod("bank"));
+    document.getElementById("btn-ewallet").addEventListener("click", () => setMethod("ewallet"));
+
+    // ===== LOAD PAYMENT DATA =====
+    async function loadPaymentData() {
+      const res = await fetch(API + "/order/payment.php?mode=json", { credentials: "include" });
+
+      const ct = res.headers.get("content-type") || "";
+      const raw = await res.text();
+
+      if (!ct.includes("application/json")) {
+        console.error("NOT JSON:", raw);
+        document.getElementById("address-left").innerText =
+          "Gagal load data (server tidak mengembalikan JSON).";
+        return null;
+      }
+
+      const d = JSON.parse(raw);
+
+      if (d.ok === false) {
+        console.error("API ERROR:", d);
+        document.getElementById("address-left").innerText =
+          d.message || "Gagal load data.";
+        return null;
+      }
+
+      // render shipping
+      document.getElementById("address-left").innerHTML =
+        `<b>${d.shipping.firstname} ${d.shipping.lastname}</b><br>${d.shipping.email}`;
+
+      document.getElementById("address-right").innerText =
+        d.shipping.address || "-";
+
+      // render items
+      let html = "";
+      (d.items || []).forEach(i => {
+        html += `
           <div class="product-row">
-              <div class="prod-info">
-                  <img src="../assets/${i.image}" alt="${i.name}">
-                  <div>
-                      <b>${i.name}</b>
-                      <div class="size-text">Size: ${i.size}</div>
-                  </div>
+            <div class="prod-info">
+              <img src="/TUBES_2_Toko/assets/products/${i.image}" alt="${i.name}">
+              <div>
+                <b>${i.name}</b>
+                <div class="size-text">Size: ${i.size}</div>
               </div>
-              <div>Rp ${i.price.toLocaleString("id-ID")}</div>
-              <div>${i.quantity}</div>
-              <div><b>Rp ${i.subtotal.toLocaleString("id-ID")}</b></div>
+            </div>
+            <div>Rp ${Number(i.price).toLocaleString("id-ID")}</div>
+            <div>${i.quantity}</div>
+            <div><b>Rp ${Number(i.subtotal).toLocaleString("id-ID")}</b></div>
           </div>`;
       });
-      document.getElementById("product-list").innerHTML=html;
+
+      document.getElementById("product-list").innerHTML =
+        html || `<div style="padding:12px;">No items.</div>`;
 
       document.getElementById("sum-subtotal").innerText =
-          "Rp "+d.subtotal.toLocaleString("id-ID");
+        "Rp " + Number(d.subtotal || 0).toLocaleString("id-ID");
       document.getElementById("sum-shipping").innerText =
-          "Rp "+d.shipping_cost.toLocaleString("id-ID");
+        "Rp " + Number(d.shipping_cost || 0).toLocaleString("id-ID");
       document.getElementById("sum-admin").innerText =
-          "Rp "+d.admin_fee.toLocaleString("id-ID");
+        "Rp " + Number(d.admin_fee || 0).toLocaleString("id-ID");
       document.getElementById("sum-total").innerText =
-          "Rp "+d.total.toLocaleString("id-ID");
-    });
+        "Rp " + Number(d.total || 0).toLocaleString("id-ID");
 
-    /* METHOD */
-    function selectMethod(m){
-        selectedMethod=m;
-        ["cod","bank","ewallet"].forEach(x=>{
-            document.getElementById("btn-"+x).classList.remove("active");
-            document.getElementById("detail-"+x).style.display="none";
-        });
-        document.getElementById("btn-"+m).classList.add("active");
-        document.getElementById("detail-"+m).style.display="block";
+      return d;
     }
 
-    /* SUBMIT */
-    function submitPayment(){
-        const fd=new FormData();
-        fd.append("method",selectedMethod);
+    // ===== SUBMIT PAYMENT =====
+    async function submitPayment() {
+      const btn = document.getElementById("btn-place");
+      btn.disabled = true;
 
-        if(selectedMethod==="ewallet"){
-            fd.append("ewallet_type", document.querySelector("input[name=ewallet_type]:checked").value);
+      try {
+        const fd = new FormData();
+        fd.append("method", selectedMethod);
+
+        if (selectedMethod === "ewallet") {
+          const ew = document.querySelector("input[name=ewallet_type]:checked");
+          fd.append("ewallet_type", ew ? ew.value : "Dana");
         }
 
-        fetch(API+"/order/processPayment.php",{method:"POST",credentials:"include",body:fd})
-        .then(r=>r.json())
-        .then(d=>{
-            if(selectedMethod==="cod")
-                location.href="payment-success.html?transaction_id="+d.transaction_id;
-            if(selectedMethod==="bank")
-                location.href="transfer-bank.html?transaction_id="+d.transaction_id;
-            if(selectedMethod==="ewallet")
-                location.href="ewallet.html?transaction_id="+d.transaction_id+"&type="+d.ewallet_type;
-        });
-    }
-</script>
-<script>
-    async function loadPart(id, url) {
-        const el = document.getElementById(id);
-        if (!el) return;
-
-        const res = await fetch(url, { cache: "no-cache" });
-        const html = await res.text();
-        el.innerHTML = html;
-
-        // paksa execute script dari include
-        el.querySelectorAll("script").forEach(oldScript => {
-            const s = document.createElement("script");
-            if (oldScript.src) s.src = oldScript.src;
-            s.textContent = oldScript.textContent;
-            document.body.appendChild(s);
-            oldScript.remove();
+        const res = await fetch(API + "/order/processPayment.php", {
+          method: "POST",
+          credentials: "include",
+          body: fd
         });
 
-        // setelah header masuk + scriptnya sudah dieksekusi
-        if (id === "header" && window.initHeaderAuth) {
-            await window.initHeaderAuth();
+        const json = await res.json();
+
+        if (json.ok === false) {
+          alert(json.message || "Payment failed.");
+          btn.disabled = false;
+          return;
         }
+
+        // backend idealnya balikin transaction_id
+        const trxId = json.transaction_id || json.id || json.trx_id;
+
+        if (!trxId) {
+          alert("Payment processed, but transaction id missing.");
+          btn.disabled = false;
+          return;
+        }
+
+        if (selectedMethod === "cod") {
+          location.href = `payment-success.html?transaction_id=${trxId}`;
+        } else if (selectedMethod === "bank") {
+          location.href = `transfer-bank.html?transaction_id=${trxId}`;
+        } else {
+          const type = json.ewallet_type || document.querySelector("input[name=ewallet_type]:checked")?.value || "Dana";
+          location.href = `ewallet.html?transaction_id=${trxId}&type=${encodeURIComponent(type)}`;
+        }
+
+      } catch (err) {
+        console.error(err);
+        alert("Terjadi error saat submit payment. Cek console.");
+        btn.disabled = false;
+      }
     }
 
-    (async function () {
-        await loadPart("header", "/TUBES_2_Toko/frontend/includes/header.html");
-        await loadPart("footer", "/TUBES_2_Toko/frontend/includes/footer.html");
+    document.getElementById("btn-place").addEventListener("click", submitPayment);
+
+    // ===== INIT =====
+    (async function init() {
+      await loadPart("header", "/TUBES_2_Toko/frontend/includes/header.html");
+      await loadPart("footer", "/TUBES_2_Toko/frontend/includes/footer.html");
+      await loadPaymentData();
     })();
-</script>
+  </script>
 </body>
 </html>
