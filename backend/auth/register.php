@@ -345,7 +345,7 @@ $slidesJson = json_encode($slides);
             </label>
 
             <div class="auth-meta">
-            <span>Already have an account? <a href="login.php">Sign in</a></span>
+            <span>Already have an account? <a href="/TUBES_2_Toko/frontend/auth/login.html">Sign in</a></span>
             </div>
 
             <button class="btn-primary auth-submit" type="submit">Register</button>
