@@ -93,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $errors[] = 'Maximum file size is 64MB.';
             } else {
                 $profileFile = uniqid('pf_') . '.' . $ext;
-                $dest = __DIR__ . '/../assets/profile/' . $profileFile;
+                $dest = __DIR__ . '/../../frontend/assets/profile/' . $profileFile;
                 if (!is_dir(dirname($dest))) mkdir(dirname($dest), 0755, true);
                 if (!move_uploaded_file($f['tmp_name'], $dest)) {
                     $errors[] = 'Failed to upload profile photo.';
