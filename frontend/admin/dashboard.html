@@ -29,7 +29,7 @@
             <main class="admin-content">
                 <div class="admin-content-header">
                     <h1 class="admin-page-title">Dashboard</h1>
-                    <button class="btn-primary-admin">
+                    <button class="btn-primary-admin" id="btnAddProduct">
                         <i class="bi bi-plus-lg"></i> Add New Product
                     </button>
                 </div>
@@ -185,10 +185,10 @@
                         <td>Rp ${Number(p.price || 0).toLocaleString("id-ID")}</td>
                         <td>${statusPill}</td>
                         <td class="cell-actions">
-                            <a href="/TUBES_2_Toko/admin/editProduct.php?id=${encodeURIComponent(p.id)}">
+                            <a href="/TUBES_2_Toko/frontend/admin/editProducts.html?id=${encodeURIComponent(p.id)}">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            <a href="/TUBES_2_Toko/admin/deleteProduct.php?id=${encodeURIComponent(p.id)}"
+                            <a href="/TUBES_2_Toko/frontend/admin/deleteProducts.php?id=${encodeURIComponent(p.id)}"
                                 onclick="return confirm('Hapus produk ini?')">
                                 <i class="bi bi-trash3"></i>
                             </a>
@@ -286,6 +286,12 @@
             el.innerHTML = await res.text();
         }
         loadPart("sideBar", "/TUBES_2_Toko/frontend/includes/sideBar.html");
+    </script>
+
+    <script>
+        document.getElementById("btnAddProduct").addEventListener("click", () => {
+            window.location.href = "/TUBES_2_Toko/frontend/admin/addProducts.html";
+        });
     </script>
 </body>
 </html>

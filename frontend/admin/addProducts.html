@@ -1,32 +1,27 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Add Product — Féyora</title>
+  <title>Add Product — FEYORA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Admin styles -->
-  <link rel="stylesheet" href="/TUBES_2_Toko/styles/adminDashboard.css">
-  <link rel="stylesheet" href="/TUBES_2_Toko/styles/adminAddProducts.css">
+  <!-- ADMIN STYLES (SAMA DENGAN DASHBOARD) -->
+  <link rel="stylesheet" href="/TUBES_2_Toko/frontend/styles/adminDashboard.css">
+  <link rel="stylesheet" href="/TUBES_2_Toko/frontend/styles/adminAddProducts.css">
+  <link rel="stylesheet" href="/TUBES_2_Toko/frontend/styles/sideBar.css">
 
-  <!-- Bootstrap Icons -->
+  <!-- ICONS -->
   <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 
 <body class="admin-body">
 
+<!-- SIDEBAR -->
+<div id="sideBar"></div>
+
+<!-- LAYOUT -->
 <div class="admin-layout">
-
-  <!-- SIDEBAR -->
-  <aside class="admin-sidebar">
-    <div class="sidebar-logo">FEYORA</div>
-    <nav class="sidebar-nav">
-      <a href="dashboard.html">Dashboard</a>
-      <a href="customers.html">Customers</a>
-      <a href="addProducts.html" class="active">Add Product</a>
-    </nav>
-  </aside>
-
   <div class="admin-main">
 
     <!-- TOPBAR -->
@@ -43,15 +38,16 @@
       </div>
     </header>
 
-    <!-- FORM -->
-    <form method="post" enctype="multipart/form-data">
-      <main class="admin-content">
+    <!-- CONTENT -->
+    <main class="admin-content">
 
-        <div class="admin-content-header">
-          <h1 class="admin-page-title">Add New Product</h1>
-        </div>
+      <div class="admin-content-header">
+        <h1 class="admin-page-title">Add New Product</h1>
+      </div>
 
-        <!-- PRODUCT GRID -->
+      <!-- FORM -->
+      <form method="post" enctype="multipart/form-data">
+
         <div class="admin-product-grid">
 
           <!-- PRODUCT INFO -->
@@ -106,13 +102,24 @@
           </div>
 
         </div>
-      </main>
-    </form>
+      </form>
 
+    </main>
   </div>
 </div>
 
-<!-- IMAGE PREVIEW SCRIPT -->
+<!-- LOAD SIDEBAR (SAMA SEPERTI DASHBOARD) -->
+<script>
+async function loadPart(id, url) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const res = await fetch(url, { cache: "no-cache" });
+  el.innerHTML = await res.text();
+}
+loadPart("sideBar", "/TUBES_2_Toko/frontend/includes/sideBar.html");
+</script>
+
+<!-- IMAGE PREVIEW -->
 <script>
 const dropzone = document.getElementById("dropzone");
 const input = document.getElementById("imageInput");
@@ -122,23 +129,6 @@ dropzone.addEventListener("click", () => input.click());
 
 input.addEventListener("change", () => {
   if (input.files[0]) showPreview(input.files[0]);
-});
-
-dropzone.addEventListener("dragover", e => {
-  e.preventDefault();
-  dropzone.classList.add("dragover");
-});
-
-dropzone.addEventListener("dragleave", () => {
-  dropzone.classList.remove("dragover");
-});
-
-dropzone.addEventListener("drop", e => {
-  e.preventDefault();
-  dropzone.classList.remove("dragover");
-  const file = e.dataTransfer.files[0];
-  input.files = e.dataTransfer.files;
-  if (file) showPreview(file);
 });
 
 function showPreview(file) {
