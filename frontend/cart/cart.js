@@ -139,3 +139,5 @@ function checkout() {
   }
   window.location.href = "../../order/checkout.html";
 }
+
+
