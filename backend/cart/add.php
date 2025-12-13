@@ -1,39 +1,43 @@
 <?php
 session_start();
 require_once __DIR__ . '/../config/db.php';
-header('Content-Type: application/json');
 
-if (!isset($_SESSION['user_id'])) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized']);
-    exit;
+if(!isset($_SESSION['user_id'])) {
+    die("Anda harus login.");
+}
+
+if(!isset($_POST['product_id'])) {
+    die("Invalid request");
 }
 
 $user_id = $_SESSION['user_id'];
-$product_id = (int)$_POST['product_id'];
+$product_id = intval($_POST['product_id']);
 $size = trim($_POST['size']);
-$qty = (int)($_POST['qty'] ?? 1);
+$qty = isset($_POST['qty']) ? intval($_POST['qty']) : 1;
 
-$stmt = $mysqli->prepare(
-    "SELECT id, quantity FROM cart WHERE user_id=? AND product_id=? AND size=?"
-);
+//cek apakah item sudah ada di cart
+$stmt = $mysqli->prepare("SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ? AND size=?");
 $stmt->bind_param("iis", $user_id, $product_id, $size);
 $stmt->execute();
-$res = $stmt->get_result();
+$result = $stmt->get_result();
 
-if ($res->num_rows > 0) {
-    $row = $res->fetch_assoc();
+if($result->num_rows > 0) {
+    //update quantity
+    $row = $result->fetch_assoc();
     $newQty = $row['quantity'] + $qty;
 
-    $up = $mysqli->prepare("UPDATE cart SET quantity=? WHERE id=?");
-    $up->bind_param("ii", $newQty, $row['id']);
-    $up->execute();
+    $update = $mysqli->prepare("UPDATE cart SET quantity = ? WHERE id = ?");
+    $update->bind_param("ii", $newQty, $row['id']);
+    $update->execute();
 } else {
-    $ins = $mysqli->prepare(
-        "INSERT INTO cart (user_id, product_id, size, quantity) VALUES (?,?,?,?)"
-    );
-    $ins->bind_param("iisi", $user_id, $product_id, $size, $qty);
-    $ins->execute();
+    //insert baru
+    $insert = $mysqli->prepare("INSERT INTO cart (user_id, product_id, size, quantity) VALUES (?,?,?,?)");
+    $insert->bind_param("iisi", $user_id, $product_id, $size, $qty);
+    $insert->execute();
 }
 
-echo json_encode(['success' => true]);
+header("Location: listCart.php");
+exit;
+
+
+

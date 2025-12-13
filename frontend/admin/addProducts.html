@@ -5,10 +5,11 @@
   <title>Add Product — FEYORA</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- ADMIN STYLES (SAMA DENGAN DASHBOARD) -->
+  <!-- Admin styles -->
+  <link rel="stylesheet" href="/TUBES_2_Toko/frontend/styles/HomePage.css">
+  <link rel="stylesheet" href="/TUBES_2_Toko/frontend/styles/sideBar.css">
   <link rel="stylesheet" href="/TUBES_2_Toko/frontend/styles/adminDashboard.css">
   <link rel="stylesheet" href="/TUBES_2_Toko/frontend/styles/adminAddProducts.css">
-  <link rel="stylesheet" href="/TUBES_2_Toko/frontend/styles/sideBar.css">
 
   <!-- ICONS -->
   <link rel="stylesheet"
@@ -17,11 +18,11 @@
 
 <body class="admin-body">
 
-<!-- SIDEBAR -->
-<div id="sideBar"></div>
 
 <!-- LAYOUT -->
 <div class="admin-layout">
+  <div id="sideBar"></div>
+
   <div class="admin-main">
 
     <!-- TOPBAR -->
@@ -38,8 +39,10 @@
       </div>
     </header>
 
-    <!-- CONTENT -->
-    <main class="admin-content">
+
+    <!-- FORM -->
+    <form id="addProductForm" enctype="multipart/form-data">
+      <main class="admin-content">
 
       <div class="admin-content-header">
         <h1 class="admin-page-title">Add New Product</h1>
@@ -139,6 +142,55 @@ function showPreview(file) {
   reader.readAsDataURL(file);
 }
 </script>
+<script>
+    async function loadPart(id, url) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const res = await fetch(url, { cache: "no-cache" });
+        el.innerHTML = await res.text();
+    }
+    loadPart("sideBar", "/TUBES_2_Toko/frontend/includes/sideBar.html");
+</script>
+<script>
+  const form = document.getElementById("addProductForm");
 
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    try {
+      const fd = new FormData(form);
+
+      const res = await fetch("/TUBES_2_Toko/backend/admin/addProducts.php", {
+        method: "POST",
+        body: fd,
+        credentials: "include"
+      });
+
+      const ct = res.headers.get("content-type") || "";
+      const raw = await res.text();
+
+      if (!ct.includes("application/json")) {
+        console.error("NOT JSON:", raw);
+        alert("Server tidak mengembalikan JSON. Cek console.");
+        return;
+      }
+
+      const json = JSON.parse(raw);
+
+      if (!res.ok || json.ok === false) {
+        const msg = (json.errors && json.errors.length)
+          ? json.errors.join("\n")
+          : (json.error || json.message || "Gagal menambah produk.");
+        alert(msg);
+        return;
+      }
+
+      window.location.href = "/TUBES_2_Toko/frontend/admin/dashboard.html";
+    } catch (err) {
+      console.error(err);
+      alert("Terjadi error saat submit. Cek console.");
+    }
+  });
+</script>
 </body>
 </html>

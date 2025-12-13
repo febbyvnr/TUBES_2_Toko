@@ -111,19 +111,6 @@ function escapeHtml(s) {
   }[c]));
 }
 
-/* ================= LOAD HEADER & FOOTER ================= */
-async function loadPart(id, url) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  try {
-    const res = await fetch(url, { cache: "no-cache" });
-    el.innerHTML = await res.text();
-  } catch {}
-}
-loadPart("header", "/TUBES_2_Toko/frontend/includes/header.html");
-loadPart("footer", "/TUBES_2_Toko/frontend/includes/footer.html");
-
-/* ================= ELEMENTS ================= */
 const productImage   = document.getElementById("productImage");
 const productTitle   = document.getElementById("productTitle");
 const productPrice   = document.getElementById("productPrice");
@@ -135,7 +122,6 @@ const cartForm     = document.getElementById("cartForm");
 const addCartBtn   = document.getElementById("addCartBtn");
 const selectedSize = document.getElementById("selectedSize");
 
-/* ================= QTY ================= */
 const minusBtn   = document.getElementById("minusBtn");
 const plusBtn    = document.getElementById("plusBtn");
 const qtyDisplay = document.getElementById("qtyDisplay");
@@ -242,6 +228,53 @@ cartForm.onsubmit = async (e) => {
 
 loadProduct();
 </script>
+<script>
+  async function loadPart(id, url) {
+    const el = document.getElementById(id);
+    if (!el) return;
 
+    const res = await fetch(url, { cache: "no-cache", credentials: "include" });
+    const html = await res.text();
+    el.innerHTML = html;
+
+    const scripts = Array.from(el.querySelectorAll("script"));
+
+    // hapus script dari fragment biar tidak dobel
+    scripts.forEach(s => s.remove());
+
+    // load script satu-satu dan TUNGGU sampai selesai
+    for (const oldScript of scripts) {
+      await new Promise((resolve, reject) => {
+        const s = document.createElement("script");
+
+        // copy attribute penting
+        for (const { name, value } of Array.from(oldScript.attributes)) {
+          s.setAttribute(name, value);
+        }
+
+        if (oldScript.src) {
+          s.onload = resolve;
+          s.onerror = reject;
+          s.src = oldScript.src;
+        } else {
+          s.textContent = oldScript.textContent;
+          resolve();
+        }
+
+        document.body.appendChild(s);
+      });
+    }
+
+    // setelah semua script header beres, baru init auth
+    if (id === "header" && typeof window.initHeaderAuth === "function") {
+      await window.initHeaderAuth();
+    }
+  }
+
+  (async function () {
+    await loadPart("header", "/TUBES_2_Toko/frontend/includes/header.html");
+    await loadPart("footer", "/TUBES_2_Toko/frontend/includes/footer.html");
+  })();
+</script>
 </body>
 </html>
