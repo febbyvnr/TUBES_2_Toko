@@ -5,276 +5,224 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Product Detail — FEYORA</title>
 
+  <!-- STYLES -->
   <link rel="stylesheet" href="/TUBES_2_Toko/styles/DetailProduct.css">
+  <link rel="stylesheet" href="/TUBES_2_Toko/styles/header.css">
+  <link rel="stylesheet" href="/TUBES_2_Toko/styles/HomePage.css">
 
-  <!-- kalau header/footer kamu butuh icons -->
   <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 
 <body>
-  <!-- OPTIONAL: load header/footer HTML include -->
-  <div id="header"></div>
 
-  <main class="detail-container">
-    <div class="image-section">
-      <img id="productImage" src="/TUBES_2_Toko/assets/products/placeholder.png" alt="Product image">
-    </div>
+<!-- HEADER -->
+<div id="header"></div>
 
-    <div class="info-section">
-      <h1 class="product-title" id="productTitle">Loading...</h1>
+<!-- DETAIL PRODUCT -->
+<main class="detail-container">
 
-      <div class="product-price" id="productPrice">—</div>
-
-      <p class="product-description" id="productDesc">Loading description...</p>
-
-      <div class="size-section">
-        <span class="size-label">Size: </span>
-
-        <div class="size-option" id="sizeOptions">
-          <!-- size buttons injected here -->
-        </div>
-      </div>
-
-      <form action="/TUBES_2_Toko/backend/cart/add.php" method="POST" id="cartForm">
-        <input type="hidden" name="product_id" id="productIdInput" value="">
-        <input type="hidden" name="size" id="selectedSize" value="">
-        <input type="hidden" name="qty" id="qtyInput" value="1">
-
-        <!-- Quantity -->
-        <div class="qty-wrapper">
-          <span class="qty-label">Quantity:</span>
-
-          <div class="qty-control">
-            <button type="button" class="qty-btn" id="minusBtn">-</button>
-            <input type="text" class="qty-input" id="qtyDisplay" value="1">
-            <button type="button" class="qty-btn" id="plusBtn">+</button>
-          </div>
-        </div>
-
-        <button type="submit" class="add-cart-btn" id="addCartBtn">Add to Cart</button>
-      </form>
-
-      <a href="/TUBES_2_Toko/frontend/product/listProduct.html" class="back-link">← Back to Products</a>
-    </div>
-  </main>
-
-  <!-- POPUP LOGIN REQUIRED -->
-  <div id="login-required-popup"
-       style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:9999;align-items:center;justify-content:center;">
-    <div style="background:#fff;border-radius:10px;padding:20px 22px;max-width:320px;width:90%;box-shadow:0 8px 30px rgba(0,0,0,0.25);text-align:center;">
-      <h4 style="margin-top:0;margin-bottom:10px;color:#222;">Anda Belum Login</h4>
-      <p style="margin:0 0 18px;color:#555;font-size:14px;">
-        Silakan login terlebih dahulu untuk menambahkan produk ke keranjang.
-      </p>
-      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:10px;">
-        <button type="button" id="login-popup-close"
-                style="padding:8px 14px;border-radius:6px;border:1px solid #ccc;background:#f5f5f5;cursor:pointer;font-size:13px;">
-          Tutup
-        </button>
-        <button type="button" id="login-popup-go"
-                style="padding:8px 14px;border-radius:6px;border:none;background:#ff2d7a;color:#fff;cursor:pointer;font-size:13px;font-weight:600;">
-          Login
-        </button>
-      </div>
-    </div>
+  <div class="image-section">
+    <img id="productImage"
+         src="/TUBES_2_Toko/assets/products/placeholder.png"
+         alt="Product image">
   </div>
 
-  <div id="footer"></div>
+  <div class="info-section">
+    <h1 class="product-title" id="productTitle">Loading...</h1>
 
-  <script>
-    // ===== CONFIG =====
-    const BACKEND_BASE = "/TUBES_2_Toko/backend";
-    const API_DETAIL   = `${BACKEND_BASE}/api/product_detail.php`;
+    <div class="product-price" id="productPrice">—</div>
 
-    function getQueryParam(name) {
-      return new URLSearchParams(window.location.search).get(name);
-    }
+    <p class="product-description" id="productDesc">
+      Loading description...
+    </p>
 
-    function formatRupiah(n) {
-      try {
-        return "Rp " + Number(n).toLocaleString("id-ID");
-      } catch {
-        return "Rp " + n;
-      }
-    }
+    <!-- SIZE -->
+    <div class="size-section">
+      <span class="size-label">Size:</span>
+      <div class="size-option" id="sizeOptions"></div>
+    </div>
 
-    function escapeHtml(s) {
-      return String(s).replace(/[&<>"']/g, c => ({
-        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-      }[c]));
-    }
+    <!-- ADD TO CART -->
+    <form action="/TUBES_2_Toko/backend/cart/add.php"
+          method="POST"
+          id="cartForm">
 
-    // ===== HEADER/FOOTER LOAD (optional) =====
-    async function loadPart(id, url) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      try {
-        const res = await fetch(url, { cache: "no-cache" });
-        el.innerHTML = await res.text();
-      } catch {}
-    }
-    loadPart("header", "/TUBES_2_Toko/frontend/includes/header.html");
-    loadPart("footer", "/TUBES_2_Toko/frontend/includes/footer.html");
+      <input type="hidden" name="product_id" id="productIdInput">
+      <input type="hidden" name="size" id="selectedSize">
+      <input type="hidden" name="qty" id="qtyInput" value="1">
 
-    // ===== UI ELEMENTS =====
-    const productImage   = document.getElementById("productImage");
-    const productTitle   = document.getElementById("productTitle");
-    const productPrice   = document.getElementById("productPrice");
-    const productDesc    = document.getElementById("productDesc");
-    const sizeOptions    = document.getElementById("sizeOptions");
-    const productIdInput = document.getElementById("productIdInput");
+      <!-- QUANTITY -->
+      <div class="qty-wrapper">
+        <span class="qty-label">Quantity:</span>
+        <div class="qty-control">
+          <button type="button" class="qty-btn" id="minusBtn">-</button>
+          <input type="text" class="qty-input" id="qtyDisplay" value="1">
+          <button type="button" class="qty-btn" id="plusBtn">+</button>
+        </div>
+      </div>
 
-    const cartForm     = document.getElementById("cartForm");
-    const addCartBtn   = document.getElementById("addCartBtn");
-    const selectedSize = document.getElementById("selectedSize");
+      <button type="submit" class="add-cart-btn" id="addCartBtn">
+        Add to Cart
+      </button>
+    </form>
 
-    // popup
-    const loginPopup   = document.getElementById("login-required-popup");
-    const popupClose   = document.getElementById("login-popup-close");
-    const popupGoLogin = document.getElementById("login-popup-go");
+    <a href="/TUBES_2_Toko/frontend/product/listProduct.html"
+       class="back-link">← Back to Products</a>
+  </div>
+</main>
 
-    // qty
-    const minusBtn   = document.getElementById("minusBtn");
-    const plusBtn    = document.getElementById("plusBtn");
-    const qtyDisplay = document.getElementById("qtyDisplay");
-    const qtyInput   = document.getElementById("qtyInput");
+<!-- LOGIN REQUIRED POPUP -->
+<div id="login-required-popup"
+     style="display:none;position:fixed;inset:0;
+            background:rgba(0,0,0,0.35);
+            z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:10px;padding:20px 22px;
+              max-width:320px;width:90%;box-shadow:0 8px 30px rgba(0,0,0,0.25);
+              text-align:center;">
+    <h4 style="margin-top:0;">Anda Belum Login</h4>
+    <p style="font-size:14px;color:#555;">
+      Silakan login terlebih dahulu untuk menambahkan produk ke keranjang.
+    </p>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button type="button" id="login-popup-close">Tutup</button>
+      <button type="button" id="login-popup-go"
+              style="background:#ff2d7a;color:#fff;border:none;">
+        Login
+      </button>
+    </div>
+  </div>
+</div>
 
-    function setQty(val) {
-      let qty = parseInt(val, 10);
-      if (isNaN(qty) || qty < 1) qty = 1;
-      qtyDisplay.value = qty;
-      qtyInput.value = qty;
-    }
+<!-- FOOTER -->
+<div id="footer"></div>
 
-    minusBtn.addEventListener("click", () => {
-      const cur = parseInt(qtyDisplay.value, 10) || 1;
-      if (cur > 1) setQty(cur - 1);
-    });
+<script>
+/* ================= CONFIG ================= */
+const API_DETAIL = "/TUBES_2_Toko/backend/product/detail.php";
+const SIZES = ["XS","S","M","L","XL","All Size"];
 
-    plusBtn.addEventListener("click", () => {
-      const cur = parseInt(qtyDisplay.value, 10) || 1;
-      setQty(cur + 1);
-    });
+/* ================= HELPERS ================= */
+function qs(name) {
+  return new URLSearchParams(window.location.search).get(name);
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",
+    '"':"&quot;","'":"&#039;"
+  }[c]));
+}
 
-    qtyDisplay.addEventListener("input", () => {
-      qtyDisplay.value = qtyDisplay.value.replace(/[^\d]/g, "");
-    });
+/* ================= LOAD HEADER & FOOTER ================= */
+async function loadPart(id, url) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  try {
+    const res = await fetch(url, { cache: "no-cache" });
+    el.innerHTML = await res.text();
+  } catch {}
+}
+loadPart("header", "/TUBES_2_Toko/frontend/includes/header.html");
+loadPart("footer", "/TUBES_2_Toko/frontend/includes/footer.html");
 
-    qtyDisplay.addEventListener("blur", () => setQty(qtyDisplay.value));
+/* ================= ELEMENTS ================= */
+const productImage   = document.getElementById("productImage");
+const productTitle   = document.getElementById("productTitle");
+const productPrice   = document.getElementById("productPrice");
+const productDesc    = document.getElementById("productDesc");
+const sizeOptions    = document.getElementById("sizeOptions");
+const productIdInput = document.getElementById("productIdInput");
 
-    // ===== RENDER SIZES =====
-    const SIZES = ["XS","S","M","L","XL","All Size"];
+const cartForm     = document.getElementById("cartForm");
+const addCartBtn   = document.getElementById("addCartBtn");
+const selectedSize = document.getElementById("selectedSize");
 
-    function renderSizes(current = "") {
-      sizeOptions.innerHTML = SIZES.map(s => {
-        const active = (current === s) ? "active" : "";
-        return `<button type="button" class="size-btn ${active}" data-size="${escapeHtml(s)}">${escapeHtml(s)}</button>`;
-      }).join("");
+/* ================= QTY ================= */
+const minusBtn   = document.getElementById("minusBtn");
+const plusBtn    = document.getElementById("plusBtn");
+const qtyDisplay = document.getElementById("qtyDisplay");
+const qtyInput   = document.getElementById("qtyInput");
 
-      // attach listeners
-      const buttons = sizeOptions.querySelectorAll(".size-btn");
-      buttons.forEach(btn => {
-        btn.addEventListener("click", () => {
-          buttons.forEach(b => b.classList.remove("active","error"));
-          btn.classList.add("active");
-          selectedSize.value = btn.dataset.size;
-        });
-      });
-    }
+function setQty(v) {
+  let q = parseInt(v,10);
+  if (isNaN(q) || q < 1) q = 1;
+  qtyDisplay.value = q;
+  qtyInput.value = q;
+}
+minusBtn.onclick = () => setQty(qtyDisplay.value - 1);
+plusBtn.onclick  = () => setQty(qtyDisplay.value + 1);
 
-    // ===== LOAD PRODUCT =====
-    async function loadProduct() {
-      const id = getQueryParam("id");
-      if (!id) {
-        productTitle.textContent = "Product not found";
-        productDesc.textContent = "Missing product id.";
-        return;
-      }
+/* ================= LOGIN POPUP ================= */
+const loginPopup = document.getElementById("login-required-popup");
+document.getElementById("login-popup-close").onclick =
+  () => loginPopup.style.display = "none";
+document.getElementById("login-popup-go").onclick =
+  () => location.href =
+    "/TUBES_2_Toko/frontend/auth/login.html?redirect=" +
+    encodeURIComponent(location.href);
 
-      const res = await fetch(`${API_DETAIL}?id=${encodeURIComponent(id)}`, {
-        credentials: "include"
-      });
+/* ================= LOAD PRODUCT ================= */
+async function loadProduct() {
+  const id = qs("id");
+  if (!id) {
+    productTitle.textContent = "Product not found";
+    return;
+  }
 
-      const data = await res.json();
+  const res = await fetch(`${API_DETAIL}?id=${id}`, {
+    credentials: "include"
+  });
+  const json = await res.json();
 
-      if (!data.ok) {
-        productTitle.textContent = "Product not found";
-        productDesc.textContent  = data.error || "Not found.";
-        return;
-      }
+  if (!json.ok) {
+    productTitle.textContent = "Product not found";
+    return;
+  }
 
-      const p = data.data.product;
+  const p = json.data;
 
-      // title + page title
-      productTitle.textContent = p.title;
-      document.title = `${p.title} — FEYORA`;
+  document.title = `${p.title} — FEYORA`;
+  productTitle.textContent = p.title;
+  productPrice.textContent = p.price_text;
+  productDesc.innerHTML    = p.description;
+  productImage.src         = p.image;
+  productIdInput.value     = p.id;
 
-      // image
-      productImage.src = p.image_url || "/TUBES_2_Toko/assets/products/placeholder.png";
-      productImage.alt = p.title;
+  // sizes
+  sizeOptions.innerHTML = SIZES.map(s =>
+    `<button type="button" class="size-btn" data-size="${s}">${s}</button>`
+  ).join("");
 
-      // price
-      productPrice.textContent = p.price_text || formatRupiah(p.price);
+  sizeOptions.querySelectorAll(".size-btn").forEach(btn => {
+    btn.onclick = () => {
+      sizeOptions.querySelectorAll(".size-btn")
+        .forEach(b => b.classList.remove("active","error"));
+      btn.classList.add("active");
+      selectedSize.value = btn.dataset.size;
+    };
+  });
 
-      // desc
-      productDesc.innerHTML = p.description_html || escapeHtml(p.description || "No description available.");
+  // login gate
+  if (!p.isLoggedIn) {
+    addCartBtn.dataset.requireLogin = "1";
+  }
+}
 
-      // form hidden
-      productIdInput.value = p.id;
+/* ================= FORM SUBMIT ================= */
+cartForm.onsubmit = e => {
+  if (addCartBtn.dataset.requireLogin === "1") {
+    e.preventDefault();
+    loginPopup.style.display = "flex";
+    return;
+  }
+  if (!selectedSize.value) {
+    e.preventDefault();
+    alert("Please select a size.");
+  }
+};
 
-      // size
-      const initialSize = p.size || "";
-      selectedSize.value = initialSize;
-      renderSizes(initialSize);
+loadProduct();
+</script>
 
-      // login gating
-      if (!data.data.isLoggedIn) {
-        addCartBtn.dataset.requireLogin = "1";
-      } else {
-        delete addCartBtn.dataset.requireLogin;
-      }
-    }
-
-    // ===== LOGIN POPUP BEHAVIOR =====
-    addCartBtn.addEventListener("click", (e) => {
-      if (addCartBtn.dataset.requireLogin === "1") {
-        e.preventDefault();
-        loginPopup.style.display = "flex";
-      }
-    });
-
-    popupClose.addEventListener("click", () => {
-      loginPopup.style.display = "none";
-    });
-
-    popupGoLogin.addEventListener("click", () => {
-      const currentUrl = window.location.href;
-      window.location.href = `/TUBES_2_Toko/frontend/auth/login.html?redirect=` + encodeURIComponent(currentUrl);
-    });
-
-    loginPopup.addEventListener("click", (e) => {
-      if (e.target === loginPopup) loginPopup.style.display = "none";
-    });
-
-    // ===== VALIDATE SIZE BEFORE SUBMIT =====
-    cartForm.addEventListener("submit", (e) => {
-      // kalau belum login, blok (safety)
-      if (addCartBtn.dataset.requireLogin === "1") {
-        e.preventDefault();
-        loginPopup.style.display = "flex";
-        return;
-      }
-
-      if (!selectedSize.value) {
-        e.preventDefault();
-        const buttons = sizeOptions.querySelectorAll(".size-btn");
-        buttons.forEach(b => b.classList.add("error"));
-        alert("Please select a size before adding to cart.");
-      }
-    });
-
-    loadProduct();
-  </script>
 </body>
 </html>
