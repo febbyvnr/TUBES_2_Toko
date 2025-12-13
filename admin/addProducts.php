@@ -65,7 +65,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bind_param("ssiiss", $name, $desc, $price, $stock, $category, $img);
 
             if ($stmt->execute()) {
-                $success = "Succesed Add Products!";
+                header("Location: /TUBES_2_Toko/admin/dashboard.php");
+                exit;
             } else {
                 $error = "Failed to Add Products!";
             }
@@ -145,7 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <div id="imagePreviewContainer" class="media-preview-container"></div>
                                 
                                 <button type="submit" name="submit" class="btn-primary-admin full">
-                                    <i class="bi bi-check2-circle"></i> Save Product
+                                    <i class="bi bi-check2-circle"></i> Save Product!
                                 </button> 
                         </div>
                         

@@ -1,0 +1,61 @@
+<link rel="stylesheet" href="/TUBES_2_Toko/frontend/styles/sideBar.css">
+<div class="admin-sidebar">
+    <div class="sidebar-header">
+        <img src="/TUBES_2_Toko/frontend/assets/Logo%20Feyora.png"
+            class="sidebar-logo" alt="Feyora Logo">
+    </div>
+
+    <ul class="sidebar-menu">
+        <li>
+            <a href="/TUBES_2_Toko/frontend/admin/dashboard.html">
+                <i class="bi bi-grid-1x2"></i> Dashboard
+            </a>
+        </li>
+
+        <li>
+            <a href="/TUBES_2_Toko/frontend/admin/orders.html">
+                <i class="bi bi-bag-check"></i> Orders
+            </a>
+        </li>
+
+        <li>
+            <a href="/TUBES_2_Toko/frontend/admin/customers.html">
+                <i class="bi bi-people"></i> Customers
+            </a>
+        </li>
+
+        <li>
+            <a href="/TUBES_2_Toko/backend/auth/logout.php" class="logout">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </a>
+        </li>
+    </ul>
+</div>
+
+<script>
+  (function () {
+      const basename = (p) => (p || "").split("/").filter(Boolean).pop() || "";
+      const currentPath = location.pathname;
+      const currentBase = basename(currentPath);
+
+      const links = document.querySelectorAll(".sidebar-menu a");
+      if (!links.length) return;
+
+      links.forEach(a => a.classList.remove("active"));
+
+      for (const a of links) {
+          if (a.classList.contains("logout")) continue;
+
+          const href = a.getAttribute("href");
+          if (!href || href === "#") continue;
+
+          const linkPath = new URL(href, location.origin).pathname;
+          const linkBase = basename(linkPath);
+
+          if (currentPath === linkPath || (currentBase && linkBase && currentBase === linkBase)) {
+              a.classList.add("active");
+              break;
+          }
+      }
+  })();
+</script>

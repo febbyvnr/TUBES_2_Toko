@@ -2,76 +2,193 @@
 session_start();
 require_once __DIR__ . '/../config/db.php';
 
-if (!isset($_SESSION['user_id'])) {
-    header('Location: /TUBES_2_Toko/auth/login.php');
-    exit;
-}
-
-if (empty($_SESSION['checkout']) || empty($_SESSION['shipping'])) {
-    header("Location: ../cart/listCart.php");
+if (!isset($_SESSION['shipping']) || !isset($_SESSION['checkout_ids'])) {
+    header("Location: checkout.php");
     exit;
 }
 
 $shipping = $_SESSION['shipping'];
-$items    = $_SESSION['checkout'];
+$user_id = $_SESSION['user_id'];
+$selected = $_SESSION['checkout_ids'];
 
-$total = 0;
-foreach ($items as $i) {
-    $total += $i['price'] * $i['quantity'];
+$ids = implode(",", array_map('intval', array_keys($selected)));
+
+$query = $mysqli->query("
+    SELECT c.quantity, c.size, p.name, p.price, p.image
+    FROM cart c
+    JOIN products p ON c.product_id = p.id
+    WHERE c.user_id = $user_id
+    AND c.id IN ($ids)
+");
+
+$items = [];
+$subtotal = 0;
+
+while ($row = $query->fetch_assoc()) {
+    $items[] = $row;
+    $subtotal += $row['price'] * $row['quantity'];
 }
-?>
 
-<!doctype html>
-<html lang="en">
-<?php
-  $pageTitle   = 'Payment — FEYORA';
-  $extraStyles = '<link rel="stylesheet" href="/TUBES_2_Toko/styles/payment.css?v=' . time() . '">';
-  include __DIR__ . '/../includes/head.php';
+$shipping_cost = 5000;
+$admin_fee = 2000;
+$total = $subtotal + $shipping_cost + $admin_fee;
 ?>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Pembayaran</title>
+
+<link rel="stylesheet" href="../styles/payment.css">
+
+</head>
 <body>
 
-<?php include __DIR__ . '/../includes/header.php'; ?>
+<div class="container">
 
-<main class="payment-page">
+    <!-- ====================== ALAMAT PENGIRIMAN ===================== -->
+    <div class="box">
+        <div class="section-title">Alamat Pengiriman</div>
 
-<div class="payment-container">
+        <div class="address-wrapper">
 
-    <div class="section">
-        <h3>Shipping Address</h3>
-        <p><?= htmlspecialchars($shipping['name']) ?></p>
-        <p><?= htmlspecialchars($shipping['phone']) ?></p>
-        <p><?= htmlspecialchars($shipping['address']) ?>,
-           <?= htmlspecialchars($shipping['city']) ?>,
-           <?= htmlspecialchars($shipping['postal_code']) ?></p>
-    </div>
-
-    <div class="section">
-        <h3>Order Summary</h3>
-        <?php foreach ($items as $i): ?>
-            <div class="order-item">
-                <span><?= $i['name'] ?> x<?= $i['quantity'] ?></span>
-                <span>Rp <?= number_format($i['price'] * $i['quantity'], 0, ',', '.') ?></span>
+            <div class="address-left">
+                <b><?= $shipping['firstname'] . " " . $shipping['lastname'] ?></b><br>
+                <span><?= htmlspecialchars($shipping['email']) ?></span>
             </div>
-        <?php endforeach; ?>
 
-        <h4>Total: Rp <?= number_format($total, 0, ',', '.') ?></h4>
+
+            <div class="address-right">
+                <?= $shipping['address'] ?>,
+                <?= $shipping['city'] ?>,
+                <?= $shipping['state'] ?>,
+                <?= $shipping['zip'] ?>
+            </div>
+
+        </div>
     </div>
 
-    <form action="processPayment.php" method="POST" class="section">
-        <h3>Choose Payment Method</h3>
+    <!-- ====================== PRODUK DIPESAN ===================== -->
+    <div class="box">
+        <div class="section-title">Produk Dipesan</div>
 
-        <label><input type="radio" name="payment_method" value="DANA" required> DANA</label><br>
-        <label><input type="radio" name="payment_method" value="OVO"> OVO</label><br>
-        <label><input type="radio" name="payment_method" value="ShopeePay"> ShopeePay</label><br>
-        <label><input type="radio" name="payment_method" value="Transfer Bank"> Bank Transfer</label><br>
-        <label><input type="radio" name="payment_method" value="COD"> COD</label><br>
+        <div class="product-header">
+            <div>Produk</div>
+            <div>Harga Satuan</div>
+            <div>Jumlah</div>
+            <div>Subtotal</div>
+        </div>
 
-        <button class="pay-btn">Confirm Payment</button>
-    </form>
+        <?php foreach ($items as $i): ?>
+        <div class="product-row">
+            <div class="prod-info">
+                <img src="/TUBES_2_Toko/assets/products/<?= $i['image'] ?>">
+                <div>
+                    <b><?= $i['name'] ?></b><br>
+                    <span class="size-text">Size: <?= strtoupper($i['size']) ?></span>
+                </div>
+            </div>
+
+            <div>Rp <?= number_format($i['price'], 0, ',', '.') ?></div>
+            <div><?= $i['quantity'] ?></div>
+            <div><b>Rp <?= number_format($i['price'] * $i['quantity'], 0, ',', '.') ?></b></div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+
+    <!-- ====================== PAYMENT METHOD + SUMMARY ===================== -->
+
+    <div class="payment-container">
+
+        <!-- LEFT SIDE -->
+        <div class="payment-left section-box">
+            <div class="section-title">Metode Pembayaran</div>
+
+            <div class="method-list">
+                <div id="btn-bank" class="method-btn" onclick="selectMethod('bank')">Transfer Bank</div>
+                <div id="btn-ewallet" class="method-btn" onclick="selectMethod('ewallet')">E-Wallet</div>
+                <div id="btn-cod" class="method-btn active" onclick="selectMethod('cod')">COD (Bayar di Tempat)</div>
+            </div>
+
+            <div class="payment-detail" id="paymentDetail">
+
+    <!-- DEFAULT (COD) -->
+    <div id="detail-cod">
+        <b>COD</b> — Cash on Delivery
+    </div>
+
+    <!-- TRANSFER BANK -->
+    <div id="detail-bank" style="display:none;">
+        <b>Transfer Bank</b> — Pembayaran via Virtual Account
+    </div>
+
+    <!-- E-WALLET -->
+    <div id="detail-ewallet" style="display:none;">
+        <b>E-Wallet</b> — Dana / OVO / Gopay
+        <div class="ewallet-options">
+            <label><input type="radio" name="ewallet_type" value="Dana"> Dana</label>
+            <label><input type="radio" name="ewallet_type" value="OVO"> OVO</label>
+            <label><input type="radio" name="ewallet_type" value="Gopay"> Gopay</label>
+        </div>
+    </div>
 
 </div>
 
-</main>
+
+            <form id="paymentForm" action="processPayment.php" method="POST">
+                <input type="hidden" name="method" id="method" value="cod">
+                <input type="hidden" name="total_price" value="<?= $total ?>">
+                <input type="hidden" name="ewallet_type" id="ewallet_type">
+            </form>
+        </div>
+
+        <!-- RIGHT SIDE SUMMARY -->
+        <div class="payment-right section-box">
+            <h3>Ringkasan Pesanan</h3>
+
+            <div class="summary-row"><span>Subtotal Produk</span><span>Rp <?= number_format($subtotal) ?></span></div>
+            <div class="summary-row"><span>Subtotal Pengiriman</span><span>Rp <?= number_format($shipping_cost) ?></span></div>
+            <div class="summary-row"><span>Biaya Admin</span><span>Rp <?= number_format($admin_fee) ?></span></div>
+
+            <div class="total-line">
+                <span>Total Pembayaran</span>
+                <span>Rp <?= number_format($total) ?></span>
+            </div>
+
+            <button class="btn-submit" onclick="document.getElementById('paymentForm').submit()">Buat Pesanan</button>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ===================== jsc ===================== -->
+<script>
+function selectMethod(method) {
+    document.getElementById("method").value = method;
+
+    // update UI
+    document.querySelectorAll(".method-btn").forEach(btn => btn.classList.remove("active"));
+    document.getElementById("btn-" + method).classList.add("active");
+
+    // hide all detail boxes
+    document.getElementById("detail-cod").style.display = "none";
+    document.getElementById("detail-bank").style.display = "none";
+    document.getElementById("detail-ewallet").style.display = "none";
+
+    // show selected detail
+    document.getElementById("detail-" + method).style.display = "block";
+}
+
+// KETIKA PILIH E-WALLET
+document.querySelectorAll("input[name='ewallet_type']").forEach(radio => {
+    radio.addEventListener("change", function () {
+        document.getElementById("ewallet_type").value = this.value;
+    });
+});
+
+</script>
+
 
 </body>
 </html>

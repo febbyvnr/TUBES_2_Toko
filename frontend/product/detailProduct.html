@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Product Detail — FEYORA</title>
+
+  <!-- STYLES -->
+  <link rel="stylesheet" href="/TUBES_2_Toko/styles/DetailProduct.css">
+  <link rel="stylesheet" href="/TUBES_2_Toko/styles/header.css">
+  <link rel="stylesheet" href="/TUBES_2_Toko/styles/HomePage.css">
+
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div id="header"></div>
+
+<!-- DETAIL PRODUCT -->
+<main class="detail-container">
+
+  <div class="image-section">
+    <img id="productImage"
+         src="/TUBES_2_Toko/assets/products/placeholder.png"
+         alt="Product image">
+  </div>
+
+  <div class="info-section">
+    <h1 class="product-title" id="productTitle">Loading...</h1>
+
+    <div class="product-price" id="productPrice">—</div>
+
+    <p class="product-description" id="productDesc">
+      Loading description...
+    </p>
+
+    <!-- SIZE -->
+    <div class="size-section">
+      <span class="size-label">Size:</span>
+      <div class="size-option" id="sizeOptions"></div>
+    </div>
+
+    <!-- ADD TO CART -->
+    <form id="cartForm">
+
+      <input type="hidden" name="product_id" id="productIdInput">
+      <input type="hidden" name="size" id="selectedSize">
+      <input type="hidden" name="qty" id="qtyInput" value="1">
+
+      <!-- QUANTITY -->
+      <div class="qty-wrapper">
+        <span class="qty-label">Quantity:</span>
+        <div class="qty-control">
+          <button type="button" class="qty-btn" id="minusBtn">-</button>
+          <input type="text" class="qty-input" id="qtyDisplay" value="1">
+          <button type="button" class="qty-btn" id="plusBtn">+</button>
+        </div>
+      </div>
+
+      <button type="submit" class="add-cart-btn" id="addCartBtn">
+        Add to Cart
+      </button>
+    </form>
+
+    <a href="/TUBES_2_Toko/frontend/product/listProduct.html"
+       class="back-link">← Back to Products</a>
+  </div>
+</main>
+
+<!-- LOGIN REQUIRED POPUP -->
+<div id="login-required-popup"
+     style="display:none;position:fixed;inset:0;
+            background:rgba(0,0,0,0.35);
+            z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:10px;padding:20px 22px;
+              max-width:320px;width:90%;box-shadow:0 8px 30px rgba(0,0,0,0.25);
+              text-align:center;">
+    <h4 style="margin-top:0;">Anda Belum Login</h4>
+    <p style="font-size:14px;color:#555;">
+      Silakan login terlebih dahulu untuk menambahkan produk ke keranjang.
+    </p>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button type="button" id="login-popup-close">Tutup</button>
+      <button type="button" id="login-popup-go"
+              style="background:#ff2d7a;color:#fff;border:none;">
+        Login
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div id="footer"></div>
+
+<script>
+/* ================= CONFIG ================= */
+const API_DETAIL = "/TUBES_2_Toko/backend/product/detailProduct.php";
+const SIZES = ["XS","S","M","L","XL","All Size"];
+
+/* ================= HELPERS ================= */
+function qs(name) {
+  return new URLSearchParams(window.location.search).get(name);
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",
+    '"':"&quot;","'":"&#039;"
+  }[c]));
+}
+
+const productImage   = document.getElementById("productImage");
+const productTitle   = document.getElementById("productTitle");
+const productPrice   = document.getElementById("productPrice");
+const productDesc    = document.getElementById("productDesc");
+const sizeOptions    = document.getElementById("sizeOptions");
+const productIdInput = document.getElementById("productIdInput");
+
+const cartForm     = document.getElementById("cartForm");
+const addCartBtn   = document.getElementById("addCartBtn");
+const selectedSize = document.getElementById("selectedSize");
+
+const minusBtn   = document.getElementById("minusBtn");
+const plusBtn    = document.getElementById("plusBtn");
+const qtyDisplay = document.getElementById("qtyDisplay");
+const qtyInput   = document.getElementById("qtyInput");
+
+function setQty(v) {
+  let q = parseInt(v,10);
+  if (isNaN(q) || q < 1) q = 1;
+  qtyDisplay.value = q;
+  qtyInput.value = q;
+}
+minusBtn.onclick = () => setQty(qtyDisplay.value - 1);
+plusBtn.onclick  = () => setQty(qtyDisplay.value + 1);
+
+/* ================= LOGIN POPUP ================= */
+const loginPopup = document.getElementById("login-required-popup");
+document.getElementById("login-popup-close").onclick =
+  () => loginPopup.style.display = "none";
+document.getElementById("login-popup-go").onclick =
+  () => location.href =
+    "/TUBES_2_Toko/frontend/auth/login.html?redirect=" +
+    encodeURIComponent(location.href);
+
+/* ================= LOAD PRODUCT ================= */
+async function loadProduct() {
+  const id = qs("id");
+  if (!id) {
+    productTitle.textContent = "Product not found";
+    return;
+  }
+
+  const res = await fetch(`${API_DETAIL}?id=${id}`, {
+    credentials: "include"
+  });
+  const json = await res.json();
+
+  if (!json.ok) {
+    productTitle.textContent = "Product not found";
+    return;
+  }
+
+  const p = json.data.product || json.data;
+
+  document.title = `${p.title} — FEYORA`;
+  productTitle.textContent = p.title || "";
+  productPrice.textContent = p.price_text || "";
+  productDesc.textContent  = p.description || "";
+  productImage.src         = p.image || "/TUBES_2_Toko/frontend/assets/products/placeholder.png";
+  productIdInput.value     = p.id || "";
+
+
+  // sizes
+  sizeOptions.innerHTML = SIZES.map(s =>
+    `<button type="button" class="size-btn" data-size="${s}">${s}</button>`
+  ).join("");
+
+  sizeOptions.querySelectorAll(".size-btn").forEach(btn => {
+    btn.onclick = () => {
+      sizeOptions.querySelectorAll(".size-btn")
+        .forEach(b => b.classList.remove("active","error"));
+      btn.classList.add("active");
+      selectedSize.value = btn.dataset.size;
+    };
+  });
+
+  // login gate
+  if (!p.isLoggedIn) {
+    addCartBtn.dataset.requireLogin = "1";
+  }
+}
+
+/* ================= FORM SUBMIT ================= */
+cartForm.onsubmit = async (e) => {
+  e.preventDefault();
+
+  if (!selectedSize.value) {
+    alert("Please select a size.");
+    return;
+  }
+
+  const formData = new URLSearchParams();
+  formData.append("product_id", productIdInput.value);
+  formData.append("size", selectedSize.value);
+  formData.append("qty", qtyInput.value);
+
+  const res = await fetch("/TUBES_2_Toko/backend/cart/add.php", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: formData.toString(),
+    credentials: "include"
+  });
+
+  const json = await res.json();
+
+  if (json.success) {
+    // pindah ke cart (atau reload cart)
+    window.location.href = "/TUBES_2_Toko/frontend/cart/listCart.html";
+  } else {
+    alert("Failed to add to cart");
+  }
+};
+
+loadProduct();
+</script>
+<script>
+  async function loadPart(id, url) {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    const res = await fetch(url, { cache: "no-cache", credentials: "include" });
+    const html = await res.text();
+    el.innerHTML = html;
+
+    const scripts = Array.from(el.querySelectorAll("script"));
+
+    // hapus script dari fragment biar tidak dobel
+    scripts.forEach(s => s.remove());
+
+    // load script satu-satu dan TUNGGU sampai selesai
+    for (const oldScript of scripts) {
+      await new Promise((resolve, reject) => {
+        const s = document.createElement("script");
+
+        // copy attribute penting
+        for (const { name, value } of Array.from(oldScript.attributes)) {
+          s.setAttribute(name, value);
+        }
+
+        if (oldScript.src) {
+          s.onload = resolve;
+          s.onerror = reject;
+          s.src = oldScript.src;
+        } else {
+          s.textContent = oldScript.textContent;
+          resolve();
+        }
+
+        document.body.appendChild(s);
+      });
+    }
+
+    // setelah semua script header beres, baru init auth
+    if (id === "header" && typeof window.initHeaderAuth === "function") {
+      await window.initHeaderAuth();
+    }
+  }
+
+  (async function () {
+    await loadPart("header", "/TUBES_2_Toko/frontend/includes/header.html");
+    await loadPart("footer", "/TUBES_2_Toko/frontend/includes/footer.html");
+  })();
+</script>
+</body>
+</html>

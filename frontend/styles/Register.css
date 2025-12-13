@@ -1,0 +1,196 @@
+@import url('HomePage.css');
+
+:root {
+  --container: 960px !important;
+  --accent: #ff2d7a;
+}
+
+body { 
+  background: #faf7f8; 
+  color: #222; 
+}
+
+/* WRAPPER REGISTER */
+.auth-layout {
+  max-width: var(--container);
+  margin: 32px auto;
+  padding: 0;
+  display: flex;
+  gap: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  min-height: 480px;
+  max-height: 800px !important;
+}
+
+/* BAGIAN KANAN (GAMBAR) */
+.auth-visual {
+  position: relative;
+  flex: 0.8;
+  overflow: hidden;
+  aspect-ratio: 3 / 4; 
+}
+
+.auth-visual-image {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: opacity .4s ease, background-image .8s ease-in-out;
+}
+
+.auth-visual-overlay {
+  position: relative;
+  z-index: 2;
+  padding: 40px;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+.auth-visual-overlay h1 {
+  font-size: 30px;
+  margin-bottom: 10px;
+}
+
+.auth-visual-overlay p {
+  max-width: 360px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* BAGIAN KIRI (FORM) */
+.auth-form {
+  flex: 1;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 28px;
+}
+
+.auth-form-inner {
+  width: 100%;
+  max-width: 380px; 
+}
+
+/* ALERT ERROR & SUCCESS */
+.auth-error {
+  background: #ffe9e9;
+  border: 1px solid #f3b3b3;
+  color: #b00;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+
+.auth-success {
+  background: #e7f8ec;
+  border: 1px solid #9ed5ae;
+  color: #21653a;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+
+/* INPUT & LABEL */
+.auth-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.form-row .auth-label {
+  flex: 1;
+}
+
+.auth-label {
+  font-size: 13px;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e6e6e6;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 14px;
+}
+
+.auth-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(255,45,122,0.25);
+}
+
+.auth-textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+/* TEXT KECIL DI BAWAH FORM */
+.auth-meta {
+  font-size: 13px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.auth-meta a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.auth-meta a:hover {
+  text-decoration: underline;
+}
+
+/* TOMBOL */
+.btn-primary.auth-submit {
+  margin-top: 10px;
+  width: 100%;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 0;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .auth-layout {
+    flex-direction: column;
+  }
+  .auth-visual {
+    aspect-ratio: auto;
+    min-height: 260px;
+  }
+}
+
+@media (max-width: 520px) {
+  .auth-layout {
+    margin: 16px auto;
+    box-shadow: none;
+    border-radius: 0;
+  }
+  .auth-form {
+    padding: 24px 18px;
+  }
+  .form-row {
+    flex-direction: column;
+  }
+}

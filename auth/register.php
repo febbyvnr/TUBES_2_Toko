@@ -135,8 +135,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // === GBS LOGIN, EMAIL AKTIVASI DL ===
 
                 // base URL sesuai project
-                $baseUrl = 'http://localhost/TUBES_2_Toko/auth';
-                $activationLink = $baseUrl . '/activate.php?token=' . urlencode($activation_token);
+                $baseUrl = '/TUBES_2_Toko/frontend/auth';
+                $activationLink = $baseUrl . '/activate.php?token=' . urlencode($activation_token) . "&return=register";
 
                 $subject = 'Account Activation';
                 $message = "Hi $username,\n\n"
@@ -188,7 +188,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 Account Activation
                             </a>
                         </div>
-                        <div style="margin-top:8px; font-size:12px; color:#666;">
+                        <div style="margin-top:8px; font-size:12px; color:#e4007f;">
                             (Error mailer: ' . htmlspecialchars($mail->ErrorInfo) . ')
                         </div>
                     ';

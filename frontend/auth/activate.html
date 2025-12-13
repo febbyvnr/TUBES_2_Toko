@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Activating… | FEYORA</title>
+    <link rel="stylesheet" href="/TUBES_2_Toko/frontend/styles/HomePage.css">
+    <link rel="stylesheet" href="/TUBES_2_Toko/frontend/styles/Login.css">
+</head>
+<body>
+
+<main class="auth-layout" style="min-height:60vh; display:flex; align-items:center; justify-content:center;">
+    <div class="auth-form-inner" style="max-width:520px; width:92%;">
+        <h2 class="auth-title">Activating your account…</h2>
+        <div id="msg-area" class="auth-meta" style="margin-top:10px;">Please wait.</div>
+    </div>
+</main>
+
+<script>
+    const msg = document.getElementById("msg-area");
+
+    function getParam(name) {
+        return new URLSearchParams(window.location.search).get(name) || "";
+    }
+
+    (async function activate() {
+        const token = getParam("token");
+        const ret   = (getParam("return") || "login").toLowerCase(); // "login" / "register"
+
+        if (!token) {
+            msg.innerHTML = `<div class="auth-error">Invalid activation link.</div>`;
+            return;
+        }
+
+        const backTo =
+            ret === "register"
+                ? "/TUBES_2_Toko/frontend/auth/register.html"
+                : "/TUBES_2_Toko/frontend/auth/login.html";
+
+        try {
+            const url = `/TUBES_2_Toko/backend/auth/activate.php?token=${encodeURIComponent(token)}`;
+            const res = await fetch(url, { credentials: "include" });
+            const data = await res.json();
+
+            if (!data.ok) {
+                // gagal -> balik juga tapi kasih pesan error
+                const err = encodeURIComponent(data.error || "Activation failed");
+                window.location.href = `${backTo}?activated=0&msg=${err}`;
+                return;
+            }
+
+            // sukses -> balik + pesan sukses
+            const okMsg = encodeURIComponent(data.message || "Account activated. You can now login.");
+            window.location.href = `${backTo}?activated=1&msg=${okMsg}`;
+
+        } catch (e) {
+            window.location.href = `${backTo}?activated=0&msg=${encodeURIComponent("Server error. Please try again.")}`;
+        }
+    })();
+</script>
+
+</body>
+</html>

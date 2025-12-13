@@ -350,10 +350,10 @@ if ($res = $mysqli->query($sqlProducts)) {
 
                 <!-- Actions -->
                 <td class="cell-actions">
-                  <a href="/TUBES_2_Toko/admin/editProduct.php?id=<?= (int)$p['id'] ?>" title="Edit">
+                  <a href="/TUBES_2_Toko/admin/editProducts.php?id=<?= (int)$p['id'] ?>" title="Edit">
                     <i class="bi bi-pencil"></i>
                   </a>
-                  <a href="/TUBES_2_Toko/admin/deleteProduct.php?id=<?= (int)$p['id'] ?>" title="Delete"
+                  <a href="/TUBES_2_Toko/admin/deleteProducts.php?id=<?= (int)$p['id'] ?>" title="Delete"
                      onclick="return confirm('Hapus produk ini?');">
                     <i class="bi bi-trash3"></i>
                   </a>

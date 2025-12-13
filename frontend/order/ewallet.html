@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>E-Wallet Payment</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="../styles/payment.css">
+</head>
+
+<body class="ewallet-page">
+
+<div class="ewallet-container">
+
+  <h2 class="ewallet-title">
+    E-Wallet Payment (<span id="wallet-name">OVO</span>)
+  </h2>
+
+  <!-- INFO TOP -->
+  <div class="ewallet-row">
+    <div>
+      <div class="label">Total Payment</div>
+    </div>
+    <div class="price" id="total">Rp 0</div>
+  </div>
+
+  <div class="ewallet-row">
+    <div>
+      <div class="label">Pay in</div>
+    </div>
+    <div>
+      <div class="countdown" id="countdown">--</div>
+      <div class="deadline" id="deadline">-</div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- WALLET -->
+  <div class="wallet-box">
+    <img id="wallet-logo" class="wallet-logo">
+    <b id="wallet-label">OVO</b>
+  </div>
+
+  <div class="label">Nomor Pembayaran</div>
+  <div class="wallet-number">
+    <span id="wallet-number">085555555555</span>
+    <span class="copy-btn" onclick="copyNumber()">SALIN</span>
+  </div>
+
+  <hr>
+
+  <!-- INSTRUCTION -->
+  <h4 class="instruction-title">
+    Cara Membayar via <span id="wallet-instruction">OVO</span>
+  </h4>
+
+  <ol class="instruction-list">
+    <li>Buka aplikasi <b id="wallet-instruction2">OVO</b></li>
+    <li>Pilih menu <b>Transfer</b></li>
+    <li>Masukkan nomor tujuan <b id="wallet-number2">085555555555</b></li>
+    <li>Masukkan nominal pembayaran</li>
+    <li>Klik <b>Bayar</b> untuk menyelesaikan transaksi</li>
+  </ol>
+
+  <!-- BUTTON -->
+  <button class="btn-check" onclick="checkStatus()">
+    Confirm Payment
+  </button>
+
+</div>
+<script>
+  const params = new URLSearchParams(location.search);
+  const type = (params.get("type") || "ovo").toLowerCase();
+  const trxId = params.get("transaction_id");
+
+  if (!trxId) alert("transaction_id tidak ada di URL.");
+
+  const WALLET_MAP = {
+    ovo: { label: "OVO", logo: "ovo.png" },
+    gopay: { label: "GOPAY", logo: "gopay.png" },
+    dana: { label: "DANA", logo: "dana.png" }
+  };
+
+  const wallet = WALLET_MAP[type] || WALLET_MAP.ovo;
+
+  document.getElementById("wallet-name").innerText = wallet.label;
+  document.getElementById("wallet-label").innerText = wallet.label;
+  document.getElementById("wallet-instruction").innerText = wallet.label;
+  document.getElementById("wallet-instruction2").innerText = wallet.label;
+
+  document.getElementById("wallet-logo").src =
+    `/TUBES_2_Toko/frontend/assets/${wallet.logo}`;
+
+  // ===== AMBIL TOTAL DARI BACKEND (SOURCE OF TRUTH) =====
+  async function loadEwalletData() {
+    try {
+      const res = await fetch(
+        `/TUBES_2_Toko/backend/order/ewallet.php?transaction_id=${encodeURIComponent(trxId)}&type=${encodeURIComponent(type)}`,
+        { credentials: "include" }
+      );
+
+      const ct = res.headers.get("content-type") || "";
+      const raw = await res.text();
+
+      if (!ct.includes("application/json")) {
+        console.error("NOT JSON:", raw);
+        alert("Server tidak mengembalikan JSON.");
+        return;
+      }
+
+      const d = JSON.parse(raw);
+
+      if (d.ok === false) {
+        alert(d.message || "Gagal load ewallet data.");
+        return;
+      }
+
+      // total dari DB
+      document.getElementById("total").innerText =
+        "Rp " + Number(d.total || 0).toLocaleString("id-ID");
+
+      // nomor pembayaran (kalau backend kasih)
+      if (d.wallet_number) {
+        document.getElementById("wallet-number").innerText = d.wallet_number;
+        document.getElementById("wallet-number2").innerText = d.wallet_number;
+      }
+
+      // deadline (kalau backend kasih)
+      document.getElementById("deadline").innerText =
+        d.deadline ? ("Jatuh tempo " + d.deadline) : "-";
+
+      if (d.deadline_ts) startCountdown(Number(d.deadline_ts));
+    } catch (err) {
+      console.error(err);
+      alert("Terjadi error saat load data e-wallet. Cek console.");
+    }
+  }
+
+  function startCountdown(deadlineTs) {
+    const el = document.getElementById("countdown");
+    const timer = setInterval(() => {
+      const diff = deadlineTs - Date.now();
+      if (diff <= 0) {
+        el.innerText = "Waktu Habis";
+        clearInterval(timer);
+        return;
+      }
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      el.innerText = `${h} jam ${m} menit ${s} detik`;
+    }, 1000);
+  }
+
+  function copyNumber() {
+    navigator.clipboard.writeText(
+      document.getElementById("wallet-number").innerText
+    );
+    alert("Nomor pembayaran disalin");
+  }
+  window.copyNumber = copyNumber;
+
+  async function confirmPayment() {
+    try {
+      const btn = document.querySelector(".btn-check");
+      btn.disabled = true;
+
+      const res = await fetch(
+        `/TUBES_2_Toko/backend/order/updateStatus.php?id=${encodeURIComponent(trxId)}&mode=json`,
+        { credentials: "include" }
+      );
+
+      const ct = res.headers.get("content-type") || "";
+      const raw = await res.text();
+
+      if (!ct.includes("application/json")) {
+        console.error("NOT JSON:", raw);
+        alert("updateStatus tidak mengembalikan JSON. Cek updateStatus.php.");
+        btn.disabled = false;
+        return;
+      }
+
+      const json = JSON.parse(raw);
+
+
+      if (!json.ok) {
+        alert(json.message || "Gagal konfirmasi pembayaran.");
+        btn.disabled = false;
+        return;
+      }
+
+      window.location.href =
+        `/TUBES_2_Toko/frontend/order/payment-success.html?transaction_id=${encodeURIComponent(trxId)}`;
+    } catch (err) {
+      console.error(err);
+      alert("Terjadi error saat confirm payment. Cek console.");
+      document.querySelector(".btn-check").disabled = false;
+    }
+  }
+  window.checkStatus = confirmPayment;
+
+  loadEwalletData();
+</script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+@import url('HomePage.css');
+
+body { background:#faf7f8; color:#222; }
+.container { padding-top:28px; }
+
+form { 
+  max-width:640px; 
+}
+form label { 
+  display:block; 
+  margin-bottom:10px; 
+  color:#333; 
+}
+form input[type="text"], 
+form input[type="email"], 
+form input[type="file"], 
+form textarea {
+  width:100%;
+  padding:10px 12px;
+  border:1px solid #e6e6e6;
+  border-radius:6px;
+  background:#fff;
+}
+
+form button.btn-primary { 
+  margin-top:12px; 
+}
+
+.muted { 
+  color:#b00; 
+}
+
+main.container form input,
+main.container form textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  margin-top: 4px;
+  font-family: inherit;
+}
+
+main.container form textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.btn-primary {
+  display: inline-block;
+  padding: 10px 20px;
+  border-radius: 20px;
+  background: #ff2d7a;
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}

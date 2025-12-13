@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Profile Settings — Feyora</title>
+
+    <link rel="stylesheet" href="../styles/SettingProfile.css">
+    <link rel="stylesheet" href="../styles/header.css">
+    <link rel="stylesheet" href="../styles/HomePage.css">
+
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+
+<div id="header"></div>
+
+<main class="container" style="padding:28px 20px; max-width:800px; color:#333;">
+    <h2 style="margin-bottom:16px;">Profile Settings</h2>
+
+    <div style="display:flex; justify-content:center; margin-bottom:20px;">
+        <div id="avatarWrap"
+            style="width:96px;height:96px;border-radius:50%;overflow:hidden;
+                border:2px solid #ff2d7a;display:flex;align-items:center;justify-content:center;
+                background:#f5f5f5;font-weight:700;font-size:32px;color:#555;">
+            <span id="avatarFallback">US</span>
+            <img id="avatarImg" alt="Profile photo" style="display:none;width:100%;height:100%;object-fit:cover;">
+        </div>
+    </div>
+
+    <div id="msgBox" style="max-width:640px;margin:0 auto 12px;display:none;"></div>
+
+    <form id="profileForm" enctype="multipart/form-data" style="max-width:640px; margin:0 auto 12px;">
+        <label>Username<br>
+            <input name="username" id="fUsername">
+        </label><br>
+
+        <label>Email<br>
+            <input name="email" id="fEmail">
+        </label><br>
+
+        <label>Phone<br>
+            <input name="phone" id="fPhone">
+        </label><br>
+
+        <label>Address<br>
+            <textarea name="address" id="fAddress"></textarea>
+        </label><br>
+
+        <label>Profile Photo<br>
+            <input type="file" name="profile_photo" accept="image/*" id="profileFileInput">
+            <small style="color:#666;">Format: JPG/PNG, maks 64MB.</small>
+        </label><br>
+
+        <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; margin-top:12px;">
+            <button class="btn-primary" type="submit">Save</button>
+
+            <button type="button" id="btnDeleteAccount"
+                style="padding:8px 14px;border-radius:6px;border:1px solid #e02424;background:#fff5f5;color:#b00000;cursor:pointer;font-size:13px;">
+                Delete Account
+            </button>
+        </div>
+    </form>
+</main>
+<div id="footer"></div>
+<div id="delete-modal"
+    style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:10px;padding:20px 22px;max-width:360px;width:90%;box-shadow:0 8px 30px rgba(0,0,0,0.25);">
+        <h3 style="margin-top:0;margin-bottom:8px;color:#222;">Hapus Akun</h3>
+        <p style="margin:0 0 10px;color:#555;font-size:14px;">
+            Tindakan ini <strong>tidak dapat dibatalkan</strong>.<br>
+            Masukkan password akun Anda untuk konfirmasi.
+        </p>
+
+        <form id="deleteForm" style="margin-top:10px;">
+            <label style="font-size:14px;color:#333;">
+                Password<br>
+                <input type="password" name="confirm_password" id="confirmPassword" style="width:100%; padding:6px 8px; margin-top:4px;">
+            </label>
+
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:14px;">
+                <button type="button" id="btnCancelDelete"
+                    style="padding:8px 14px;border-radius:6px;border:1px solid #ccc;background:#f5f5f5;cursor:pointer;font-size:13px;">
+                    Batal
+                </button>
+                <button type="submit"
+                    style="padding:8px 14px;border-radius:6px;border:none;background:#e02424;color:#fff;cursor:pointer;font-size:13px;font-weight:600;">
+                    Hapus Akun
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    async function loadPart(id, url) {
+        const el = document.getElementById(id);
+        const res = await fetch(url, { cache: "no-cache" });
+        el.innerHTML = await res.text();
+
+        el.querySelectorAll("script").forEach(oldScript => {
+            const s = document.createElement("script");
+            if (oldScript.src) s.src = oldScript.src;
+            s.textContent = oldScript.textContent;
+            document.body.appendChild(s);
+            oldScript.remove();
+        });
+
+        if (id === "header" && window.initHeaderAuth) await window.initHeaderAuth();
+    }
+
+    function showMsg(text, ok=true){
+        const box = document.getElementById("msgBox");
+        box.style.display = "block";
+        box.style.padding = "10px 16px";
+        box.style.borderRadius = "8px";
+        box.style.fontSize = "14px";
+        box.style.margin = "0 auto 12px";
+        box.style.maxWidth = "640px";
+        box.style.background = ok ? "#e7f9ee" : "#ffe9e9";
+        box.style.border = ok ? "1px solid #9bd4af" : "1px solid #ffb3b3";
+        box.style.color = ok ? "#236b3d" : "#b00000";
+        box.textContent = text;
+    }
+
+    function initials(username){
+        const s = String(username || "User").trim();
+        return (s.slice(0,2).toUpperCase() || "US");
+    }
+
+    async function loadMe(){
+        const res = await fetch("/TUBES_2_Toko/backend/user/getProfile.php", { credentials:"include", cache:"no-cache" });
+        const j = await res.json();
+        if (!j.ok) {
+            location.href = "/TUBES_2_Toko/frontend/auth/login.html";
+            return;
+        }
+
+        document.getElementById("fUsername").value = j.user.username || "";
+        document.getElementById("fEmail").value = j.user.email || "";
+        document.getElementById("fPhone").value = j.user.phone || "";
+        document.getElementById("fAddress").value = j.user.address || "";
+
+        const avatarImg = document.getElementById("avatarImg");
+        const fallback = document.getElementById("avatarFallback");
+
+        fallback.textContent = initials(j.user.username);
+
+        if (j.user.profile_photo_url) {
+            avatarImg.src = j.user.profile_photo_url + "?v=" + Date.now();
+            avatarImg.style.display = "block";
+            fallback.style.display = "none";
+        } else {
+            avatarImg.style.display = "none";
+            fallback.style.display = "block";
+        }
+    }
+
+    document.getElementById("profileFileInput").addEventListener("change", (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+          const img = document.getElementById("avatarImg");
+          const fallback = document.getElementById("avatarFallback");
+          img.src = ev.target.result;
+          img.style.display = "block";
+          fallback.style.display = "none";
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById("profileForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+
+      const res = await fetch("/TUBES_2_Toko/backend/user/updateProfile.php", {
+          method: "POST",
+          body: fd,
+          credentials: "include"
+      });
+
+      const j = await res.json();
+      if (!j.ok) {
+          showMsg("Gagal update profile: " + (j.error || "UNKNOWN"), false);
+          return;
+      }
+
+      showMsg("Profil berhasil diperbarui.", true);
+
+      const avatarImg = document.getElementById("avatarImg");
+      const fallback = document.getElementById("avatarFallback");
+      if (j.user?.profile_photo_url) {
+          avatarImg.src = j.user.profile_photo_url + "?v=" + Date.now();
+          avatarImg.style.display = "block";
+          fallback.style.display = "none";
+      }
+
+      await loadMe();
+      if (window.initHeaderAuth) await window.initHeaderAuth();
+    });
+
+    const modal = document.getElementById("delete-modal");
+    document.getElementById("btnDeleteAccount").addEventListener("click", () => modal.style.display = "flex");
+    document.getElementById("btnCancelDelete").addEventListener("click", () => modal.style.display = "none");
+    modal.addEventListener("click", (e) => { if (e.target === modal) modal.style.display = "none"; });
+
+    document.getElementById("deleteForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const fd = new FormData();
+        fd.append("confirm_password", document.getElementById("confirmPassword").value);
+
+        const res = await fetch("/TUBES_2_Toko/backend/user/deleteAccount.php", {
+            method:"POST",
+            body: fd,
+            credentials:"include"
+        });
+        const j = await res.json();
+        if (!j.ok) {
+            showMsg("Gagal hapus akun: " + (j.error || "UNKNOWN"), false);
+            return;
+        }
+        location.href = "/TUBES_2_Toko/index.html";
+    });
+
+    (async function init(){
+        await loadPart("header", "/TUBES_2_Toko/frontend/includes/header.html");
+        await loadPart("footer", "/TUBES_2_Toko/frontend/includes/footer.html");
+        await loadMe();
+    })();
+</script>
+</body>
+</html>
