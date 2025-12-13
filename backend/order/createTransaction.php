@@ -17,8 +17,19 @@ if (!isset($_SESSION['checkout_ids']) || empty($_SESSION['checkout_ids'])) {
 }
 
 if (isset($_SESSION['transaction_id']) && (int)$_SESSION['transaction_id'] > 0) {
-  echo json_encode(["ok" => true, "data" => ["transaction_id" => (int)$_SESSION['transaction_id']]]);
-  exit;
+  $tid = (int)$_SESSION['transaction_id'];
+
+  $chk = $mysqli->prepare("SELECT status FROM transactions WHERE id = ? AND user_id = ?");
+  $chk->bind_param("ii", $tid, $user_id);
+  $chk->execute();
+  $row = $chk->get_result()->fetch_assoc();
+
+  if ($row && ($row['status'] === 'Order Created' || $row['status'] === 'Waiting for Payment')) {
+    echo json_encode(["ok" => true, "data" => ["transaction_id" => $tid, "note" => "reuse_existing"]]);
+    exit;
+  }
+
+  unset($_SESSION['transaction_id']);
 }
 
 $selected = $_SESSION['checkout_ids'];       
